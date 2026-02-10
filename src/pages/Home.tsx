@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner'
@@ -41,13 +41,17 @@ export default function Home() {
   const isLoggedIn = useSelector(selectIsLoggedIn)
 
   const [activeMenu, setActiveMenu] = useState<MenuKey>('dashboard')
+  const fetchedRef = useRef(false)
 
-  // 从微信回调进入时 userInfo 可能为空，进入首页后静默拉取
+  // 从微信回调进入时 userInfo 可能为空，进入首页后静默拉取一次。
+  // fetchedRef 守卫确保只拉取一次，兼容 React 18 StrictMode 下 effect 的双重调用。
   useEffect(() => {
+    if (fetchedRef.current) return
+    fetchedRef.current = true
     if (isLoggedIn && !userInfo?.userId) {
       dispatch(fetchUserInfo())
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, userInfo, dispatch])
 
   const handleLogout = () => {
     dispatch(logout())
