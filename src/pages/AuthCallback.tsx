@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { loginSuccess } from '@/store/authSlice'
@@ -8,8 +8,13 @@ export default function AuthCallback() {
   const navigate = useNavigate()
   const dispatch = useDispatch<AppDispatch>()
   const [searchParams] = useSearchParams()
+  const handled = useRef(false)
 
   useEffect(() => {
+    // handled 守卫确保此逻辑只执行一次，兼容 React 18 StrictMode 下 effect 的双重调用。
+    if (handled.current) return
+    handled.current = true
+
     const token = searchParams.get('token')
     if (!token) {
       navigate('/login', { replace: true })
@@ -20,7 +25,7 @@ export default function AuthCallback() {
     // 导致 token 被清空，路由守卫再次重定向回 /login，形成死循环。
     dispatch(loginSuccess({ token, userInfo: {} }))
     navigate('/home', { replace: true })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchParams, dispatch, navigate])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-slate-50 to-slate-200">
