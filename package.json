@@ -1,0 +1,30 @@
+{
+  "name": "kaichui-erp",
+  "version": "1.0.0",
+  "description": "开锤后台管理系统 - 前后端一体化",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server/app.js",
+    "server:dev": "nodemon server/app.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.5",
+    "pinia": "^2.1.7",
+    "axios": "^1.6.2",
+    "element-plus": "^2.5.0",
+    "@element-plus/icons-vue": "^2.3.1",
+    "qrcode": "^1.5.3",
+    "js-cookie": "^3.0.5",
+    "express": "^4.18.2",
+     "wx-server-sdk": "^3.0.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0",
+    "nodemon": "^3.0.2"
+  }
+}

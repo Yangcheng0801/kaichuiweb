@@ -1,0 +1,19 @@
+{
+  "comment": "腾讯云开发云托管：环境变量请在云开发控制台-云托管-服务-版本配置-环境变量中设置，此处仅作参考清单",
+  "containerPort": 80,
+  "minNum": 1,
+  "maxNum": 5,
+  "cpu": 0.25,
+  "mem": 0.5,
+  "policyType": "cpu",
+  "policyThreshold": 60,
+  "envParams": {
+    "TCB_ENV_ID": "请替换为您的云开发环境 ID",
+    "WX_WEB_APPID": "网站应用 AppID（Web 扫码登录）",
+    "WX_WEB_SECRET": "网站应用 Secret",
+    "WX_APPID": "USE_HTTP_DB=true 时必填：小程序 AppID（拥有该云开发环境）",
+    "WX_APP_SECRET": "USE_HTTP_DB=true 时必填：小程序 AppSecret",
+    "JWT_SECRET": "请替换为随机密钥（用于 Web 登录 Token）",
+    "USE_HTTP_DB": "false"
+  }
+}
