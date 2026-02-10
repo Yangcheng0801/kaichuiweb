@@ -11,7 +11,12 @@ function createOrdersRouter(getDb) {
   router.get('/', async (req, res) => {
     try {
       const db = getDb();
-      const { page = 1, pageSize = 20, status } = req.query;
+      let page = parseInt(req.query.page, 10);
+      let pageSize = parseInt(req.query.pageSize, 10);
+      const { status } = req.query;
+
+      page = Number.isFinite(page) && page > 0 ? page : 1;
+      pageSize = Number.isFinite(pageSize) && pageSize > 0 && pageSize <= 100 ? pageSize : 20;
 
       let query = db.collection('orders');
 
@@ -22,15 +27,15 @@ function createOrdersRouter(getDb) {
       const result = await query
         .orderBy('createTime', 'desc')
         .skip((page - 1) * pageSize)
-        .limit(parseInt(pageSize))
+        .limit(pageSize)
         .get();
 
       res.json({
         success: true,
         data: result.data,
         total: result.data.length,
-        page: parseInt(page),
-        pageSize: parseInt(pageSize)
+        page,
+        pageSize
       });
     } catch (error) {
       console.error('获取订单列表失败:', error);

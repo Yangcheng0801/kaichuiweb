@@ -75,16 +75,6 @@ export default service
 
 // API方法
 export const api = {
-  // 健康检查
-  health: () => service.get('/health'),
-
-  // 微信登录
-  wechat: {
-    getQrCode: () => service.post('/auth/wechat/qrcode'),
-    checkLogin: (qrCodeId: string) => service.get(`/auth/wechat/check/${qrCodeId}`),
-    getUserInfo: () => service.get('/auth/wechat/userinfo')
-  },
-
   // 用户管理
   users: {
     getList: (params?: object) => service.get('/users', { params }),

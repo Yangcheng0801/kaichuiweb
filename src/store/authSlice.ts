@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import Cookies from 'js-cookie'
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://www.kaichui.com.cn/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 export interface UserInfo {
   userId?: string
@@ -25,6 +25,11 @@ const initialState: AuthState = {
   userInfo: JSON.parse(localStorage.getItem('userInfo') || 'null'),
   loading: false,
 }
+
+// 此文件中的接口调用有意使用裸 axios 而非 src/utils/api.ts 中的 service 实例。
+// 原因：service 的响应拦截器在收到 401 时会直接执行 window.location.href = '/login'，
+// 而 checkLoginStatus / fetchUserInfo 需要对 401 做差异化处理（前者主动 logout，后者静默失败），
+// 若复用 service，拦截器会抢先跳转，导致无法进入这里的 catch 分支，引发登录死循环。
 
 // 验证 token 并更新 userInfo（失败时会 logout）
 export const checkLoginStatus = createAsyncThunk(

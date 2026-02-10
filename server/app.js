@@ -833,6 +833,15 @@ app.get('/api/debug/qrcode-latest', async (req, res) => {
 
 // ==================== HTML 页面构建函数 ====================
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /** 登录成功后跳转到前端：用 window.top.location 保证无论回调在顶层还是 iframe 内打开，都让整页跳转 */
 function buildRedirectHtml(redirectUrl) {
   const escaped = redirectUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\u003c');
@@ -937,15 +946,15 @@ function buildSuccessHtml(userInfo) {
     <div class="user-info">
       <div class="user-info-item">
         <span class="user-info-label">姓名</span>
-        <span class="user-info-value">${userInfo.userName || '未设置'}</span>
+        <span class="user-info-value">${escapeHtml(userInfo.userName || '未设置')}</span>
       </div>
       <div class="user-info-item">
         <span class="user-info-label">角色</span>
-        <span class="user-info-value">${userInfo.userRole || '未设置'}</span>
+        <span class="user-info-value">${escapeHtml(userInfo.userRole || '未设置')}</span>
       </div>
       <div class="user-info-item">
         <span class="user-info-label">所属球会</span>
-        <span class="user-info-value">${userInfo.clubName || '未设置'}</span>
+        <span class="user-info-value">${escapeHtml(userInfo.clubName || '未设置')}</span>
       </div>
     </div>
     <p style="font-size: 14px; color: #9ca3af;">
@@ -1113,7 +1122,7 @@ function buildErrorHtml(errorMessage) {
     <p class="message">授权过程中发生错误，请重试</p>
     <div class="error-detail">
       <strong>错误详情：</strong><br>
-      ${errorMessage || '未知错误'}
+      ${escapeHtml(errorMessage || '未知错误')}
     </div>
     <p style="font-size: 14px; color: #9ca3af;">
       页面将在 <span id="countdown" style="color: #ef4444; font-weight: 600;">5</span> 秒后自动关闭
