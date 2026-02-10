@@ -58,22 +58,22 @@ export default function Home() {
   const currentMenuLabel = menuItems.find(m => m.key === activeMenu)?.label ?? ''
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* 侧边栏 */}
-      <aside className="w-[200px] bg-[#304156] text-white flex flex-col flex-shrink-0">
-        <div className="h-[60px] flex items-center justify-center border-b border-[#1f2d3d]">
-          <h3 className="m-0 text-lg font-semibold text-white">开锤后台</h3>
+    <div className="flex h-screen bg-white">
+      {/* 侧边栏 - 纯白风格 */}
+      <aside className="w-[240px] bg-white flex flex-col flex-shrink-0 border-r border-gray-100">
+        <div className="h-[72px] flex items-center px-8 border-b border-gray-100">
+          <h3 className="m-0 text-xl font-semibold text-black tracking-tight">开锤</h3>
         </div>
-        <nav className="flex-1 py-2">
+        <nav className="flex-1 py-6 px-4">
           {menuItems.map(item => (
             <button
               key={item.key}
               onClick={() => setActiveMenu(item.key)}
               className={[
-                'w-full flex items-center gap-3 px-5 py-3 text-sm text-left transition-colors',
+                'w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-left transition-all rounded-lg mb-1',
                 activeMenu === item.key
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-gray-300 hover:bg-[#263445] hover:text-white'
+                  ? 'bg-black text-white shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-black'
               ].join(' ')}
             >
               {item.icon}
@@ -84,21 +84,21 @@ export default function Home() {
       </aside>
 
       {/* 主内容区 */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* 顶部导航 */}
-        <header className="h-[60px] bg-white border-b border-gray-200 flex items-center px-5 justify-between">
-          <nav className="flex items-center gap-1 text-sm text-gray-500">
-            <span>首页</span>
-            <span className="mx-1">/</span>
-            <span className="text-gray-900">{currentMenuLabel}</span>
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50/50">
+        {/* 顶部导航 - 极简设计 */}
+        <header className="h-[72px] bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center px-8 justify-between">
+          <nav className="flex items-center gap-2 text-sm">
+            <span className="text-gray-400">首页</span>
+            <span className="text-gray-300">/</span>
+            <span className="text-black font-medium">{currentMenuLabel}</span>
           </nav>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 cursor-pointer">
-                <UserCircle size={18} />
+              <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-50">
+                <UserCircle size={20} />
                 <span>{userInfo?.nickname || userInfo?.openid || '用户'}</span>
-                <ChevronDown size={14} />
+                <ChevronDown size={16} />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -109,7 +109,7 @@ export default function Home() {
               {/* 退出登录需要二次确认 */}
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <DropdownMenuItem onSelect={e => e.preventDefault()} className="text-red-500 focus:text-red-500">
+                  <DropdownMenuItem onSelect={e => e.preventDefault()} className="text-red-600 focus:text-red-600">
                     退出登录
                   </DropdownMenuItem>
                 </AlertDialogTrigger>
@@ -129,44 +129,93 @@ export default function Home() {
         </header>
 
         {/* 主要内容 */}
-        <main className="flex-1 overflow-auto p-5">
+        <main className="flex-1 overflow-auto p-8">
           {activeMenu === 'dashboard' ? (
-            <div>
-              {/* 数据卡片 */}
-              <div className="grid grid-cols-4 gap-5 mb-5">
+            <div className="max-w-[1400px]">
+              {/* 数据卡片 - 微阴影悬浮效果 */}
+              <div className="grid grid-cols-4 gap-6 mb-8">
                 {statCards.map(card => (
-                  <div key={card.label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-4">
-                      <span className={card.color}>{card.icon}</span>
+                  <div 
+                    key={card.label} 
+                    className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group"
+                  >
+                    <div className="flex flex-col gap-4">
+                      <span className="text-black opacity-80 group-hover:opacity-100 transition-opacity">
+                        {card.icon}
+                      </span>
                       <div>
-                        <div className="text-2xl font-bold text-gray-800">{card.value}</div>
-                        <div className="text-sm text-gray-500 mt-1">{card.label}</div>
+                        <div className="text-3xl font-bold text-black tracking-tight mb-1">{card.value}</div>
+                        <div className="text-sm text-gray-500 font-medium">{card.label}</div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* 欢迎卡片 */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div className="px-5 py-4 border-b border-gray-100 font-medium text-gray-800">
-                  欢迎使用开锤后台管理系统
+              {/* 欢迎卡片 - 现代设计 */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-8 py-6 border-b border-gray-100">
+                  <h2 className="text-xl font-bold text-black tracking-tight">
+                    欢迎使用开锤后台管理系统
+                  </h2>
                 </div>
-                <div className="p-5 space-y-3 text-sm text-gray-600">
-                  <p>🎉 恭喜您成功登录系统！</p>
-                  <p>📊 系统运行状态正常</p>
-                  <p>🔒 您的账户权限：{userInfo?.role || '普通用户'}</p>
-                  <p>🏢 所属租户：{userInfo?.tenantId || '默认租户'}</p>
+                <div className="p-8">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="flex items-start gap-4 p-5 bg-gray-50/50 rounded-xl border border-gray-100">
+                      <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white text-xl flex-shrink-0">
+                        ✓
+                      </div>
+                      <div>
+                        <div className="font-semibold text-black mb-1">登录成功</div>
+                        <div className="text-sm text-gray-600">您已成功进入系统</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-5 bg-gray-50/50 rounded-xl border border-gray-100">
+                      <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white text-xl flex-shrink-0">
+                        ◉
+                      </div>
+                      <div>
+                        <div className="font-semibold text-black mb-1">系统状态</div>
+                        <div className="text-sm text-gray-600">运行正常</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-5 bg-gray-50/50 rounded-xl border border-gray-100">
+                      <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white text-xl flex-shrink-0">
+                        ⚡
+                      </div>
+                      <div>
+                        <div className="font-semibold text-black mb-1">账户权限</div>
+                        <div className="text-sm text-gray-600">{userInfo?.role || '普通用户'}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-5 bg-gray-50/50 rounded-xl border border-gray-100">
+                      <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white text-xl flex-shrink-0">
+                        ◈
+                      </div>
+                      <div>
+                        <div className="font-semibold text-black mb-1">所属租户</div>
+                        <div className="text-sm text-gray-600">{userInfo?.tenantId || '默认租户'}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-gray-400">
-              <BarChart2 size={48} className="opacity-30" />
-              <p className="text-base">功能开发中...</p>
+            <div className="flex flex-col items-center justify-center min-h-[500px] gap-6">
+              <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center">
+                <BarChart2 size={40} className="text-gray-300" />
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-medium text-gray-900 mb-2">功能开发中</p>
+                <p className="text-sm text-gray-500">该功能即将上线，敬请期待</p>
+              </div>
               <button
                 onClick={() => setActiveMenu('dashboard')}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 transition-colors"
+                className="px-6 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-all shadow-sm hover:shadow-md"
               >
                 返回首页
               </button>
