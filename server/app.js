@@ -1159,7 +1159,6 @@ app.listen(PORT, async () => {
   console.log(`=================================`);
   console.log(`服务器启动成功！`);
   console.log(`端口: ${PORT}`);
-  console.log(`云开发环境: ${targetEnv}`);
   console.log(`云开发环境: ${targetEnv || '未设置 TCB_ENV_ID'}`);
   console.log(`时间: ${new Date().toLocaleString('zh-CN')}`);
   console.log(`=================================`);

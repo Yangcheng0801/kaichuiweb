@@ -28,8 +28,8 @@ service.interceptors.response.use(
   response => {
     const res = response.data
 
-    // 如果返回的状态码不是200，说明接口有问题
-    if (res.code !== 200 && res.success !== true) {
+    // 后端统一返回 { success: boolean }，不含 code 字段
+    if (res.success !== true) {
       toast.error(res.message || '请求失败')
       return Promise.reject(new Error(res.message || '请求失败'))
     }

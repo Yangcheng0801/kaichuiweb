@@ -164,6 +164,11 @@ function createHttpDb(env) {
         where(cond) {
           const condStr = JSON.stringify(cond);
           return {
+            async get() {
+              const q = `db.collection("${name}").where(${condStr}).get()`;
+              const res = await query(env, q);
+              return { data: res.data };
+            },
             orderBy(field, order) {
               const dir = order === 'desc' ? 'desc' : 'asc';
               return {
@@ -184,6 +189,19 @@ function createHttpDb(env) {
                   return {
                     async get() {
                       const q = `db.collection("${name}").where(${condStr}).orderBy("${field}", "${dir}").limit(${n}).get()`;
+                      const res = await query(env, q);
+                      return { data: res.data };
+                    }
+                  };
+                }
+              };
+            },
+            skip(s) {
+              return {
+                limit(n) {
+                  return {
+                    async get() {
+                      const q = `db.collection("${name}").where(${condStr}).skip(${s}).limit(${n}).get()`;
                       const res = await query(env, q);
                       return { data: res.data };
                     }
