@@ -8,7 +8,7 @@ import type { AppDispatch } from '@/store'
 // 让 TypeScript 知道 window 上有 WxLogin
 declare global {
   interface Window {
-    WxLogin?: (config: {
+    WxLogin?: new (config: {
       self_redirect: boolean
       id: string
       appid: string
