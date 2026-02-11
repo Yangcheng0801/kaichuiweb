@@ -7,6 +7,20 @@ module.exports = {
   ],
   theme: {
     extend: {
+      keyframes: {
+        'slide-in-left': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        'slide-in-right': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+      },
+      animation: {
+        'slide-in-left': 'slide-in-left 0.3s cubic-bezier(0.4,0,0.2,1) forwards',
+        'slide-in-right': 'slide-in-right 0.3s cubic-bezier(0.4,0,0.2,1) forwards',
+      },
       colors: {
         primary: {
           DEFAULT: '#10b981',
