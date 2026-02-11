@@ -1,110 +1,40 @@
-// JWT Token 工具函数
-// 用于生成和验证登录 Token
+// JWT Token 工具函数（基于 jsonwebtoken，HS256 算法）
+// jsonwebtoken 是 Node.js 生态事实标准，周下载量 1.5 亿，内置时序安全签名比较。
 
-const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 /**
  * 生成 JWT Token
- * @param {Object} payload - Token 载荷数据
- * @param {string} secret - 密钥（建议从环境变量获取）
- * @param {number} expiresIn - 过期时间（秒），默认7天
+ * @param {Object} payload   - Token 载荷数据
+ * @param {string} secret    - 密钥（从环境变量获取）
+ * @param {number} expiresIn - 过期时间（秒），默认 7 天
  * @returns {string} JWT Token
  */
 function generateToken(payload, secret, expiresIn = 7 * 24 * 60 * 60) {
-  const header = {
-    alg: 'HS256',
-    typ: 'JWT'
-  };
-  
-  const now = Math.floor(Date.now() / 1000);
-  const tokenPayload = {
-    ...payload,
-    iat: now, // 签发时间
-    exp: now + expiresIn // 过期时间
-  };
-  
-  const encodedHeader = base64UrlEncode(JSON.stringify(header));
-  const encodedPayload = base64UrlEncode(JSON.stringify(tokenPayload));
-  const signature = sign(`${encodedHeader}.${encodedPayload}`, secret);
-  
-  return `${encodedHeader}.${encodedPayload}.${signature}`;
+  return jwt.sign(payload, secret, {
+    algorithm: 'HS256',
+    expiresIn
+  });
 }
 
 /**
  * 验证 JWT Token
- * @param {string} token - JWT Token
+ * @param {string} token  - JWT Token
  * @param {string} secret - 密钥
- * @returns {Object|null} 解码后的 payload，验证失败返回 null
+ * @returns {{ payload: Object|null, expired: boolean }} 解码后的 payload；验证失败返回 null，过期时 expired 为 true
  */
 function verifyToken(token, secret) {
   try {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      return null;
-    }
-    
-    const [encodedHeader, encodedPayload, signature] = parts;
-    
-    // 验证签名
-    const expectedSignature = sign(`${encodedHeader}.${encodedPayload}`, secret);
-    if (signature !== expectedSignature) {
-      console.error('[JWT] 签名验证失败');
-      return null;
-    }
-    
-    // 解码 payload
-    const payload = JSON.parse(base64UrlDecode(encodedPayload));
-    
-    // 验证过期时间
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp && payload.exp < now) {
+    const payload = jwt.verify(token, secret, { algorithms: ['HS256'] });
+    return { payload, expired: false };
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
       console.error('[JWT] Token 已过期');
-      return null;
+      return { payload: null, expired: true };
     }
-    
-    return payload;
-  } catch (error) {
-    console.error('[JWT] Token 验证失败:', error);
-    return null;
+    console.error('[JWT] Token 验证失败:', err.message);
+    return { payload: null, expired: false };
   }
 }
 
-/**
- * Base64 URL 编码
- */
-function base64UrlEncode(str) {
-  return Buffer.from(str)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-}
-
-/**
- * Base64 URL 解码
- */
-function base64UrlDecode(str) {
-  str = str.replace(/-/g, '+').replace(/_/g, '/');
-  while (str.length % 4) {
-    str += '=';
-  }
-  return Buffer.from(str, 'base64').toString();
-}
-
-/**
- * HMAC-SHA256 签名
- */
-function sign(message, secret) {
-  return crypto
-    .createHmac('sha256', secret)
-    .update(message)
-    .digest('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-}
-
-module.exports = {
-  generateToken,
-  verifyToken
-};
+module.exports = { generateToken, verifyToken };

@@ -446,7 +446,8 @@ app.get('/api/auth/callback', async (req, res) => {
           code: code,
           grant_type: 'authorization_code'
         },
-        timeout: 10000
+        timeout: 10000,
+        httpsAgent: httpsAgentInsecure
       });
       
       if (tokenRes.data.errcode) {
@@ -761,17 +762,17 @@ app.get('/api/auth/verify', async (req, res) => {
         message: '服务器未配置登录密钥（JWT_SECRET），请联系管理员在云托管环境变量中配置'
       });
     }
-    const payload = verifyToken(token, jwtSecret);
-    
+    const { payload, expired } = verifyToken(token, jwtSecret);
+
     if (!payload) {
       return res.status(401).json({
         success: false,
-        message: 'Token 无效或已过期'
+        message: expired ? 'Token 已过期，请重新登录' : 'Token 无效'
       });
     }
-    
+
     console.log('[VerifyToken] Token 验证成功，userId:', payload.userId);
-    
+
     // 查询用户最新信息（云开发 doc().get() 的 data 为数组）
     const db = getDb();
     const userRes = await db.collection('users').doc(payload.userId).get();
@@ -790,7 +791,7 @@ app.get('/api/auth/verify', async (req, res) => {
       data: {
         userId: userInfo._id,
         nickname: userInfo.name || userInfo.nickName || '微信用户',
-        openid: userInfo._openid || payload.openid,
+        openid: userInfo._openid || payload.openid || null,
         role: userInfo.role || 'user',
         clubId: userInfo.clubId,
         tenantId: userInfo.clubId
