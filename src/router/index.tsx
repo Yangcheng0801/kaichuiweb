@@ -7,6 +7,7 @@ const Login = lazy(() => import('@/pages/Login'))
 const Home = lazy(() => import('@/pages/Home'))
 const AuthCallback = lazy(() => import('@/pages/AuthCallback'))
 const Settings = lazy(() => import('@/pages/Settings'))
+const Resources = lazy(() => import('@/pages/Resources'))
 
 // 受保护路由：未登录跳转到 /login
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -49,6 +50,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resources"
+          element={
+            <ProtectedRoute>
+              <Resources />
             </ProtectedRoute>
           }
         />

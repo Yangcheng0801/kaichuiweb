@@ -101,6 +101,31 @@ export const api = {
     reset: (id: string) => service.post(`/quotas/${id}/reset`)
   },
 
+  // 资源管理
+  resources: {
+    courses: {
+      getList: (params?: object) => service.get('/resources/courses', { params }),
+      getDetail: (id: string) => service.get(`/resources/courses/${id}`),
+      create: (data: object) => service.post('/resources/courses', data),
+      update: (id: string, data: object) => service.put(`/resources/courses/${id}`, data),
+      delete: (id: string) => service.delete(`/resources/courses/${id}`),
+    },
+    caddies: {
+      getList: (params?: object) => service.get('/resources/caddies', { params }),
+      getDetail: (id: string) => service.get(`/resources/caddies/${id}`),
+      create: (data: object) => service.post('/resources/caddies', data),
+      update: (id: string, data: object) => service.put(`/resources/caddies/${id}`, data),
+      delete: (id: string) => service.delete(`/resources/caddies/${id}`),
+    },
+    carts: {
+      getList: (params?: object) => service.get('/resources/carts', { params }),
+      getDetail: (id: string) => service.get(`/resources/carts/${id}`),
+      create: (data: object) => service.post('/resources/carts', data),
+      update: (id: string, data: object) => service.put(`/resources/carts/${id}`, data),
+      delete: (id: string) => service.delete(`/resources/carts/${id}`),
+    },
+  },
+
   // 系统设置
   settings: {
     getClubInfo: (clubId = 'default') => service.get('/settings/club', { params: { clubId } }),

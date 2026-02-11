@@ -91,6 +91,9 @@ app.use('/api/orders', require('./routes/orders')(getDb));
 // 系统设置路由：球会信息、预订规则、价格规则
 app.use('/api/settings', require('./routes/settings')(getDb));
 
+// 资源管理路由：球场、球童、球车
+app.use('/api/resources', require('./routes/resources')(getDb));
+
 // 3. 健康检查接口
 app.get('/health', (req, res) => {
   res.json({
