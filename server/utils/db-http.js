@@ -78,7 +78,7 @@ async function query(env, queryStr) {
       })
     : [];
   const pager = data.pager || {};
-  return { data: list, pager };
+  return { data: list, pager, count: data.count };
 }
 
 /**
@@ -163,38 +163,63 @@ function createHttpDb(env) {
         },
         where(cond) {
           const condStr = JSON.stringify(cond);
+          const buildOrderBy = (orderByStrs) => {
+            const orderClause = orderByStrs.length ? '.orderBy(' + orderByStrs.map(([f, o]) => `"${f}", "${o}"`).join(').orderBy(') + ')' : '';
+            return {
+              async count() {
+                const q = `db.collection("${name}").where(${condStr})${orderClause}.count()`;
+                const res = await query(env, q);
+                const total = (res.pager && res.pager.total) ?? (res.count != null ? res.count : null) ?? (res.data && res.data[0] && res.data[0].total) ?? (Array.isArray(res.data) ? res.data.length : 0);
+                return { total: total ?? 0 };
+              },
+              orderBy(field, order) {
+                const dir = order === 'desc' ? 'desc' : 'asc';
+                return buildOrderBy([...orderByStrs, [field, dir]]);
+              },
+              async get() {
+                const q = `db.collection("${name}").where(${condStr})${orderClause}.limit(1000).get()`;
+                const res = await query(env, q);
+                return { data: res.data };
+              },
+              skip(s) {
+                return {
+                  limit(n) {
+                    return {
+                      async get() {
+                        const q = `db.collection("${name}").where(${condStr})${orderClause}.skip(${s}).limit(${n}).get()`;
+                        const res = await query(env, q);
+                        return { data: res.data };
+                      }
+                    };
+                  }
+                };
+              },
+              limit(n) {
+                return {
+                  async get() {
+                    const q = `db.collection("${name}").where(${condStr})${orderClause}.limit(${n}).get()`;
+                    const res = await query(env, q);
+                    return { data: res.data };
+                  }
+                };
+              }
+            };
+          };
           return {
             async get() {
               const q = `db.collection("${name}").where(${condStr}).get()`;
               const res = await query(env, q);
               return { data: res.data };
             },
+            async count() {
+              const q = `db.collection("${name}").where(${condStr}).count()`;
+              const res = await query(env, q);
+              const total = (res.pager && res.pager.total) ?? (res.count != null ? res.count : null) ?? (res.data && res.data[0] && res.data[0].total) ?? (Array.isArray(res.data) ? res.data.length : 0);
+              return { total: total ?? 0 };
+            },
             orderBy(field, order) {
               const dir = order === 'desc' ? 'desc' : 'asc';
-              return {
-                skip(s) {
-                  return {
-                    limit(n) {
-                      return {
-                        async get() {
-                          const q = `db.collection("${name}").where(${condStr}).orderBy("${field}", "${dir}").skip(${s}).limit(${n}).get()`;
-                          const res = await query(env, q);
-                          return { data: res.data };
-                        }
-                      };
-                    }
-                  };
-                },
-                limit(n) {
-                  return {
-                    async get() {
-                      const q = `db.collection("${name}").where(${condStr}).orderBy("${field}", "${dir}").limit(${n}).get()`;
-                      const res = await query(env, q);
-                      return { data: res.data };
-                    }
-                  };
-                }
-              };
+              return buildOrderBy([[field, dir]]);
             },
             skip(s) {
               return {
