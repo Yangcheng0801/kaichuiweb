@@ -24,9 +24,9 @@ export default function Resources() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb]">
+    <div className="min-h-screen bg-[#f4f7fb] flex flex-col">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 h-[60px] flex items-center gap-4 shadow-sm">
+      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
         <button
           onClick={() => navigate('/home')}
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
@@ -38,9 +38,9 @@ export default function Resources() {
         <h1 className="text-base font-semibold text-gray-900">资源管理</h1>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div className="flex-1 flex flex-col px-6 py-6 gap-4">
         {/* Tabs */}
-        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100 mb-8 w-fit">
+        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit">
           {TABS.map(tab => (
             <button
               key={tab.key}
@@ -57,8 +57,8 @@ export default function Resources() {
           ))}
         </div>
 
-        {/* 内容区 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+        {/* 内容区：撐满剩余高度 */}
+        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
           {renderContent()}
         </div>
       </div>

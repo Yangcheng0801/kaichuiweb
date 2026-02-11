@@ -101,6 +101,20 @@ export const api = {
     reset: (id: string) => service.post(`/quotas/${id}/reset`)
   },
 
+  // 预订管理
+  bookings: {
+    getList:     (params?: object) => service.get('/bookings', { params }),
+    getTeeSheet: (params: { date: string; courseId?: string }) => service.get('/bookings/tee-sheet', { params }),
+    getDetail:   (id: string) => service.get(`/bookings/${id}`),
+    create:      (data: object) => service.post('/bookings', data),
+    update:      (id: string, data: object) => service.put(`/bookings/${id}`, data),
+    delete:      (id: string) => service.delete(`/bookings/${id}`),
+    confirm:     (id: string) => service.put(`/bookings/${id}`, { status: 'confirmed' }),
+    checkIn:     (id: string) => service.put(`/bookings/${id}`, { status: 'checked_in' }),
+    complete:    (id: string) => service.put(`/bookings/${id}`, { status: 'completed' }),
+    cancel:      (id: string, note?: string) => service.put(`/bookings/${id}`, { status: 'cancelled', cancelNote: note }),
+  },
+
   // 资源管理
   resources: {
     courses: {
