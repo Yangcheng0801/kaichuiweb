@@ -1,16 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Flag, UserCheck, Car } from 'lucide-react'
+import { ArrowLeft, Flag, UserCheck } from 'lucide-react'
 import Courses from './Courses'
 import Caddies from './Caddies'
-import Carts from './Carts'
 
-type TabKey = 'courses' | 'caddies' | 'carts'
+type TabKey = 'courses' | 'caddies'
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'courses', label: '球场管理', icon: <Flag size={16} /> },
   { key: 'caddies', label: '球童管理', icon: <UserCheck size={16} /> },
-  { key: 'carts',   label: '球车管理', icon: <Car size={16} /> },
 ]
 
 export default function Resources() {
@@ -19,8 +17,7 @@ export default function Resources() {
 
   const renderContent = () => {
     if (activeTab === 'courses') return <Courses />
-    if (activeTab === 'caddies') return <Caddies />
-    return <Carts />
+    return <Caddies />
   }
 
   return (

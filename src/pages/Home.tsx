@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner'
 import {
   BarChart2, Users, Building2, PieChart,
-  UserCircle, ChevronDown, FileText, AlertTriangle, Menu, X, PanelRightClose, Settings, Layers, CalendarDays
+  UserCircle, ChevronDown, FileText, AlertTriangle, Menu, X, PanelRightClose, Settings, Layers, CalendarDays, Car
 } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -300,6 +300,15 @@ export default function Home() {
             <Layers size={16} />
           </span>
           <span>资源管理</span>
+        </button>
+        <button
+          onClick={() => navigate('/cart-management')}
+          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl"
+        >
+          <span className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-500 p-1.5">
+            <Car size={16} />
+          </span>
+          <span>球车管理</span>
         </button>
         <button
           onClick={() => navigate('/settings')}

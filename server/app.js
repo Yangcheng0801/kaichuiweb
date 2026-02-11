@@ -97,6 +97,11 @@ app.use('/api/resources', require('./routes/resources')(getDb));
 // 预订管理路由
 app.use('/api/bookings', require('./routes/bookings')(getDb));
 
+// 球车管理路由（需 JWT 鉴权，clubId 从 JWT 注入）
+const { requireAuthWithClubId } = require('./middleware/auth-cart');
+app.use('/api/carts', require('./routes/carts')(getDb, requireAuthWithClubId));
+app.use('/api/maintenance', require('./routes/maintenance')(getDb, requireAuthWithClubId));
+
 // 3. 健康检查接口
 app.get('/health', (req, res) => {
   res.json({

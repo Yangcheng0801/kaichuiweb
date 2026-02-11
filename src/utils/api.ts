@@ -140,6 +140,26 @@ export const api = {
     },
   },
 
+  // 球车管理（新 - 与小程序对齐，需 JWT）
+  cartManagement: {
+    getStatistics: (params?: { date?: string }) => service.get('/carts/statistics', { params }),
+    getList: (params?: object) => service.get('/carts', { params }),
+    getBrands: () => service.get('/carts/brands'),
+    create: (data: { brand: string; cartNumber: string }) => service.post('/carts', data),
+    batchCreate: (data: { brand: string; numbers: string[] }) => service.post('/carts/batch', data),
+    update: (id: string, data: object) => service.put(`/carts/${id}`, data),
+    batchUpdateStatus: (data: { cartIds: string[]; status: string }) => service.put('/carts/batch-status', data),
+    delete: (data: { cartId?: string; cartIds?: string[] }) => service.delete('/carts', { data }),
+    getUsageList: (params?: object) => service.get('/carts/usage', { params }),
+    getUsageDetail: (id: string) => service.get(`/carts/usage/${id}`),
+  },
+  maintenance: {
+    getList: (params?: object) => service.get('/maintenance', { params }),
+    complete: (id: string, data?: { notes?: string; cost?: number }) => service.put(`/maintenance/${id}/complete`, data || {}),
+    getFaultAnalysis: (params?: { date?: string }) => service.get('/maintenance/fault-analysis', { params }),
+    getFaultTypes: () => service.get('/maintenance/fault-types'),
+  },
+
   // 系统设置
   settings: {
     getClubInfo: (clubId = 'default') => service.get('/settings/club', { params: { clubId } }),
