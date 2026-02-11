@@ -88,6 +88,9 @@ function checkStatusRateLimitMiddleware(req, res, next) {
 // 订单路由（与主应用共用 getDb，适配腾讯云开发云托管）
 app.use('/api/orders', require('./routes/orders')(getDb));
 
+// 系统设置路由：球会信息、预订规则、价格规则
+app.use('/api/settings', require('./routes/settings')(getDb));
+
 // 3. 健康检查接口
 app.get('/health', (req, res) => {
   res.json({

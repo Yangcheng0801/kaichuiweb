@@ -99,5 +99,15 @@ export const api = {
     getDetail: (id: string) => service.get(`/quotas/${id}`),
     update: (id: string, data: object) => service.put(`/quotas/${id}`, data),
     reset: (id: string) => service.post(`/quotas/${id}/reset`)
+  },
+
+  // 系统设置
+  settings: {
+    getClubInfo: (clubId = 'default') => service.get('/settings/club', { params: { clubId } }),
+    updateClubInfo: (data: object) => service.put('/settings/club', data),
+    getBookingRules: (clubId = 'default') => service.get('/settings/booking-rules', { params: { clubId } }),
+    updateBookingRules: (data: object) => service.put('/settings/booking-rules', data),
+    getPricingRules: (clubId = 'default') => service.get('/settings/pricing-rules', { params: { clubId } }),
+    updatePricingRules: (data: object) => service.put('/settings/pricing-rules', data),
   }
 }

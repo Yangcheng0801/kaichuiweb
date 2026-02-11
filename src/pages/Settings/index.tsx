@@ -1,0 +1,67 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ArrowLeft, Building2, CalendarClock, BadgeDollarSign } from 'lucide-react'
+import ClubInfo from './ClubInfo'
+import BookingRules from './BookingRules'
+import PricingRules from './PricingRules'
+
+type TabKey = 'club' | 'booking' | 'pricing'
+
+const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
+  { key: 'club',    label: '球会信息', icon: <Building2 size={16} /> },
+  { key: 'booking', label: '预订规则', icon: <CalendarClock size={16} /> },
+  { key: 'pricing', label: '价格规则', icon: <BadgeDollarSign size={16} /> },
+]
+
+export default function Settings() {
+  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<TabKey>('club')
+
+  const renderContent = () => {
+    if (activeTab === 'club') return <ClubInfo />
+    if (activeTab === 'booking') return <BookingRules />
+    return <PricingRules />
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f4f7fb]">
+      {/* 顶部导航栏 */}
+      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 h-[60px] flex items-center gap-4 shadow-sm">
+        <button
+          onClick={() => navigate('/home')}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          返回
+        </button>
+        <div className="h-4 w-px bg-gray-200" />
+        <h1 className="text-base font-semibold text-gray-900">系统设置</h1>
+      </header>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        {/* Tabs */}
+        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100 mb-8 w-fit">
+          {TABS.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === tab.key
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* 内容区 */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+          {renderContent()}
+        </div>
+      </div>
+    </div>
+  )
+}
