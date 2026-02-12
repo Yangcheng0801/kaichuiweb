@@ -27,17 +27,28 @@
 - **副视图切换**：双视图模式下点击其他模块可切换右侧副视图；点击「关闭双视图」按钮退出。
 - **取消**：放置模式下按 `Esc` 可取消。
 
+#### 球车管理（独立一级菜单）
+- **数据总览**：9 项 KPI（总球车数、可用、在用、维修中、禁用、未借出、已借出、未归还、均用时长）。
+- **球车管理**：球车 CRUD、批量新增、批量更新状态、删除；支持按品牌、状态、日期筛选及分页。
+- **维修管理**：维修记录列表、完成维修、故障类型分析、故障类型列表。
+- **使用记录**：查看球车使用记录及详情。
+- **鉴权**：统一使用 `users.clubId → JWT clubId`，通过 `requireAuthWithClubId` 注入 `req.clubId`，与小程序云函数逻辑对齐。
+
 ---
 
 ### 目录速览
 ```
 ├── src/
-│   ├── pages/           # 页面：Login、Home、AuthCallback
+│   ├── pages/           # 页面：Login、Home、AuthCallback、CartManagement、Resources、Settings 等
 │   ├── components/ui/   # 通用 UI（Button、Dropdown、AlertDialog 等）
 │   ├── store/           # Redux：authSlice、store
 │   ├── router/          # 路由与受保护路由
 │   └── utils/           # api、utils
-├── server/              # Node/Express 服务，负责 API、微信扫码登录、静态资源托管
+├── server/
+│   ├── routes/          # 路由：carts、maintenance、auth、users、golf 等
+│   ├── middleware/      # auth-cart（球车鉴权）、auth 等
+│   ├── utils/           # db-http（HTTP 数据库适配器）
+│   └── app.js           # Express 入口，API、微信扫码登录、静态资源托管
 ├── container.config.json# 云托管容器配置（如需使用 TCB）
 ├── Dockerfile           # 可选容器打包脚本
 ├── package.json         # 前后端共用脚本
@@ -83,7 +94,9 @@
 3. 云托管（TCB）部署建议：
    - 使用仓库自带 `Dockerfile` 或者 TCB 提供的「一键部署」模板。
    - 在「服务配置 → 环境变量」里写入必需变量（见下方）。
-   - 确认服务绑定到正确的云开发环境（`TCB_ENV_ID`），并已在数据库中创建 `qrcode_tickets`、`users` 等集合。
+   - 确认服务绑定到正确的云开发环境（`TCB_ENV_ID`），并已在数据库中创建以下集合：
+     - 认证/用户：`qrcode_tickets`、`users`
+     - 球车管理：`carts`、`cart_usage_records`、`maintenance_records`、`carbrands`（可选）
 
 ---
 
@@ -98,10 +111,9 @@
 | `WX_CALLBACK_BASE` | 否 | 微信扫码回调域名，默认 `https://www.kaichui.com.cn` | `https://admin.kaichui.com` |
 | `FRONTEND_BASE_URL` | 否 | 登录成功后重定向的前端域名，未设置时复用 `WX_CALLBACK_BASE` | `https://admin.kaichui.com` |
 | `JWT_SECRET` | 是（生产） | 签发登录 Token 的密钥。本地若缺失自动回退默认值 | 强烈建议至少 32 位随机串 |
-| `USE_HTTP_DB` | 否 | 设为 `true` 时，改用 `createHttpDb` 通过 HTTP API 访问数据库 | `false` |
+| `USE_HTTP_DB` | 否 | 设为 `true` 时，改用 `createHttpDb` 通过微信 TCB HTTP API 访问数据库（云托管内网 SDK 不可达时使用） | `false` |
+| `WX_APPID` & `WX_APP_SECRET` | 条件必填 | `USE_HTTP_DB=true` 时**必填**，需为**拥有该云开发环境的小程序**凭证；TCB API 仅接受该主体 access_token。与扫码登录的 `WX_WEB_APPID` 不同 | `wx2766aa***` |
 | `TCB_API_KEY` / `TCB_ACCESS_TOKEN` | 否 | 若启用 HTTP DB 测试（`/api/db-test?method=http`）需提供 | 从云开发控制台生成 |
-| `WX_WEB_APPID` & `WX_WEB_SECRET` | 是 | 微信网站应用，扫码登录必填 | — |
-| `WX_APPID` & `WX_APP_SECRET` | 否 | 若需调用小程序/公众号接口，可额外设置 | — |
 | `PORT` | 否 | Express 监听端口，本地常设为 `3000`，云托管保持默认 `80` | `3000` |
 | `WARMUP_TIMEOUT_MS` | 否 | 数据库预热超时时间（毫秒） | `8000` |
 | `VITE_API_BASE_URL` | 否（前端构建时） | Vite 编译期注入的 API 基地址；默认 `/api` | `https://api.kaichui.com` |
@@ -136,6 +148,30 @@
 4. **接口调试**  
    - 除认证相关接口外，还有 `/api/golf/orders`、`/api/users` 等示例，便于对接真实业务。
    - `GET /api/db-test` 可检查 SDK/HTTP/微信 API 的数据库连通性，是排查云托管网络问题的首选。
+   - 球车管理相关接口见下方「球车管理 API」。
+
+---
+
+### 球车管理 API
+
+与小程序球车管理模块共用同一云开发环境，集合 `carts`、`cart_usage_records`、`maintenance_records` 需已存在。所有接口需通过 `requireAuthWithClubId` 校验，`req.clubId` 来自 JWT。
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/carts/statistics` | GET | 数据总览 9 项 KPI |
+| `/api/carts/brands` | GET | 品牌选项列表 |
+| `/api/carts` | GET | 球车列表（分页、筛选） |
+| `/api/carts` | POST | 新增球车 |
+| `/api/carts/batch` | POST | 批量新增球车 |
+| `/api/carts/:id` | PUT | 编辑球车 |
+| `/api/carts/batch-status` | PUT | 批量更新状态 |
+| `/api/carts` | DELETE | 删除球车 |
+| `/api/carts/usage` | GET | 使用记录列表 |
+| `/api/carts/usage/:id` | GET | 使用记录详情 |
+| `/api/maintenance` | GET | 维修记录列表 |
+| `/api/maintenance/:id/complete` | PUT | 完成维修 |
+| `/api/maintenance/fault-analysis` | GET | 故障类型分析 |
+| `/api/maintenance/fault-types` | GET | 故障类型列表 |
 
 ---
 
@@ -154,7 +190,8 @@
 
 ### 故障排查
 - **二维码生成失败**：检查 `WX_WEB_APPID/WX_WEB_SECRET` 是否正确，是否已在微信开放平台里设置合法回调域名。
-- **数据库连接超时**：云托管内若频繁超时，可试着设置 `USE_HTTP_DB=true` 并提供 `TCB_API_KEY`，或调大 `WARMUP_TIMEOUT_MS`。
+- **数据库连接超时**：云托管内若频繁超时，可设置 `USE_HTTP_DB=true` 并配置 `WX_APPID` + `WX_APP_SECRET`（小程序凭证），或调大 `WARMUP_TIMEOUT_MS`。
+- **HTTP DB 模式报错**：`USE_HTTP_DB=true` 时必须配置拥有云开发环境的小程序 `WX_APPID`、`WX_APP_SECRET`。`db-http.js` 已实现 `count()`、链式 `orderBy()` 等，兼容球车管理等业务。
 - **登录后立即跳回登录页**：多为 `JWT_SECRET` 未配置或前端 cookie 写入失败，检查浏览器 cookie、同域策略以及 `checkLoginStatus` 的网络响应。
 - **本地联调跨域问题**：确保 Vite 端口与 Express 端口一致地写在代理配置内，或通过 `VITE_API_BASE_URL` 指向运行中的后端地址。
 
