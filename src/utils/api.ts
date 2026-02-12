@@ -103,16 +103,24 @@ export const api = {
 
   // 预订管理
   bookings: {
+    // 列表 / 查询
     getList:     (params?: object) => service.get('/bookings', { params }),
     getTeeSheet: (params: { date: string; courseId?: string }) => service.get('/bookings/tee-sheet', { params }),
     getDetail:   (id: string) => service.get(`/bookings/${id}`),
+    // 创建 / 更新 / 删除
     create:      (data: object) => service.post('/bookings', data),
     update:      (id: string, data: object) => service.put(`/bookings/${id}`, data),
     delete:      (id: string) => service.delete(`/bookings/${id}`),
-    confirm:     (id: string) => service.put(`/bookings/${id}`, { status: 'confirmed' }),
-    checkIn:     (id: string) => service.put(`/bookings/${id}`, { status: 'checked_in' }),
-    complete:    (id: string) => service.put(`/bookings/${id}`, { status: 'completed' }),
-    cancel:      (id: string, note?: string) => service.put(`/bookings/${id}`, { status: 'cancelled', cancelNote: note }),
+    // 状态流转快捷方法
+    confirm:     (id: string, extra?: object) => service.put(`/bookings/${id}`, { status: 'confirmed', ...extra }),
+    checkIn:     (id: string, extra?: object) => service.put(`/bookings/${id}`, { status: 'checked_in', ...extra }),
+    complete:    (id: string, extra?: object) => service.put(`/bookings/${id}`, { status: 'completed', ...extra }),
+    cancel:      (id: string, note?: string, extra?: object) => service.put(`/bookings/${id}`, { status: 'cancelled', statusNote: note, ...extra }),
+    // 收款（v2）
+    pay:         (id: string, data: { amount: number; payMethod: string; note?: string; operatorId?: string; operatorName?: string }) => service.post(`/bookings/${id}/pay`, data),
+    getPayments: (id: string) => service.get(`/bookings/${id}/payments`),
+    // 到访资源分配（签到时更新球车/更衣柜/客房等）
+    updateResources: (id: string, data: object) => service.put(`/bookings/${id}/resources`, data),
   },
 
   // 资源管理
@@ -158,6 +166,20 @@ export const api = {
     complete: (id: string, data?: { notes?: string; cost?: number }) => service.put(`/maintenance/${id}/complete`, data || {}),
     getFaultAnalysis: (params?: { date?: string }) => service.get('/maintenance/fault-analysis', { params }),
     getFaultTypes: () => service.get('/maintenance/fault-types'),
+  },
+
+  // 球员管理（平台级球员 + 球场档案 + 充值）
+  players: {
+    search:          (params: { q: string; clubId?: string }) => service.get('/players/search', { params }),
+    getList:         (params?: object) => service.get('/players', { params }),
+    getDetail:       (id: string, params?: { clubId?: string }) => service.get(`/players/${id}`, { params }),
+    create:          (data: object) => service.post('/players', data),
+    update:          (id: string, data: object) => service.put(`/players/${id}`, data),
+    updateProfile:   (id: string, data: object) => service.put(`/players/${id}/profile`, data),
+    recharge:        (id: string, data: { clubId: string; amount: number; payMethod?: string; note?: string }) => service.post(`/players/${id}/recharge`, data),
+    refreshQrcode:   (id: string) => service.post(`/players/${id}/refresh-qrcode`),
+    addVehicle:      (id: string, data: { plateNo: string; brand?: string; color?: string; isPrimary?: boolean }) => service.post(`/players/${id}/vehicles`, data),
+    delete:          (id: string) => service.delete(`/players/${id}`),
   },
 
   // 系统设置

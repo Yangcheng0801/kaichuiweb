@@ -97,6 +97,9 @@ app.use('/api/resources', require('./routes/resources')(getDb));
 // 预订管理路由
 app.use('/api/bookings', require('./routes/bookings')(getDb));
 
+// 球员管理路由（平台级球员档案 + 球场档案 + 充值）
+app.use('/api/players', require('./routes/players')(getDb));
+
 // 球车管理路由（需 JWT 鉴权，clubId 从 JWT 注入）
 const { requireAuthWithClubId } = require('./middleware/auth-cart');
 app.use('/api/carts', require('./routes/carts')(getDb, requireAuthWithClubId));
