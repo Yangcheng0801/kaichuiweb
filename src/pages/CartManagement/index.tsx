@@ -78,15 +78,30 @@ const STATUS_SIDEBAR = [
 function formatDate(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
-function formatTime(v?: string) {
-  if (!v) return '--'
-  const d = new Date(v)
-  return isNaN(d.getTime()) ? v : `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+// 兼容 TCB 各种时间格式：string / number(ms) / { $date: ms } / { toDate() } / Date
+function toDate(v: any): Date | null {
+  if (!v) return null
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v
+  if (typeof v === 'number') return new Date(v < 1e11 ? v * 1000 : v)
+  if (typeof v === 'object') {
+    if (typeof v.toDate === 'function') { try { return v.toDate() } catch { return null } }
+    if (typeof v.$date === 'number') return new Date(v.$date)
+    if (typeof v.$date === 'string') return new Date(v.$date)
+  }
+  if (typeof v === 'string') {
+    const d = new Date(v)
+    return isNaN(d.getTime()) ? null : d
+  }
+  return null
 }
-function formatDateTime(v?: string) {
-  if (!v) return '--'
-  const d = new Date(v)
-  if (isNaN(d.getTime())) return v
+function formatTime(v?: any) {
+  const d = toDate(v)
+  if (!d) return '--'
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+function formatDateTime(v?: any) {
+  const d = toDate(v)
+  if (!d) return '--'
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
@@ -729,35 +744,47 @@ function MaintenanceTab() {
 // ─── 使用记录 Tab（甘特时间轴 + 列表切换）──────────────────────────────────────
 
 function UsageTab({ brandList }: { brandList: string[] }) {
-  const [list, setList]         = useState<UsageRecord[]>([])
-  const [total, setTotal]       = useState(0)
-  const [page, setPage]         = useState(1)
-  const [loading, setLoading]   = useState(false)
-  const [date, setDate]         = useState(formatDate(new Date()))
-  const [brand, setBrand]       = useState('all')
-  const [detail, setDetail]     = useState<any>(null)
-  const [viewMode, setViewMode] = useState<'gantt' | 'list'>('gantt')
+  const [list, setList]             = useState<UsageRecord[]>([])
+  const [total, setTotal]           = useState(0)
+  const [page, setPage]             = useState(1)
+  const [loading, setLoading]       = useState(false)
+  const [date, setDate]             = useState(formatDate(new Date()))
+  const [brand, setBrand]           = useState('all')
+  const [searchText, setSearchText] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [detail, setDetail]         = useState<any>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [viewMode, setViewMode]     = useState<'gantt' | 'list'>('gantt')
   const PAGE_SIZE = 60
 
   const load = useCallback(() => {
     setLoading(true)
-    api.cartManagement.getUsageList({ page, limit: PAGE_SIZE, date, brand })
+    api.cartManagement.getUsageList({ page, limit: PAGE_SIZE, date, brand, searchText })
       .then((res: any) => { setList(res.data || []); setTotal(res.total || 0) })
       .catch(() => {}).finally(() => setLoading(false))
-  }, [date, brand, page])
+  }, [date, brand, page, searchText])
 
   useEffect(() => { load() }, [load])
-  useEffect(() => { setPage(1) }, [date, brand])
+  useEffect(() => { setPage(1) }, [date, brand, searchText])
 
-  const loadDetail = (id: string) =>
-    api.cartManagement.getUsageDetail(id).then((r: any) => setDetail(r.data))
+  const handleSearch = () => { setSearchText(searchInput.trim()); setPage(1) }
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter') handleSearch() }
+  const clearSearch = () => { setSearchInput(''); setSearchText(''); setPage(1) }
+
+  const loadDetail = (id: string) => {
+    setDetailLoading(true)
+    setDetail(null)
+    api.cartManagement.getUsageDetail(id)
+      .then((r: any) => { setDetail(r.data || r) })
+      .catch((err: any) => { toast.error('加载详情失败：' + (err?.message || '未知错误')) })
+      .finally(() => setDetailLoading(false))
+  }
 
   // 甘特轴：06:00 ~ 22:00
   const GANTT_START = 6, GANTT_END = 22, GANTT_HOURS = GANTT_END - GANTT_START
-  const toPct = (v?: string) => {
-    if (!v) return null
-    const d = new Date(v)
-    if (isNaN(d.getTime())) return null
+  const toPct = (v?: any) => {
+    const d = toDate(v)
+    if (!d) return null
     const h = Math.max(GANTT_START, Math.min(GANTT_END, d.getHours() + d.getMinutes() / 60))
     return ((h - GANTT_START) / GANTT_HOURS) * 100
   }
@@ -767,13 +794,39 @@ function UsageTab({ brandList }: { brandList: string[] }) {
   return (
     <div className="flex flex-col h-full min-h-0 space-y-3">
       {/* 工具栏 */}
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
         <input type="date" value={date} onChange={e => setDate(e.target.value)}
           className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm" />
         <select value={brand} onChange={e => setBrand(e.target.value)}
           className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white">
           {brandList.map(b => <option key={b} value={b === '全部' ? 'all' : b}>{b}</option>)}
         </select>
+        {/* 搜索框：支持车号 / 球童工号 / 球童姓名 */}
+        <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
+          <Search size={13} className="ml-2.5 text-gray-400 flex-shrink-0" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="车号 / 球童工号 / 姓名"
+            className="px-2 py-1.5 text-sm outline-none w-40"
+          />
+          {searchInput && (
+            <button onClick={clearSearch} className="mr-1 text-gray-400 hover:text-gray-600">
+              <X size={13} />
+            </button>
+          )}
+          <button onClick={handleSearch}
+            className="px-2.5 py-1.5 bg-emerald-600 text-white text-xs hover:bg-emerald-700 transition-colors">
+            搜索
+          </button>
+        </div>
+        {searchText && (
+          <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+            搜索: {searchText}
+          </span>
+        )}
         <button onClick={load} className="p-1.5 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
           <RefreshCw size={14} className={loading ? 'animate-spin text-gray-400' : 'text-gray-500'} />
         </button>
@@ -900,65 +953,171 @@ function UsageTab({ brandList }: { brandList: string[] }) {
         </div>
       )}
 
-      {/* 使用记录详情弹窗 */}
-      {detail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-auto">
-            <div className="flex justify-between px-6 py-4 border-b">
-              <h2 className="font-semibold">球车 {detail.cartNumber} · 使用详情</h2>
-              <button onClick={() => setDetail(null)}><X size={18} /></button>
-            </div>
-            <div className="p-6">
-              <div className="relative pl-8 space-y-4">
-                {/* 出库 */}
-                <div className="flex items-start">
-                  <div className="absolute left-0 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center z-10">
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                  </div>
-                  <div className="absolute left-3 top-6 h-full w-px bg-gray-200" />
-                  <div>
-                    <div className="text-sm font-semibold text-gray-800">出库</div>
-                    <div className="text-xs text-gray-500">{formatDateTime(detail.checkoutTime)}</div>
-                    {detail.checkoutByDisplay && <div className="text-xs text-gray-400">{detail.checkoutByDisplay}</div>}
-                  </div>
-                </div>
-                {/* 圈次 */}
-                {(detail.laps || []).map((lap: any, i: number) => (
-                  <div key={i}>
-                    <div className="flex items-start">
-                      <div className="absolute left-0 w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center z-10">
-                        <div className="w-2 h-2 rounded-full bg-amber-500" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-700">第 {i + 1} 圈 · 下场</div>
-                        <div className="text-xs text-gray-500">{formatDateTime(lap.departTime)}</div>
-                        {lap.departByDisplay && <div className="text-xs text-gray-400">{lap.departByDisplay}</div>}
-                        {lap.returnTime && (
-                          <div className="text-xs text-gray-500 mt-1">↩ 回场 {formatDateTime(lap.returnTime)}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {/* 入库 */}
-                <div className="flex items-start">
-                  <div className={`absolute left-0 w-6 h-6 rounded-full flex items-center justify-center z-10 ${detail.checkinTime ? 'bg-emerald-100' : 'bg-gray-100'}`}>
-                    <div className={`w-2.5 h-2.5 rounded-full ${detail.checkinTime ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                  </div>
-                  <div>
-                    <div className={`text-sm font-semibold ${detail.checkinTime ? 'text-emerald-700' : 'text-gray-400'}`}>
-                      {detail.checkinTime ? '入库' : '尚未入库'}
-                    </div>
-                    {detail.checkinTime && (
-                      <>
-                        <div className="text-xs text-gray-500">{formatDateTime(detail.checkinTime)}</div>
-                        {detail.checkinByDisplay && <div className="text-xs text-gray-400">{detail.checkinByDisplay}</div>}
-                      </>
-                    )}
-                  </div>
-                </div>
+      {/* 使用记录详情弹窗（loading 中 or 有数据时都显示） */}
+      {(detailLoading || detail) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+          onClick={e => { if (e.target === e.currentTarget) { setDetail(null); setDetailLoading(false) } }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0">
+              <div>
+                <h2 className="font-semibold text-gray-900">
+                  {detail ? `球车 ${detail.cartNumber} · 使用详情` : '加载中...'}
+                </h2>
+                {detail && (
+                  <p className="text-xs text-gray-400 mt-0.5">{detail.brand}  ·  {formatDateTime(detail.checkoutTime)} 出库</p>
+                )}
               </div>
+              <button onClick={() => { setDetail(null); setDetailLoading(false) }}
+                className="p-1 rounded-lg hover:bg-gray-100 text-gray-500">
+                <X size={18} />
+              </button>
             </div>
+
+            {detailLoading ? (
+              <div className="flex-1 flex items-center justify-center py-12 text-gray-400">
+                <RefreshCw size={22} className="animate-spin mr-2" />加载中...
+              </div>
+            ) : detail && (
+              <div className="overflow-auto flex-1">
+                {/* 基础信息卡 */}
+                <div className="mx-6 mt-5 grid grid-cols-3 gap-3">
+                  {[
+                    { label: '车号', value: detail.cartNumber },
+                    { label: '品牌', value: detail.brand || '--' },
+                    { label: '圈数', value: `${(detail.laps || []).length} 圈` },
+                    {
+                      label: '使用时长',
+                      value: (() => {
+                        const s = toDate(detail.checkoutTime), e = toDate(detail.checkinTime)
+                        if (!s || !e) return detail.checkinTime ? '--' : '进行中'
+                        const m = Math.floor((e.getTime() - s.getTime()) / 60000)
+                        return m > 0 ? `${Math.floor(m / 60)}h${m % 60}m` : '--'
+                      })()
+                    },
+                    { label: '出库时间', value: formatDateTime(detail.checkoutTime) },
+                    { label: '入库时间', value: formatDateTime(detail.checkinTime) },
+                  ].map(item => (
+                    <div key={item.label} className="bg-gray-50 rounded-xl px-3 py-2.5">
+                      <div className="text-[10px] text-gray-400 mb-0.5">{item.label}</div>
+                      <div className="text-sm font-medium text-gray-800">{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 操作时间轴 */}
+                <div className="px-6 pt-5 pb-2">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">操作时间轴</div>
+                  <div className="relative">
+                    {/* 竖线 */}
+                    <div className="absolute left-[11px] top-3 bottom-3 w-px bg-gray-200" />
+                    <div className="space-y-0">
+
+                      {/* 出库 */}
+                      <div className="flex items-start gap-3 pb-4">
+                        <div className="relative z-10 w-6 h-6 rounded-full bg-blue-100 border-2 border-blue-300 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        </div>
+                        <div className="flex-1 bg-blue-50 rounded-xl px-3 py-2.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-blue-800">出库</span>
+                            <span className="text-xs text-blue-600">{formatDateTime(detail.checkoutTime)}</span>
+                          </div>
+                          {detail.checkoutByDisplay && (
+                            <div className="text-xs text-blue-600 mt-0.5 flex items-center gap-1">
+                              <span className="opacity-60">操作人</span> {detail.checkoutByDisplay}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 圈次 */}
+                      {(detail.laps || []).map((lap: any, i: number) => (
+                        <div key={i} className="space-y-0">
+                          {/* 下场 */}
+                          <div className="flex items-start gap-3 pb-3">
+                            <div className="relative z-10 w-6 h-6 rounded-full bg-amber-100 border-2 border-amber-300 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-[9px] font-bold text-amber-600">{i + 1}</span>
+                            </div>
+                            <div className="flex-1 bg-amber-50 rounded-xl px-3 py-2.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-amber-800">第 {i + 1} 圈 · 下场</span>
+                                <span className="text-xs text-amber-600">{formatDateTime(lap.departTime)}</span>
+                              </div>
+                              {lap.departByDisplay && (
+                                <div className="text-xs text-amber-600 mt-0.5">
+                                  <span className="opacity-60">操作人</span> {lap.departByDisplay}
+                                </div>
+                              )}
+                              {lap.returnTime && (
+                                <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-amber-100">
+                                  <span className="text-xs text-amber-700">↩ 回场</span>
+                                  <span className="text-xs text-amber-600">{formatDateTime(lap.returnTime)}</span>
+                                </div>
+                              )}
+                              {lap.returnByDisplay && (
+                                <div className="text-xs text-amber-600 mt-0.5">
+                                  <span className="opacity-60">操作人</span> {lap.returnByDisplay}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* 入库 */}
+                      <div className="flex items-start gap-3">
+                        <div className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 border-2
+                          ${detail.checkinTime ? 'bg-emerald-100 border-emerald-300' : 'bg-gray-100 border-gray-300'}`}>
+                          <div className={`w-2 h-2 rounded-full ${detail.checkinTime ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                        </div>
+                        <div className={`flex-1 rounded-xl px-3 py-2.5 ${detail.checkinTime ? 'bg-emerald-50' : 'bg-gray-50'}`}>
+                          <div className="flex items-center justify-between">
+                            <span className={`text-sm font-semibold ${detail.checkinTime ? 'text-emerald-800' : 'text-gray-400'}`}>
+                              {detail.checkinTime ? '入库' : '尚未入库'}
+                            </span>
+                            {detail.checkinTime && (
+                              <span className="text-xs text-emerald-600">{formatDateTime(detail.checkinTime)}</span>
+                            )}
+                          </div>
+                          {detail.checkinByDisplay && (
+                            <div className="text-xs text-emerald-600 mt-0.5">
+                              <span className="opacity-60">操作人</span> {detail.checkinByDisplay}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+                {/* 责任人摘要 */}
+                {(() => {
+                  const people = new Set<string>()
+                  if (detail.checkoutByDisplay) people.add(detail.checkoutByDisplay)
+                  if (detail.checkinByDisplay) people.add(detail.checkinByDisplay)
+                  ;(detail.laps || []).forEach((l: any) => {
+                    if (l.departByDisplay) people.add(l.departByDisplay)
+                    if (l.returnByDisplay) people.add(l.returnByDisplay)
+                  })
+                  if (people.size === 0) return null
+                  return (
+                    <div className="mx-6 mb-5 mt-1 bg-gray-50 rounded-xl px-4 py-3">
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">责任人摘要</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[...people].map(p => (
+                          <span key={p} className="inline-flex items-center gap-1 bg-white border border-gray-200 px-2.5 py-1 rounded-full text-xs text-gray-700">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />{p}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-2">共涉及 {people.size} 名操作人员</div>
+                    </div>
+                  )
+                })()}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -312,6 +312,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   });
 
   // GET /api/carts/usage - 使用记录列表（需在 PUT /:id 之前定义）
+  // searchText 支持：车号、球童工号（caddieNumber）、球童姓名（name/nickName）
   router.get('/usage', async (req, res) => {
     try {
       const db = getDb();
@@ -324,6 +325,34 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
       const pageNum = Math.max(1, parseInt(page, 10) || 1);
       const skip = (pageNum - 1) * limitNum;
 
+      const s = String(searchText || '').trim();
+
+      // 如果有搜索词，先尝试通过 users 集合查匹配的 openid（支持球童工号/姓名）
+      let matchedOpenids = null; // null = 未限制；[] = 无匹配（直接返回空）
+      if (s) {
+        try {
+          const userConds = [
+            { clubId },
+            _.or([
+              { name: db.RegExp({ regexp: s, options: 'i' }) },
+              { nickName: db.RegExp({ regexp: s, options: 'i' }) },
+              { caddieNumber: db.RegExp({ regexp: s, options: 'i' }) },
+            ])
+          ];
+          const usersRes = await db.collection('users')
+            .where(_.and(userConds))
+            .field({ _openid: true, name: true, nickName: true, caddieNumber: true })
+            .limit(200)
+            .get();
+          const matched = usersRes.data || [];
+          if (matched.length > 0) {
+            matchedOpenids = matched.map(u => u._openid).filter(Boolean);
+          }
+        } catch (e) {
+          console.warn('[Carts] 搜索 users 失败，跳过球童搜索:', e && e.message);
+        }
+      }
+
       const conds = [
         { clubId },
         { checkoutTime: _.gte(start).and(_.lte(end)) }
@@ -332,16 +361,23 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
       if (status === 'ongoing') conds.push({ checkinTime: _.exists(false) });
       else if (status === 'completed') conds.push({ checkinTime: _.exists(true) });
 
-      const s = String(searchText || '').trim();
       if (s) {
-        const searchConditions = [
-          { brand: db.RegExp({ regexp: s, options: 'i' }) },
+        // 构建搜索条件：车号匹配 OR 操作人openid匹配
+        const searchOrConds = [
           { cartNumber: db.RegExp({ regexp: s, options: 'i' }) },
-          { checkoutBy: db.RegExp({ regexp: s, options: 'i' }) },
-          { checkinBy: db.RegExp({ regexp: s, options: 'i' }) }
         ];
-        if (/^\d+$/.test(s)) searchConditions.push({ cartNumber: Number(s) });
-        conds.push(_.or(searchConditions));
+        if (/^\d+$/.test(s)) searchOrConds.push({ cartNumber: Number(s) });
+        // 如果找到了匹配的球童 openid，加入 openid 范围搜索
+        if (matchedOpenids && matchedOpenids.length > 0) {
+          searchOrConds.push({ checkoutBy: _.in(matchedOpenids) });
+          searchOrConds.push({ checkinBy: _.in(matchedOpenids) });
+        } else if (matchedOpenids === null) {
+          // users 查询出错时降级：直接在 checkoutBy/checkinBy 上做正则
+          searchOrConds.push({ checkoutBy: db.RegExp({ regexp: s, options: 'i' }) });
+          searchOrConds.push({ checkinBy: db.RegExp({ regexp: s, options: 'i' }) });
+        }
+        // matchedOpenids === [] 时：搜索词不匹配任何球童 且 不是车号，条件只剩车号匹配
+        if (searchOrConds.length > 0) conds.push(_.or(searchOrConds));
       }
 
       const whereExpr = conds.length === 1 ? conds[0] : _.and(conds);
@@ -352,6 +388,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
       const list = listRes.data || [];
       const total = countRes.total || 0;
 
+      // 批量查询操作人显示名
       const openids = [...new Set(list.flatMap(r => [r.checkoutBy, r.checkinBy]).filter(v => typeof v === 'string' && v))];
       let displayMap = {};
       if (openids.length > 0) {
@@ -360,7 +397,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
             .field({ _openid: true, nickName: true, caddieNumber: true, name: true })
             .get();
           (usersRes.data || []).forEach(u => {
-            const display = [u.name || u.nickName || '', u.caddieNumber || ''].filter(Boolean).join(' ');
+            const display = [u.name || u.nickName || '', u.caddieNumber ? `(${u.caddieNumber})` : ''].filter(Boolean).join(' ');
             if (u._openid) displayMap[u._openid] = display || u._openid;
           });
         } catch (e) {}
