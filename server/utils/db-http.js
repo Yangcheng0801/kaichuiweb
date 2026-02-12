@@ -111,6 +111,67 @@ async function remove(env, collectionName, docId) {
 }
 
 /**
+ * 执行 databaseupdate（where().update()）
+ */
+async function updateWhere(env, collectionName, condStr, updateData) {
+  const queryStr = `db.collection("${collectionName}").where(${condStr}).update({ data: ${JSON.stringify(updateData)} })`;
+  const data = await tcbPost('databaseupdate', { env, query: queryStr });
+  return { stats: { updated: data.matched || 0 } };
+}
+
+/**
+ * 执行 databasedelete（where().remove()）
+ */
+async function removeWhere(env, collectionName, condStr) {
+  const queryStr = `db.collection("${collectionName}").where(${condStr}).remove()`;
+  const data = await tcbPost('databasedelete', { env, query: queryStr });
+  return { stats: { removed: data.deleted || 0 } };
+}
+
+/**
+ * 供 HTTP DB 使用的 command 对象（序列化为 TCB JS 表达式字符串）
+ * 注：_.neq / _.gte 等在 JSON.stringify 时会变为 {} 导致查询失败。
+ * 这里实现"可 JSON.stringify"的占位符，由 where() 在序列化前递归替换为 db.command.xxx 表达式字符串。
+ */
+const httpDbCommand = (() => {
+  // 标记一个值为 db command 表达式
+  const mkCmd = (expr) => ({ __httpDbCmd: true, expr });
+  // 序列化值（Date → new Date(...) 表达式）
+  const serVal = (v) => v instanceof Date ? `new Date(${JSON.stringify(v.toISOString())})` : JSON.stringify(v);
+  return {
+    neq: (v) => mkCmd(`_.neq(${serVal(v)})`),
+    eq:  (v) => mkCmd(`_.eq(${serVal(v)})`),
+    gt:  (v) => mkCmd(`_.gt(${serVal(v)})`),
+    gte: (v) => {
+      const base = mkCmd(`_.gte(${serVal(v)})`);
+      base.and = (other) => mkCmd(`_.gte(${serVal(v)}).and(${other && other.__httpDbCmd ? other.expr : serVal(other)})`);
+      return base;
+    },
+    lte: (v) => mkCmd(`_.lte(${serVal(v)})`),
+    in:  (arr) => mkCmd(`_.in(${JSON.stringify(arr)})`),
+    exists: (v) => mkCmd(`_.exists(${v ? 'true' : 'false'})`),
+    and: (arr) => mkCmd(`_.and([${arr.map(item => serializeWhere(item)).join(',')}])`),
+    or:  (arr) => mkCmd(`_.or([${arr.map(item => serializeWhere(item)).join(',')}])`),
+  };
+})();
+
+/**
+ * 将包含 __httpDbCmd 占位符的条件对象序列化为 TCB 查询字符串
+ */
+function serializeWhere(cond) {
+  if (cond && cond.__httpDbCmd) return cond.expr;
+  if (Array.isArray(cond)) return `[${cond.map(serializeWhere).join(',')}]`;
+  if (cond && typeof cond === 'object') {
+    const parts = Object.entries(cond).map(([k, v]) => {
+      const vStr = (v && v.__httpDbCmd) ? v.expr : JSON.stringify(v);
+      return `"${k}": ${vStr}`;
+    });
+    return `{${parts.join(',')}}`;
+  }
+  return JSON.stringify(cond);
+}
+
+/**
  * 返回兼容 SDK 的 HTTP 数据库适配器（仅实现当前业务用到的接口）
  * serverDate() 在 HTTP 模式下用 new Date() 替代
  */
@@ -118,6 +179,10 @@ function createHttpDb(env) {
   const serverDate = () => new Date();
   return {
     serverDate,
+    command: httpDbCommand,
+    RegExp({ regexp, options }) {
+      return { __httpDbCmd: true, expr: `new db.RegExp({regexp: ${JSON.stringify(regexp)}, options: ${JSON.stringify(options || '')}})` };
+    },
     collection(name) {
       return {
         async get() {
@@ -162,7 +227,7 @@ function createHttpDb(env) {
           };
         },
         where(cond) {
-          const condStr = JSON.stringify(cond);
+          const condStr = serializeWhere(cond);
           const buildOrderBy = (orderByStrs) => {
             const orderClause = orderByStrs.length ? '.orderBy(' + orderByStrs.map(([f, o]) => `"${f}", "${o}"`).join(').orderBy(') + ')' : '';
             return {
@@ -216,6 +281,23 @@ function createHttpDb(env) {
               const res = await query(env, q);
               const total = (res.pager && res.pager.total) ?? (res.count != null ? res.count : null) ?? (res.data && res.data[0] && res.data[0].total) ?? (Array.isArray(res.data) ? res.data.length : 0);
               return { total: total ?? 0 };
+            },
+            async update(opts) {
+              const data = opts.data || opts;
+              return updateWhere(env, name, condStr, data);
+            },
+            async remove() {
+              return removeWhere(env, name, condStr);
+            },
+            field(projection) {
+              const fieldStr = JSON.stringify(projection);
+              return {
+                async get() {
+                  const q = `db.collection("${name}").where(${condStr}).field(${fieldStr}).get()`;
+                  const res = await query(env, q);
+                  return { data: res.data };
+                }
+              };
             },
             orderBy(field, order) {
               const dir = order === 'desc' ? 'desc' : 'asc';

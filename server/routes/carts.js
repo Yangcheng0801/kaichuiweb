@@ -53,13 +53,11 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   const router = express.Router();
   router.use(requireAuthWithClubId);
 
-  const db = getDb();
-  const _ = getCmd(db);
-
   // GET /api/carts/statistics - 数据总览 9 项 KPI
   router.get('/statistics', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const dateStr = (req.query.date && String(req.query.date).trim()) || getChinaTodayStr();
       const { start, end } = parseChinaDateRange(dateStr);
@@ -218,6 +216,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.get('/brands', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const res0 = await db.collection('carbrands')
         .where(_.and([
@@ -242,6 +241,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.get('/', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const { page = 1, limit = 20, brand = 'all', status = 'all', searchText = '' } = req.query;
       const todayStr = getChinaTodayStr();
@@ -315,6 +315,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.get('/usage', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const { page = 1, limit = 20, date, brand = 'all', status = 'all', searchText = '' } = req.query;
       const dateStr = (date && String(date).trim()) || getChinaTodayStr();
@@ -381,6 +382,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.get('/usage/:id', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const { id } = req.params;
 
@@ -441,6 +443,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.post('/', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const { brand, cartNumber } = req.body;
       if (!brand || !cartNumber) {
@@ -477,6 +480,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.post('/batch', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const { brand, numbers } = req.body;
       if (!brand || !Array.isArray(numbers) || numbers.length === 0) {
@@ -532,6 +536,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.put('/batch-status', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const { cartIds, status } = req.body;
       if (!cartIds || !Array.isArray(cartIds) || cartIds.length === 0 || !status) {
         return res.status(400).json({ success: false, message: '缺少 cartIds 或 status' });
@@ -556,6 +561,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.put('/:id', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const { id } = req.params;
       const payload = req.body;
@@ -603,6 +609,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   router.delete('/', async (req, res) => {
     try {
       const db = getDb();
+      const _ = getCmd(db);
       const clubId = req.clubId;
       const body = req.body || {};
       const q = req.query || {};

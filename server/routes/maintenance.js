@@ -40,12 +40,11 @@ function createMaintenanceRouter(getDb, requireAuthWithClubId) {
   const router = express.Router();
   router.use(requireAuthWithClubId);
 
-  const db = getDb();
-  const _ = (db && db.command) ? db.command : cloud.database().command;
-
   // GET /api/maintenance - 维修记录列表
   router.get('/', async (req, res) => {
     try {
+      const db = getDb();
+      const _ = (db && db.command) ? db.command : cloud.database().command;
       const clubId = req.clubId;
       const { status = 'all', limit = 20, skip = 0, date } = req.query;
       const dateStr = (date && String(date).trim()) || '';
@@ -122,6 +121,7 @@ function createMaintenanceRouter(getDb, requireAuthWithClubId) {
   // PUT /api/maintenance/:id/complete - 完成维修
   router.put('/:id/complete', async (req, res) => {
     try {
+      const db = getDb();
       const clubId = req.clubId;
       const { id } = req.params;
       const { notes, cost } = req.body || {};
@@ -160,6 +160,8 @@ function createMaintenanceRouter(getDb, requireAuthWithClubId) {
   // GET /api/maintenance/fault-analysis - 故障类型分析（按 faultType 聚合）
   router.get('/fault-analysis', async (req, res) => {
     try {
+      const db = getDb();
+      const _ = (db && db.command) ? db.command : cloud.database().command;
       const clubId = req.clubId;
       const dateStr = (req.query.date && String(req.query.date).trim()) || getChinaTodayStr();
       const { start, end } = parseChinaDateRange(dateStr);
@@ -195,6 +197,7 @@ function createMaintenanceRouter(getDb, requireAuthWithClubId) {
   // GET /api/maintenance/fault-types - 获取故障类型列表（用于报修表单）
   router.get('/fault-types', async (req, res) => {
     try {
+      const db = getDb();
       const clubId = req.clubId;
       const res0 = await db.collection('cart_fault_types')
         .where({ clubId })
