@@ -178,7 +178,7 @@ function createPlayersRouter(getDb) {
         const profRes = await db.collection('player_club_profiles')
           .where(profConds.length === 1 ? profConds[0] : _.and(profConds))
           .field({ playerId: true })
-          .limit(2000).get();
+          .limit(1000).get();
         playerIds = (profRes.data || []).map(p => p.playerId).filter(Boolean);
         if (playerIds.length === 0) {
           return res.json({ success: true, data: [], total: 0, page, pageSize });
