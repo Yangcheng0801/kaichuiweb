@@ -81,7 +81,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
         const cartsRes = await db.collection('carts').where({
           clubId,
           isDeleted: _.neq(true)
-        }).get();
+        }).limit(1000).get();
         const carts = cartsRes.data || [];
         statistics.totalCarts = carts.length;
         carts.forEach(cart => {

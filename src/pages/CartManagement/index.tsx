@@ -15,6 +15,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 
 const STATUS_LIST = [
   { value: 'all', label: '全部' },
+  { value: 'availableGroup', label: '可用' },
   { value: 'notCheckedOut', label: '未出库' },
   { value: 'checkedOut', label: '已出库' },
   { value: 'inUse', label: '使用中' },
@@ -270,17 +271,21 @@ export default function CartManagement() {
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   {[
-                    { key: 'totalCarts', label: '球车总数' },
-                    { key: 'availableCarts', label: '可用' },
-                    { key: 'notCheckedOut', label: '未出库' },
-                    { key: 'checkedOut', label: '已出库' },
-                    { key: 'inUseCarts', label: '使用中' },
-                    { key: 'notCheckedIn', label: '未入库' },
-                    { key: 'maintenanceCarts', label: '维修中' },
-                    { key: 'disabledCarts', label: '停用' },
-                    { key: 'avgUseTime', label: '平均使用时长' },
-                  ].map(({ key, label }) => (
-                    <div key={key} className="rounded-xl border border-gray-100 p-4 bg-gray-50/50">
+                    { key: 'totalCarts', label: '球车总数', status: 'all' },
+                    { key: 'availableCarts', label: '可用', status: 'availableGroup' },
+                    { key: 'notCheckedOut', label: '未出库', status: 'notCheckedOut' },
+                    { key: 'checkedOut', label: '已出库', status: 'checkedOut' },
+                    { key: 'inUseCarts', label: '使用中', status: 'inUse' },
+                    { key: 'notCheckedIn', label: '未入库', status: 'notCheckedIn' },
+                    { key: 'maintenanceCarts', label: '维修中', status: 'maintenance' },
+                    { key: 'disabledCarts', label: '停用', status: 'disabled' },
+                    { key: 'avgUseTime', label: '平均使用时长', status: null },
+                  ].map(({ key, label, status }) => (
+                    <div
+                      key={key}
+                      onClick={() => status != null && (setCartPage(1), setActiveTab('carts'), setCartFilters(f => ({ ...f, status })))}
+                      className={`rounded-xl border border-gray-100 p-4 bg-gray-50/50 ${status != null ? 'cursor-pointer hover:bg-gray-100 hover:border-gray-200 transition-colors' : ''}`}
+                    >
                       <div className="text-2xl font-bold text-gray-900">{stats[key] ?? '--'}</div>
                       <div className="text-xs text-gray-500 mt-1">{label}</div>
                     </div>
