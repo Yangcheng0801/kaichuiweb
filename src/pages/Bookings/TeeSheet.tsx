@@ -136,7 +136,10 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
   const [bagDesc, setBagDesc] = useState('')
   // 停车
   const [plateNo, setPlateNo] = useState(existing?.parking?.plateNo || '')
+  const [companions, setCompanions] = useState<{ name: string; playerNo?: string }[]>([])
   const [companionSearch, setCompanionSearch] = useState('')
+  const [companionResults, setCompanionResults] = useState<any[]>([])
+  const [searchingCompanion, setSearchingCompanion] = useState(false)
 
   // ── 可用资源列表 ───────────────────────────────────────────────────────────
   const [availableLockers, setAvailableLockers] = useState<AvailableLocker[]>([])
@@ -170,6 +173,33 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
     setSelectedLockerIds(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     )
+  }
+
+  // 搜索同行人
+  const handleCompanionSearch = async (q: string) => {
+    setCompanionSearch(q)
+    if (!q || q.length < 1) { setCompanionResults([]); return }
+    setSearchingCompanion(true)
+    try {
+      const res = await api.players.search({ q })
+      setCompanionResults((res as any).data || [])
+    } catch {
+      setCompanionResults([])
+    } finally {
+      setSearchingCompanion(false)
+    }
+  }
+
+  const addCompanion = (player: any) => {
+    const already = companions.some(c => c.playerNo === player.playerNo || c.name === player.name)
+    if (already) { toast.error('该同行人已添加'); return }
+    setCompanions(prev => [...prev, { name: player.name || player.nickName || '', playerNo: player.playerNo || '' }])
+    setCompanionSearch('')
+    setCompanionResults([])
+  }
+
+  const removeCompanion = (idx: number) => {
+    setCompanions(prev => prev.filter((_, i) => i !== idx))
   }
 
   // 球童选择
@@ -228,8 +258,11 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
       }
 
       // 停车
-      if (plateNo) {
-        resources.parking = { plateNo, companions: [] }
+      if (plateNo || companions.length > 0) {
+        resources.parking = {
+          plateNo,
+          companions: companions.map(c => `${c.name}${c.playerNo ? `(${c.playerNo})` : ''}`),
+        }
       }
 
       // 临时消费卡
@@ -529,6 +562,56 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             <input value={plateNo} onChange={e => setPlateNo(e.target.value)}
               placeholder="车牌号（可留空）"
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+
+            {/* 同行人 */}
+            <div className="mt-3">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-xs font-medium text-gray-600">同行人</span>
+                {companions.length > 0 && (
+                  <span className="text-[10px] text-gray-400">({companions.length}人)</span>
+                )}
+              </div>
+              {/* 已添加的同行人 */}
+              {companions.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {companions.map((c, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200">
+                      {c.name}{c.playerNo ? `(${c.playerNo})` : ''}
+                      <button onClick={() => removeCompanion(i)} className="ml-0.5 hover:text-red-500 transition-colors">
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {/* 搜索添加 */}
+              <div className="relative">
+                <div className="flex items-center gap-1">
+                  <Search size={13} className="text-gray-400 absolute left-2.5 pointer-events-none" />
+                  <input value={companionSearch} onChange={e => handleCompanionSearch(e.target.value)}
+                    placeholder="搜索球员姓名/编号添加同行人..."
+                    className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                </div>
+                {/* 搜索结果下拉 */}
+                {companionSearch && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-32 overflow-y-auto">
+                    {searchingCompanion ? (
+                      <div className="px-3 py-2 text-xs text-gray-400">搜索中...</div>
+                    ) : companionResults.length === 0 ? (
+                      <div className="px-3 py-2 text-xs text-gray-400">未找到匹配的球员</div>
+                    ) : (
+                      companionResults.map((p: any) => (
+                        <button key={p._id || p.playerNo} onClick={() => addCompanion(p)}
+                          className="w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-gray-50 transition-colors text-left">
+                          <span className="font-medium text-gray-700">{p.name || p.nickName}</span>
+                          <span className="text-gray-400">{p.playerNo || ''}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </section>
 
         </div>
