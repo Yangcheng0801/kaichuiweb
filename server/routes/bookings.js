@@ -85,6 +85,96 @@ function createBookingsRouter(getDb) {
     }
   }
 
+  // ─── 工具：占用更衣柜 ──────────────────────────────────────────────────────
+  async function occupyLocker(db, lockerId, bookingId, playerName) {
+    if (!lockerId) return;
+    try {
+      await db.collection('lockers').doc(lockerId).update({
+        data: { status: 'occupied', currentBookingId: bookingId, currentPlayerName: playerName || '', updateTime: new Date() }
+      });
+      console.log(`[Bookings] 更衣柜 ${lockerId} 已占用`);
+    } catch (e) {
+      console.warn(`[Bookings] 占用更衣柜失败 ${lockerId}:`, e.message);
+    }
+  }
+
+  // ─── 工具：释放更衣柜 ──────────────────────────────────────────────────────
+  async function releaseLocker(db, lockerId) {
+    if (!lockerId) return;
+    try {
+      await db.collection('lockers').doc(lockerId).update({
+        data: { status: 'available', currentBookingId: null, currentPlayerName: null, updateTime: new Date() }
+      });
+      console.log(`[Bookings] 更衣柜 ${lockerId} 已释放`);
+    } catch (e) {
+      console.warn(`[Bookings] 释放更衣柜失败 ${lockerId}:`, e.message);
+    }
+  }
+
+  // ─── 工具：占用客房 ────────────────────────────────────────────────────────
+  async function occupyRoom(db, roomId, bookingId, guestName) {
+    if (!roomId) return;
+    try {
+      await db.collection('rooms').doc(roomId).update({
+        data: { status: 'occupied', currentBookingId: bookingId, currentGuestName: guestName || '', updateTime: new Date() }
+      });
+      console.log(`[Bookings] 客房 ${roomId} 已占用`);
+    } catch (e) {
+      console.warn(`[Bookings] 占用客房失败 ${roomId}:`, e.message);
+    }
+  }
+
+  // ─── 工具：释放客房 ────────────────────────────────────────────────────────
+  async function releaseRoom(db, roomId) {
+    if (!roomId) return;
+    try {
+      await db.collection('rooms').doc(roomId).update({
+        data: { status: 'cleaning', currentBookingId: null, currentGuestName: null, updateTime: new Date() }
+      });
+      console.log(`[Bookings] 客房 ${roomId} 已释放（清洁中）`);
+    } catch (e) {
+      console.warn(`[Bookings] 释放客房失败 ${roomId}:`, e.message);
+    }
+  }
+
+  // ─── 工具：回收临时消费卡 ──────────────────────────────────────────────────
+  async function returnTempCard(db, cardId) {
+    if (!cardId) return;
+    try {
+      const cardRes = await db.collection('temp_consume_cards').doc(cardId).get();
+      const card = Array.isArray(cardRes.data) ? cardRes.data[0] : cardRes.data;
+      if (!card) return;
+      const newStatus = card.cardType === 'virtual' ? 'retired' : 'available';
+      await db.collection('temp_consume_cards').doc(cardId).update({
+        data: { status: newStatus, currentBookingId: null, currentPlayerName: null, returnedAt: new Date(), updateTime: new Date() }
+      });
+      console.log(`[Bookings] 临时消费卡 ${cardId} 已回收`);
+    } catch (e) {
+      console.warn(`[Bookings] 回收消费卡失败 ${cardId}:`, e.message);
+    }
+  }
+
+  // ─── 工具：释放预订的所有资源 ──────────────────────────────────────────────
+  async function releaseAllResources(db, booking) {
+    const res = booking.assignedResources || {};
+    // 球童
+    await releaseCaddy(db, res.caddyId || booking.caddyId);
+    // 更衣柜
+    if (Array.isArray(res.lockers)) {
+      for (const l of res.lockers) {
+        if (l.lockerId) await releaseLocker(db, l.lockerId);
+      }
+    }
+    // 客房
+    if (Array.isArray(res.rooms)) {
+      for (const r of res.rooms) {
+        if (r.roomId) await releaseRoom(db, r.roomId);
+      }
+    }
+    // 临时消费卡
+    if (res.tempCardId) await returnTempCard(db, res.tempCardId);
+  }
+
   // ─── 工具：分页参数解析 ──────────────────────────────────────────────────────
   function parsePage(query) {
     let page = parseInt(query.page, 10);
@@ -371,12 +461,12 @@ function createBookingsRouter(getDb) {
         await releaseCaddy(db, oldCaddyId);
         await occupyCaddy(db, newCaddyId);
       }
-      // 取消/完赛后释放球童
+      // 取消/完赛后释放全部资源（球童 + 更衣柜 + 客房 + 临时消费卡）
       if (
         (fields.status === BOOKING_STATUS.CANCELLED || fields.status === BOOKING_STATUS.COMPLETED) &&
         old.status !== fields.status
       ) {
-        await releaseCaddy(db, newCaddyId || oldCaddyId);
+        await releaseAllResources(db, old);
       }
 
       console.log(`[Bookings] 预订 ${id} 更新成功，状态: ${old.status} → ${fields.status || old.status}`);
@@ -482,9 +572,18 @@ function createBookingsRouter(getDb) {
   });
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // PUT /api/bookings/:id/resources  更新到访资源分配（签到时填写球车/更衣柜/客房等）
+  // PUT /api/bookings/:id/resources  更新到访资源分配（签到时填写）
   //
-  // Body 可包含：caddyId, caddyName, cartId, cartNo, lockers[], rooms[], bagStorage[], parking
+  // Body 可包含：
+  //   caddyId, caddyName,                     -- 球童
+  //   cartId, cartNo,                          -- 球车
+  //   lockers: [{ lockerId, lockerNo, area }], -- 更衣柜（带实体ID）
+  //   rooms: [{ roomId, roomNo, roomType, checkInDate, checkOutDate, nights }], -- 客房
+  //   bagStorage: [{ bagNo, location, description }],
+  //   parking: { plateNo, companions: [...] },
+  //   tempCardId, tempCardNo,                  -- 临时消费卡（实体卡）
+  //   generateTempCard: true,                  -- 系统生成虚拟卡号
+  //   stayType: 'day_trip' | 'overnight',      -- 住宿类型
   // ══════════════════════════════════════════════════════════════════════════════
   router.put('/:id/resources', async (req, res) => {
     try {
@@ -495,7 +594,12 @@ function createBookingsRouter(getDb) {
       const old = Array.isArray(oldResult.data) ? oldResult.data[0] : oldResult.data;
       if (!old) return res.status(404).json({ success: false, error: '预订记录不存在' });
 
-      const { caddyId, caddyName, cartId, cartNo, lockers, rooms, bagStorage, parking } = req.body;
+      const {
+        caddyId, caddyName, cartId, cartNo,
+        lockers, rooms, bagStorage, parking,
+        tempCardId, tempCardNo, generateTempCard,
+        stayType,
+      } = req.body;
 
       const oldAssigned = old.assignedResources || {};
       const newAssigned = {
@@ -510,7 +614,7 @@ function createBookingsRouter(getDb) {
         ...(parking    !== undefined ? { parking }   : {}),
       };
 
-      // 球童变更时联动
+      // ── 球童变更联动 ────────────────────────────────────────────────────────
       const oldCaddyId = oldAssigned.caddyId || old.caddyId;
       const newCaddyId = caddyId !== undefined ? caddyId : oldCaddyId;
       if (oldCaddyId !== newCaddyId) {
@@ -520,12 +624,73 @@ function createBookingsRouter(getDb) {
         newAssigned.caddyName = caddyName || '';
       }
 
+      // ── 更衣柜联动 ─────────────────────────────────────────────────────────
+      if (lockers !== undefined) {
+        // 释放旧更衣柜
+        const oldLockers = oldAssigned.lockers || [];
+        for (const ol of oldLockers) {
+          if (ol.lockerId) await releaseLocker(db, ol.lockerId);
+        }
+        // 占用新更衣柜
+        const playerName = (old.players && old.players[0]?.name) || '';
+        for (const nl of (lockers || [])) {
+          if (nl.lockerId) await occupyLocker(db, nl.lockerId, id, playerName);
+        }
+      }
+
+      // ── 客房联动 ───────────────────────────────────────────────────────────
+      if (rooms !== undefined) {
+        const oldRooms = oldAssigned.rooms || [];
+        for (const or_ of oldRooms) {
+          if (or_.roomId) await releaseRoom(db, or_.roomId);
+        }
+        const guestName = (old.players && old.players[0]?.name) || '';
+        for (const nr of (rooms || [])) {
+          if (nr.roomId) await occupyRoom(db, nr.roomId, id, guestName);
+        }
+      }
+
+      // ── 临时消费卡 ─────────────────────────────────────────────────────────
+      if (tempCardId) {
+        // 发放实体卡
+        const playerName = (old.players && old.players[0]?.name) || '';
+        try {
+          await db.collection('temp_consume_cards').doc(tempCardId).update({
+            data: { status: 'in_use', currentBookingId: id, currentPlayerName: playerName, issuedAt: new Date(), updateTime: new Date() }
+          });
+        } catch (e) { console.warn('[Bookings] 发放消费卡失败:', e.message); }
+        newAssigned.tempCardId = tempCardId;
+        newAssigned.tempCardNo = tempCardNo || '';
+      } else if (generateTempCard) {
+        // 系统生成虚拟卡
+        const playerName = (old.players && old.players[0]?.name) || '';
+        const clubId = old.clubId || 'default';
+        try {
+          // 生成虚拟卡号
+          let cardNo = `V${Date.now().toString().slice(-6)}`;
+          const data = {
+            cardNo, cardType: 'virtual', status: 'in_use',
+            currentBookingId: id, currentPlayerName: playerName,
+            issuedAt: new Date(), returnedAt: null, clubId,
+            createTime: new Date(), updateTime: new Date(),
+          };
+          const cardResult = await db.collection('temp_consume_cards').add({ data });
+          newAssigned.tempCardId = cardResult._id;
+          newAssigned.tempCardNo = cardNo;
+          console.log(`[Bookings] 生成虚拟消费卡 ${cardNo} → 预订 ${id}`);
+        } catch (e) { console.warn('[Bookings] 生成虚拟消费卡失败:', e.message); }
+      }
+
+      // ── 住宿类型 ───────────────────────────────────────────────────────────
+      const extraUpdate = {};
+      if (stayType !== undefined) extraUpdate.stayType = stayType;
+
       await db.collection('bookings').doc(id).update({
         data: {
           assignedResources: newAssigned,
-          // 同步顶层球童字段（发球表展示用）
           ...(caddyId   !== undefined ? { caddyId, caddyName: caddyName || '' } : {}),
           ...(cartNo    !== undefined ? { cartNo } : {}),
+          ...extraUpdate,
           updateTime: new Date(),
           version: (Number(old.version) || 0) + 1,
         }

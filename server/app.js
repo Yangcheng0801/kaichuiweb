@@ -100,6 +100,15 @@ app.use('/api/bookings', require('./routes/bookings')(getDb));
 // 球员管理路由（平台级球员档案 + 球场档案 + 充值）
 app.use('/api/players', require('./routes/players')(getDb));
 
+// 更衣柜管理路由
+app.use('/api/lockers', require('./routes/lockers')(getDb));
+
+// 客房管理路由
+app.use('/api/rooms', require('./routes/rooms')(getDb));
+
+// 临时消费卡管理路由
+app.use('/api/temp-cards', require('./routes/temp-cards')(getDb));
+
 // 球车管理路由（需 JWT 鉴权，clubId 从 JWT 注入）
 const { requireAuthWithClubId } = require('./middleware/auth-cart');
 app.use('/api/carts', require('./routes/carts')(getDb, requireAuthWithClubId));

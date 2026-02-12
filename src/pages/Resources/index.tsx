@@ -1,14 +1,20 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Flag, UserCheck } from 'lucide-react'
+import { ArrowLeft, Flag, UserCheck, Lock, DoorOpen, CreditCard } from 'lucide-react'
 import Courses from './Courses'
 import Caddies from './Caddies'
+import Lockers from './Lockers'
+import Rooms from './Rooms'
+import TempCards from './TempCards'
 
-type TabKey = 'courses' | 'caddies'
+type TabKey = 'courses' | 'caddies' | 'lockers' | 'rooms' | 'temp-cards'
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'courses', label: '球场管理', icon: <Flag size={16} /> },
-  { key: 'caddies', label: '球童管理', icon: <UserCheck size={16} /> },
+  { key: 'courses',    label: '球场管理',   icon: <Flag size={16} /> },
+  { key: 'caddies',    label: '球童管理',   icon: <UserCheck size={16} /> },
+  { key: 'lockers',    label: '更衣柜',     icon: <Lock size={16} /> },
+  { key: 'rooms',      label: '客房管理',   icon: <DoorOpen size={16} /> },
+  { key: 'temp-cards', label: '消费卡',     icon: <CreditCard size={16} /> },
 ]
 
 export default function Resources() {
@@ -16,8 +22,14 @@ export default function Resources() {
   const [activeTab, setActiveTab] = useState<TabKey>('courses')
 
   const renderContent = () => {
-    if (activeTab === 'courses') return <Courses />
-    return <Caddies />
+    switch (activeTab) {
+      case 'courses':    return <Courses />
+      case 'caddies':    return <Caddies />
+      case 'lockers':    return <Lockers />
+      case 'rooms':      return <Rooms />
+      case 'temp-cards': return <TempCards />
+      default:           return <Courses />
+    }
   }
 
   return (
@@ -37,7 +49,7 @@ export default function Resources() {
 
       <div className="flex-1 flex flex-col px-6 py-6 gap-4">
         {/* Tabs */}
-        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit">
+        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit flex-wrap">
           {TABS.map(tab => (
             <button
               key={tab.key}
@@ -54,7 +66,7 @@ export default function Resources() {
           ))}
         </div>
 
-        {/* 内容区：撐满剩余高度 */}
+        {/* 内容区 */}
         <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
           {renderContent()}
         </div>

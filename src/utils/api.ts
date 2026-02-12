@@ -182,6 +182,36 @@ export const api = {
     delete:          (id: string) => service.delete(`/players/${id}`),
   },
 
+  // 更衣柜管理
+  lockers: {
+    getList:  (params?: object) => service.get('/lockers', { params }),
+    getStats: () => service.get('/lockers/stats'),
+    getDetail:(id: string) => service.get(`/lockers/${id}`),
+    create:   (data: object) => service.post('/lockers', data),
+    update:   (id: string, data: object) => service.put(`/lockers/${id}`, data),
+    remove:   (id: string) => service.delete(`/lockers/${id}`),
+  },
+
+  // 客房管理
+  rooms: {
+    getList:  (params?: object) => service.get('/rooms', { params }),
+    getStats: () => service.get('/rooms/stats'),
+    getDetail:(id: string) => service.get(`/rooms/${id}`),
+    create:   (data: object) => service.post('/rooms', data),
+    update:   (id: string, data: object) => service.put(`/rooms/${id}`, data),
+    remove:   (id: string) => service.delete(`/rooms/${id}`),
+  },
+
+  // 临时消费卡管理
+  tempCards: {
+    getList:    (params?: object) => service.get('/temp-cards', { params }),
+    create:     (data: object) => service.post('/temp-cards', data),
+    issue:      (data: { cardId: string; bookingId: string; playerName?: string }) => service.post('/temp-cards/issue', data),
+    returnCard: (data: { cardId: string }) => service.post('/temp-cards/return', data),
+    generate:   (data: { bookingId: string; playerName?: string; clubId?: string }) => service.post('/temp-cards/generate', data),
+    remove:     (id: string) => service.delete(`/temp-cards/${id}`),
+  },
+
   // 系统设置
   settings: {
     getClubInfo: (clubId = 'default') => service.get('/settings/club', { params: { clubId } }),

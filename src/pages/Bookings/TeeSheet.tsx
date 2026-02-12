@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { ChevronLeft, ChevronRight, Plus, X, CreditCard, Wallet, QrCode, Banknote, Building2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, X, CreditCard, Wallet, QrCode, Banknote, Building2, Search, UserCheck, Car, Lock, DoorOpen, Package, ParkingCircle, Zap } from 'lucide-react'
 import { api } from '@/utils/api'
 
 // ─── 类型 ─────────────────────────────────────────────────────────────────────
@@ -25,8 +25,9 @@ interface Booking {
   teeTime:     string
   courseId:    string
   courseName:  string
-  players:     { name: string; type: string }[]
+  players:     { name: string; type: string; playerNo?: string; phone?: string; memberId?: string }[]
   playerCount: number
+  caddyId:     string
   caddyName:   string
   cartNo:      string
   totalFee:    number
@@ -35,15 +36,18 @@ interface Booking {
   status:      string
   note:        string
   version:     number
+  stayType?:   string
   assignedResources?: {
-    caddyId:    string | null
-    caddyName:  string
-    cartId:     string | null
-    cartNo:     string
-    lockers:    { lockerNo: string; area?: string }[]
-    rooms:      { roomNo: string; type?: string }[]
-    bagStorage: { bagNo: string; location?: string }[]
-    parking:    { plateNo: string; companions?: string[] } | null
+    caddyId:     string | null
+    caddyName:   string
+    cartId:      string | null
+    cartNo:      string
+    lockers:     { lockerId?: string; lockerNo: string; area?: string }[]
+    rooms:       { roomId?: string; roomNo: string; roomType?: string }[]
+    bagStorage:  { bagNo: string; location?: string }[]
+    parking:     { plateNo: string; companions?: string[] } | null
+    tempCardId?: string
+    tempCardNo?: string
   }
 }
 
@@ -84,7 +88,7 @@ function formatDisplay(s: string) {
   return d.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })
 }
 
-// ─── 签到弹窗 ─────────────────────────────────────────────────────────────────
+// ─── 签到工作台弹窗（全面升级版） ─────────────────────────────────────────────
 
 interface CheckInDialogProps {
   booking:  Booking
@@ -92,26 +96,158 @@ interface CheckInDialogProps {
   onSuccess: () => void
 }
 
+interface AvailableLocker { _id: string; lockerNo: string; area: string; size: string; dailyFee: number; status: string }
+interface AvailableRoom   { _id: string; roomNo: string; roomType: string; floor: string; pricePerNight: number; status: string }
+interface AvailableCard   { _id: string; cardNo: string; cardType: string; status: string }
+interface AvailableCaddy  { _id: string; name: string; level: string; rating?: number; status: string }
+interface AvailableCart    { _id: string; cartNumber?: string; brand?: string; status?: string; name?: string }
+
+const LOCKER_STATUS_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+  available:   { bg: 'bg-emerald-50',  border: 'border-emerald-300', text: 'text-emerald-700' },
+  occupied:    { bg: 'bg-red-50',      border: 'border-red-300',     text: 'text-red-600' },
+  maintenance: { bg: 'bg-gray-100',    border: 'border-gray-300',    text: 'text-gray-400' },
+}
+
+const ROOM_TYPE_MAP: Record<string, string> = { standard: '标间', deluxe: '豪华', suite: '套房' }
+
 function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
   const existing = booking.assignedResources
-  const [cartNo,    setCartNo]    = useState(existing?.cartNo    || booking.cartNo || '')
-  const [lockerNo,  setLockerNo]  = useState(existing?.lockers?.[0]?.lockerNo  || '')
-  const [bagNo,     setBagNo]     = useState(existing?.bagStorage?.[0]?.bagNo  || '')
-  const [saving,    setSaving]    = useState(false)
 
+  // ── 资源选择状态 ───────────────────────────────────────────────────────────
+  // 消费凭证
+  const [consumeMode, setConsumeMode] = useState<'existing' | 'physical' | 'virtual'>('existing')
+  const [selectedCardId, setSelectedCardId] = useState('')
+  // 住宿类型
+  const [stayType, setStayType] = useState(booking.stayType || 'day_trip')
+  // 球车
+  const [cartNo, setCartNo] = useState(existing?.cartNo || booking.cartNo || '')
+  // 球童
+  const [caddyId, setCaddyId] = useState(existing?.caddyId || booking.caddyId || '')
+  const [caddyName, setCaddyName] = useState(existing?.caddyName || booking.caddyName || '')
+  // 更衣柜
+  const [selectedLockerIds, setSelectedLockerIds] = useState<string[]>([])
+  // 客房
+  const [selectedRoomId, setSelectedRoomId] = useState('')
+  const [roomCheckIn, setRoomCheckIn] = useState(booking.date || '')
+  const [roomCheckOut, setRoomCheckOut] = useState('')
+  // 球包寄存
+  const [needBag, setNeedBag] = useState(false)
+  const [bagNo, setBagNo] = useState(existing?.bagStorage?.[0]?.bagNo || '')
+  const [bagDesc, setBagDesc] = useState('')
+  // 停车
+  const [plateNo, setPlateNo] = useState(existing?.parking?.plateNo || '')
+  const [companionSearch, setCompanionSearch] = useState('')
+
+  // ── 可用资源列表 ───────────────────────────────────────────────────────────
+  const [availableLockers, setAvailableLockers] = useState<AvailableLocker[]>([])
+  const [availableRooms, setAvailableRooms] = useState<AvailableRoom[]>([])
+  const [availableCards, setAvailableCards] = useState<AvailableCard[]>([])
+  const [availableCaddies, setAvailableCaddies] = useState<AvailableCaddy[]>([])
+  const [availableCarts, setAvailableCarts] = useState<AvailableCart[]>([])
+  const [saving, setSaving] = useState(false)
+  const [resourceLoading, setResourceLoading] = useState(true)
+
+  // 加载所有可用资源
+  useEffect(() => {
+    setResourceLoading(true)
+    Promise.all([
+      api.lockers.getList({ status: 'available', pageSize: 200 }).catch(() => ({ data: [] })),
+      api.rooms.getList({ status: 'available', pageSize: 200 }).catch(() => ({ data: [] })),
+      api.tempCards.getList({ status: 'available', cardType: 'physical' }).catch(() => ({ data: [] })),
+      api.resources.caddies.getList({ status: 'available' }).catch(() => ({ data: [] })),
+      api.resources.carts.getList({ status: 'active' }).catch(() => ({ data: [] })),
+    ]).then(([lockersRes, roomsRes, cardsRes, caddiesRes, cartsRes]) => {
+      setAvailableLockers((lockersRes as any).data || [])
+      setAvailableRooms((roomsRes as any).data || [])
+      setAvailableCards((cardsRes as any).data || [])
+      setAvailableCaddies((caddiesRes as any).data || [])
+      setAvailableCarts((cartsRes as any).data || [])
+    }).finally(() => setResourceLoading(false))
+  }, [])
+
+  // 更衣柜选择切换
+  const toggleLocker = (id: string) => {
+    setSelectedLockerIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    )
+  }
+
+  // 球童选择
+  const handleCaddySelect = (caddy: AvailableCaddy) => {
+    if (caddyId === caddy._id) {
+      setCaddyId('')
+      setCaddyName('')
+    } else {
+      setCaddyId(caddy._id)
+      setCaddyName(caddy.name)
+    }
+  }
+
+  // ── 提交签到 ───────────────────────────────────────────────────────────────
   const handleConfirm = async () => {
     setSaving(true)
     try {
-      // 更新资源分配
+      // 构建资源分配数据
       const resources: any = {}
-      if (cartNo)   resources.cartNo = cartNo
-      if (lockerNo) resources.lockers    = [{ lockerNo }]
-      if (bagNo)    resources.bagStorage = [{ bagNo }]
 
+      // 球车
+      if (cartNo) resources.cartNo = cartNo
+
+      // 球童
+      if (caddyId) {
+        resources.caddyId = caddyId
+        resources.caddyName = caddyName
+      }
+
+      // 更衣柜
+      if (selectedLockerIds.length > 0) {
+        resources.lockers = selectedLockerIds.map(id => {
+          const l = availableLockers.find(x => x._id === id)
+          return { lockerId: id, lockerNo: l?.lockerNo || '', area: l?.area || '' }
+        })
+      }
+
+      // 客房
+      if (stayType !== 'day_trip' && selectedRoomId) {
+        const room = availableRooms.find(r => r._id === selectedRoomId)
+        resources.rooms = [{
+          roomId: selectedRoomId,
+          roomNo: room?.roomNo || '',
+          roomType: room?.roomType || '',
+          checkInDate: roomCheckIn,
+          checkOutDate: roomCheckOut,
+          nights: roomCheckOut && roomCheckIn
+            ? Math.max(1, Math.round((new Date(roomCheckOut).getTime() - new Date(roomCheckIn).getTime()) / 86400000))
+            : 1,
+        }]
+      }
+
+      // 球包寄存
+      if (needBag && bagNo) {
+        resources.bagStorage = [{ bagNo, location: '', description: bagDesc }]
+      }
+
+      // 停车
+      if (plateNo) {
+        resources.parking = { plateNo, companions: [] }
+      }
+
+      // 临时消费卡
+      if (consumeMode === 'physical' && selectedCardId) {
+        resources.tempCardId = selectedCardId
+        const card = availableCards.find(c => c._id === selectedCardId)
+        resources.tempCardNo = card?.cardNo || ''
+      } else if (consumeMode === 'virtual') {
+        resources.generateTempCard = true
+      }
+
+      // 住宿类型
+      resources.stayType = stayType
+
+      // 调用 API
       if (Object.keys(resources).length > 0) {
         await api.bookings.updateResources(booking._id, resources)
       }
-      // 签到（改状态）
       await api.bookings.checkIn(booking._id)
       toast.success('签到成功')
       onSuccess()
@@ -123,63 +259,288 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
     }
   }
 
+  // ── 按区域分组更衣柜 ─────────────────────────────────────────────────────
+  const lockersByArea = availableLockers.reduce<Record<string, AvailableLocker[]>>((acc, l) => {
+    const key = l.area || '未分区'
+    if (!acc[key]) acc[key] = []
+    acc[key].push(l)
+    return acc
+  }, {})
+
+  const playerInfo = booking.players?.[0]
+  const hasExistingCard = playerInfo?.type === 'member'
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
           <div>
-            <h2 className="font-semibold text-gray-900">办理签到</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{booking.teeTime} · {booking.courseName}</p>
+            <h2 className="font-semibold text-gray-900 text-lg">办理签到</h2>
+            <p className="text-xs text-gray-400 mt-0.5">{booking.teeTime} · {booking.courseName} {booking.orderNo && `· ${booking.orderNo}`}</p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
             <X size={18} />
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
-          {/* 球员信息 */}
-          <div className="flex flex-wrap gap-1.5">
-            {booking.players?.map((p, i) => (
-              <span key={i} className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                p.type === 'guest' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'
-              }`}>
-                {p.name}{p.type === 'guest' ? '（嘉宾）' : ''}
-              </span>
-            ))}
+        {/* Body - scrollable */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          {/* 1. 球员信息卡片 */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
+            <div className="flex items-center gap-3 flex-wrap">
+              {booking.players?.map((p, i) => (
+                <span key={i} className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+                  p.type === 'guest' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'
+                }`}>
+                  {p.name}{p.type === 'guest' ? '（嘉宾）' : '（会员）'}
+                </span>
+              ))}
+              <span className="text-xs text-gray-400 ml-auto">{booking.playerCount}人</span>
+            </div>
+            {playerInfo && (
+              <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                {(playerInfo as any).playerNo && <span>球员号：{(playerInfo as any).playerNo}</span>}
+                {(playerInfo as any).phone && <span>手机：{(playerInfo as any).phone}</span>}
+                {(playerInfo as any).memberId && <span>会员卡：{(playerInfo as any).memberId}</span>}
+              </div>
+            )}
           </div>
 
-          {/* 资源分配 */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">球车号</label>
+          {/* 2. 消费凭证 */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <CreditCard size={14} /> 消费凭证
+            </h3>
+            <div className="flex gap-2">
+              <button onClick={() => setConsumeMode('existing')}
+                className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${consumeMode === 'existing' ? 'bg-blue-50 border-blue-400 text-blue-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                {hasExistingCard ? '已有会员卡' : '无需消费卡'}
+              </button>
+              <button onClick={() => setConsumeMode('physical')}
+                className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${consumeMode === 'physical' ? 'bg-blue-50 border-blue-400 text-blue-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                发放实体卡
+              </button>
+              <button onClick={() => setConsumeMode('virtual')}
+                className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${consumeMode === 'virtual' ? 'bg-purple-50 border-purple-400 text-purple-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                <span className="flex items-center justify-center gap-1"><Zap size={12} />系统生成</span>
+              </button>
+            </div>
+            {consumeMode === 'physical' && (
+              <div className="mt-2">
+                {availableCards.length === 0 ? (
+                  <p className="text-xs text-gray-400 py-2">暂无可用实体卡，请先在资源管理中录入</p>
+                ) : (
+                  <select value={selectedCardId} onChange={e => setSelectedCardId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="">选择实体消费卡...</option>
+                    {availableCards.map(c => (
+                      <option key={c._id} value={c._id}>{c.cardNo}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
+            {consumeMode === 'virtual' && (
+              <p className="text-xs text-purple-500 mt-2 bg-purple-50 rounded-lg px-3 py-2">
+                签到后系统将自动生成临时消费卡号
+              </p>
+            )}
+          </section>
+
+          {/* 3. 住宿类型 */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <DoorOpen size={14} /> 住宿类型
+            </h3>
+            <div className="flex gap-2">
+              {[
+                { value: 'day_trip',  label: '当天往返' },
+                { value: 'overnight', label: '两球一晚' },
+                { value: 'stay_only', label: '仅住宿' },
+              ].map(opt => (
+                <button key={opt.value} onClick={() => setStayType(opt.value)}
+                  className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${stayType === opt.value ? 'bg-emerald-50 border-emerald-400 text-emerald-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* 4. 球车 + 球童（并排） */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 球车 */}
+            <section>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Car size={14} /> 球车分配
+              </h3>
+              <select value={cartNo} onChange={e => setCartNo(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                <option value="">选择球车（可留空）</option>
+                {availableCarts.map(c => (
+                  <option key={c._id} value={c.cartNumber || c.name || ''}>
+                    {c.cartNumber || c.name}{c.brand ? ` (${c.brand})` : ''}
+                  </option>
+                ))}
+              </select>
               <input value={cartNo} onChange={e => setCartNo(e.target.value)}
-                placeholder="输入球车号（如：A01）"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">更衣柜号</label>
-              <input value={lockerNo} onChange={e => setLockerNo(e.target.value)}
-                placeholder="输入更衣柜号（可留空）"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">球包寄存号</label>
-              <input value={bagNo} onChange={e => setBagNo(e.target.value)}
-                placeholder="输入球包寄存号（可留空）"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            </div>
+                placeholder="或直接输入车号"
+                className="w-full mt-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-500 focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+            </section>
+
+            {/* 球童 */}
+            <section>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <UserCheck size={14} /> 球童分配
+                {caddyName && <span className="text-xs text-emerald-600 font-normal ml-1">已选：{caddyName}</span>}
+              </h3>
+              {resourceLoading ? (
+                <p className="text-xs text-gray-400 py-2">加载中...</p>
+              ) : availableCaddies.length === 0 ? (
+                <p className="text-xs text-gray-400 py-2">当前无空闲球童</p>
+              ) : (
+                <div className="max-h-28 overflow-y-auto space-y-1 pr-1">
+                  {availableCaddies.map(c => (
+                    <button key={c._id} onClick={() => handleCaddySelect(c)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-xs transition-all ${
+                        caddyId === c._id
+                          ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
+                          : 'border-gray-100 text-gray-600 hover:bg-gray-50'
+                      }`}>
+                      <span className="font-medium">{c.name}</span>
+                      <span className="text-gray-400">{c.level || '普通'}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
+
+          {/* 5. 更衣柜可视化选择 */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <Lock size={14} /> 更衣柜分配
+              {selectedLockerIds.length > 0 && (
+                <span className="text-xs text-emerald-600 font-normal">
+                  已选 {selectedLockerIds.length} 个
+                </span>
+              )}
+            </h3>
+            {resourceLoading ? (
+              <p className="text-xs text-gray-400 py-2">加载中...</p>
+            ) : Object.keys(lockersByArea).length === 0 ? (
+              <p className="text-xs text-gray-400 py-2">暂无可用更衣柜，请先在资源管理中录入</p>
+            ) : (
+              <div className="space-y-3 max-h-36 overflow-y-auto pr-1">
+                {Object.entries(lockersByArea).map(([area, items]) => (
+                  <div key={area}>
+                    <div className="text-[10px] text-gray-400 mb-1">{area}</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {items.sort((a, b) => a.lockerNo.localeCompare(b.lockerNo)).map(l => {
+                        const selected = selectedLockerIds.includes(l._id)
+                        return (
+                          <button key={l._id} onClick={() => toggleLocker(l._id)}
+                            className={`w-14 h-10 rounded-lg border-2 text-[11px] font-bold transition-all flex flex-col items-center justify-center ${
+                              selected
+                                ? 'bg-blue-500 border-blue-600 text-white shadow-md scale-105'
+                                : 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:border-blue-400 hover:bg-blue-50'
+                            }`}>
+                            {l.lockerNo}
+                            {l.dailyFee > 0 && <span className="text-[8px] opacity-70">¥{l.dailyFee}</span>}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* 6. 客房分配（两球一晚 / 仅住宿时显示） */}
+          {stayType !== 'day_trip' && (
+            <section>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <DoorOpen size={14} /> 客房分配
+              </h3>
+              {availableRooms.length === 0 ? (
+                <p className="text-xs text-gray-400 py-2">暂无空闲客房</p>
+              ) : (
+                <>
+                  <select value={selectedRoomId} onChange={e => setSelectedRoomId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    <option value="">选择客房...</option>
+                    {availableRooms.map(r => (
+                      <option key={r._id} value={r._id}>
+                        {r.roomNo} - {ROOM_TYPE_MAP[r.roomType] || r.roomType} ({r.floor}) ¥{r.pricePerNight}/晚
+                      </option>
+                    ))}
+                  </select>
+                  {selectedRoomId && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div>
+                        <label className="block text-[10px] text-gray-500 mb-0.5">入住日期</label>
+                        <input type="date" value={roomCheckIn} onChange={e => setRoomCheckIn(e.target.value)}
+                          className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-gray-500 mb-0.5">退房日期</label>
+                        <input type="date" value={roomCheckOut} onChange={e => setRoomCheckOut(e.target.value)}
+                          className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          )}
+
+          {/* 7. 球包寄存 */}
+          <section>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={needBag} onChange={e => setNeedBag(e.target.checked)}
+                className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+              <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Package size={14} /> 需要寄存球包
+              </span>
+            </label>
+            {needBag && (
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div>
+                  <input value={bagNo} onChange={e => setBagNo(e.target.value)}
+                    placeholder="寄存编号（如 B-025）"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                </div>
+                <div>
+                  <input value={bagDesc} onChange={e => setBagDesc(e.target.value)}
+                    placeholder="球包描述（可选）"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* 8. 停车信息 */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <ParkingCircle size={14} /> 停车信息
+            </h3>
+            <input value={plateNo} onChange={e => setPlateNo(e.target.value)}
+              placeholder="车牌号（可留空）"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+          </section>
+
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
+        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 flex-shrink-0">
           <button onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors">
+            className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors">
             取消
           </button>
           <button onClick={handleConfirm} disabled={saving}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium">
+            className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-semibold">
             {saving ? '处理中...' : '确认签到'}
           </button>
         </div>
@@ -577,7 +938,13 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                           </span>
                         )}
                         {res?.lockers?.[0]?.lockerNo && (
-                          <span className="text-blue-600">柜：{res.lockers[0].lockerNo}</span>
+                          <span className="text-blue-600">柜：{res.lockers.map(l => l.lockerNo).join(',')}</span>
+                        )}
+                        {res?.rooms?.[0]?.roomNo && (
+                          <span className="text-purple-600">房：{res.rooms[0].roomNo}</span>
+                        )}
+                        {res?.tempCardNo && (
+                          <span className="text-orange-600">卡：{res.tempCardNo}</span>
                         )}
                         {res?.bagStorage?.[0]?.bagNo && (
                           <span>球包：{res.bagStorage[0].bagNo}</span>
