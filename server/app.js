@@ -85,6 +85,9 @@ function checkStatusRateLimitMiddleware(req, res, next) {
   next();
 }
 
+// 首页仪表盘路由（聚合 KPI / 资源概况 / 近期动态）
+app.use('/api/dashboard', require('./routes/dashboard')(getDb));
+
 // 订单路由（与主应用共用 getDb，适配腾讯云开发云托管）
 app.use('/api/orders', require('./routes/orders')(getDb));
 

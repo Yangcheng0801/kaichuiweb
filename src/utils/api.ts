@@ -75,6 +75,11 @@ export default service
 
 // API方法
 export const api = {
+  // 首页仪表盘
+  dashboard: {
+    getData: (params?: { clubId?: string }) => service.get('/dashboard', { params }),
+  },
+
   // 用户管理
   users: {
     getList: (params?: object) => service.get('/users', { params }),

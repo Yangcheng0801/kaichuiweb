@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner'
 import {
-  BarChart2, Users, Building2, PieChart,
-  UserCircle, ChevronDown, FileText, AlertTriangle, Menu, X, PanelRightClose, Settings, Layers, CalendarDays, Car, UserRound
+  CalendarDays, Layers, Car, UserRound, Settings,
+  UserCircle, ChevronDown, Menu, X,
+  CalendarCheck, DollarSign, Clock, Users,
+  BarChart3, RefreshCw, ArrowRight, TrendingUp,
+  Armchair, BedDouble, CreditCard, Bike
 } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -17,57 +20,67 @@ import {
 } from '@/components/ui/alert-dialog'
 import { selectUserInfo, selectIsLoggedIn, logout, fetchUserInfo } from '@/store/authSlice'
 import type { AppDispatch } from '@/store'
+import { api } from '@/utils/api'
 
-type MenuKey = 'dashboard' | 'users' | 'tenants' | 'quotas'
-
-const menuItems: { key: MenuKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'dashboard', label: '数据概览', icon: <BarChart2 size={16} /> },
-  { key: 'users',     label: '用户管理', icon: <Users size={16} /> },
-  { key: 'tenants',   label: '租户管理', icon: <Building2 size={16} /> },
-  { key: 'quotas',    label: '配额管理', icon: <PieChart size={16} /> },
+/* ========== 侧边栏导航项 ========== */
+const navItems = [
+  { key: 'bookings',        label: '预订管理', path: '/bookings',        icon: CalendarDays, color: 'bg-emerald-50 text-emerald-600' },
+  { key: 'resources',       label: '资源管理', path: '/resources',       icon: Layers,       color: 'bg-blue-50 text-blue-600' },
+  { key: 'cart-management', label: '球车管理', path: '/cart-management', icon: Car,          color: 'bg-amber-50 text-amber-600' },
+  { key: 'players',         label: '球员管理', path: '/players',         icon: UserRound,    color: 'bg-purple-50 text-purple-600' },
+  { key: 'settings',        label: '系统设置', path: '/settings',        icon: Settings,     color: 'bg-gray-100 text-gray-600' },
 ]
 
-const statCards = [
-  { label: '总用户数', value: '1,234', icon: <Users size={28} />, color: 'text-blue-500' },
-  { label: '租户数量', value: '56',    icon: <Building2 size={28} />, color: 'text-green-500' },
-  { label: '数据记录', value: '8,901', icon: <FileText size={28} />, color: 'text-orange-400' },
-  { label: '待处理',   value: '12',    icon: <AlertTriangle size={28} />, color: 'text-red-400' },
-]
+/* ========== 预订状态中文映射 ========== */
+const STATUS_MAP: Record<string, { label: string; cls: string }> = {
+  pending:    { label: '待确认', cls: 'bg-yellow-100 text-yellow-700' },
+  confirmed:  { label: '已确认', cls: 'bg-blue-100 text-blue-700' },
+  checked_in: { label: '已签到', cls: 'bg-emerald-100 text-emerald-700' },
+  playing:    { label: '打球中', cls: 'bg-green-100 text-green-700' },
+  completed:  { label: '已完赛', cls: 'bg-gray-100 text-gray-600' },
+  cancelled:  { label: '已取消', cls: 'bg-red-100 text-red-600' },
+  no_show:    { label: '未到场', cls: 'bg-orange-100 text-orange-600' },
+}
 
-const LONG_PRESS_MS = 800
+/* ========== 类型 ========== */
+interface DashboardData {
+  kpi: {
+    todayBookings: number
+    todayCheckedIn: number
+    todayCompleted: number
+    todayPending: number
+    todayRevenue: number
+    todayPaid: number
+    todayPendingFee: number
+  }
+  resources: {
+    carts:    { total: number; available: number; inUse: number; maintenance: number }
+    lockers:  { total: number; available: number; occupied: number; maintenance: number }
+    rooms:    { total: number; available: number; occupied: number; cleaning: number; maintenance: number }
+    caddies:  { total: number; available: number; busy: number; off: number }
+    tempCards: { total: number; available: number; inUse: number }
+  }
+  recentBookings: {
+    _id: string; orderNo: string; date: string; teeTime: string
+    playerName: string; playerCount: number; courseName: string
+    status: string; totalFee: number; createdAt: string
+  }[]
+}
 
-const getMenuLabel = (key: MenuKey) => menuItems.find(m => m.key === key)?.label ?? ''
-
+/* ========== 组件 ========== */
 export default function Home() {
   const navigate = useNavigate()
   const dispatch = useDispatch<AppDispatch>()
   const userInfo = useSelector(selectUserInfo)
   const isLoggedIn = useSelector(selectIsLoggedIn)
 
-  // ---------- 布局状态 ----------
-  const [activeMenu, setActiveMenu] = useState<MenuKey>('dashboard')
-  const [sidebarOpen, setSidebarOpen] = useState(false)   // 桌面端：鼠标靠近左边缘展开
-  const [drawerOpen, setDrawerOpen] = useState(false)     // 移动端：抽屉开关
-  const [dualViewOpen, setDualViewOpen] = useState(false) // 双视图模式
-  const [secondaryView, setSecondaryView] = useState<MenuKey>('users')
-  const [splitRatio, setSplitRatio] = useState(50)         // 左右分栏比例 0-100，默认 5:5
-
-  // ---------- 放置模式（类似 Windows 小窗） ----------
-  const [placementMode, setPlacementMode] = useState<{ module: MenuKey; currentActive: MenuKey } | null>(null)
-  const [placementHoverZone, setPlacementHoverZone] = useState<'left' | 'right' | null>(null)
-  const placementContainerRef = useRef<HTMLDivElement>(null)
-  const placementHoverZoneRef = useRef<'left' | 'right'>('right')
-
-  // ---------- 长按与分割线拖拽 ----------
-  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const longPressFiredRef = useRef(false)
-  const splitContainerRef = useRef<HTMLDivElement>(null)
-  const splitDraggingRef = useRef(false)
-  const [isDraggingSplit, setIsDraggingSplit] = useState(false) // 拖拽分割线时禁用 width 过渡，避免延迟
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
   const fetchedRef = useRef(false)
 
-  // 从微信回调进入时 userInfo 可能为空，进入首页后静默拉取一次。
-  // fetchedRef 守卫确保只拉取一次，兼容 React 18 StrictMode 下 effect 的双重调用。
+  // 拉取用户信息（首次进入）
   useEffect(() => {
     if (fetchedRef.current) return
     fetchedRef.current = true
@@ -76,273 +89,108 @@ export default function Home() {
     }
   }, [isLoggedIn, userInfo, dispatch])
 
+  // 拉取仪表盘数据
+  const fetchDashboard = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res: any = await api.dashboard.getData()
+      setData(res.data)
+    } catch (e) {
+      console.error('Dashboard fetch failed', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchDashboard() }, [fetchDashboard])
+
   const handleLogout = () => {
     dispatch(logout())
     toast.success('已退出登录')
     navigate('/login')
   }
 
-  const currentMenuLabel = getMenuLabel(activeMenu)
-
   const closeDrawer = () => setDrawerOpen(false)
+  const kpi = data?.kpi
+  const res = data?.resources
+  const recent = data?.recentBookings || []
 
-  // ---------- 导航：长按 / 点击 ----------
-  const handleNavPointerDown = (item: MenuKey) => {
-    longPressFiredRef.current = false
-    longPressTimerRef.current = setTimeout(() => {
-      longPressTimerRef.current = null
-      if (item !== activeMenu) {
-        longPressFiredRef.current = true
-        setPlacementMode({ module: item, currentActive: activeMenu })
-        setPlacementHoverZone(null)
-        placementHoverZoneRef.current = 'right'
-        closeDrawer()
-      }
-    }, LONG_PRESS_MS)
-  }
-
-  const handleNavPointerUp = (item: MenuKey) => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current)
-      longPressTimerRef.current = null
-    }
-    if (longPressFiredRef.current) return
-    if (dualViewOpen) {
-      if (item === activeMenu) {
-        setDualViewOpen(false)
-      } else {
-        setSecondaryView(item)
-      }
-      closeDrawer()
-    } else {
-      setActiveMenu(item)
-      closeDrawer()
-    }
-  }
-
-  const handleNavPointerLeave = () => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current)
-      longPressTimerRef.current = null
-    }
-  }
-
-  const handlePlacement = (isLeft: boolean) => {
-    if (!placementMode) return
-    const { module, currentActive } = placementMode
-    if (isLeft) {
-      setActiveMenu(module)
-      setSecondaryView(currentActive)
-      toast.success(`已开启双视图：${getMenuLabel(module)}（左） + ${getMenuLabel(currentActive)}（右）`)
-    } else {
-      setActiveMenu(currentActive)
-      setSecondaryView(module)
-      toast.success(`已开启双视图：${getMenuLabel(currentActive)}（左） + ${getMenuLabel(module)}（右）`)
-    }
-    setDualViewOpen(true)
-    setPlacementMode(null)
-  }
-
-  // ---------- 放置模式：监听 pointer 移动与释放 ----------
-  useEffect(() => {
-    if (!placementMode) return
-    const container = placementContainerRef.current
-    const onPointerMove = (e: PointerEvent) => {
-      if (!container) return
-      const rect = container.getBoundingClientRect()
-      const mid = rect.left + rect.width / 2
-      const zone = e.clientX < mid ? 'left' : 'right'
-      placementHoverZoneRef.current = zone
-      setPlacementHoverZone(zone)
-    }
-    const onPointerUp = () => {
-      handlePlacement(placementHoverZoneRef.current === 'left')
-    }
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setPlacementMode(null)
-        setPlacementHoverZone(null)
-      }
-    }
-    document.addEventListener('pointermove', onPointerMove)
-    document.addEventListener('pointerup', onPointerUp)
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('pointermove', onPointerMove)
-      document.removeEventListener('pointerup', onPointerUp)
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [placementMode])
-
-  // ---------- 双视图分割线拖拽 ----------
-  const handleSplitMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    splitDraggingRef.current = true
-    setIsDraggingSplit(true) // 拖拽时禁用 width 过渡，避免跟手延迟
-    const container = splitContainerRef.current
-    if (!container) return
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (!splitDraggingRef.current || !container) return
-      const rect = container.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      let ratio = Math.max(20, Math.min(80, (x / rect.width) * 100))
-      // 回中吸附：48–52% 范围内吸附到 50%，提供明显提示
-      if (ratio >= 48 && ratio <= 52) ratio = 50
-      setSplitRatio(ratio)
-    }
-    const onMouseUp = () => {
-      splitDraggingRef.current = false
-      setIsDraggingSplit(false)
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', onMouseUp)
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-    }
-    document.body.style.cursor = 'col-resize'
-    document.body.style.userSelect = 'none'
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', onMouseUp)
-  }
-
-  // ---------- 面板内容渲染 ----------
-  const renderPanelContent = (key: MenuKey) => {
-    if (key === 'dashboard') {
-      return (
-        <div className="space-y-8">
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-            {statCards.map(card => (
-              <div key={card.label} className="bg-white rounded-2xl p-6 shadow-[0_12px_35px_rgba(15,23,42,0.08)] border border-white/80">
-                <div className="flex items-center gap-4">
-                  <span className={`${card.color} flex items-center justify-center w-12 h-12 rounded-2xl bg-gray-50`}>{card.icon}</span>
-                  <div>
-                    <div className="text-3xl font-semibold text-gray-900 tracking-tight">{card.value}</div>
-                    <div className="text-sm text-gray-500 mt-1">{card.label}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="bg-white rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.08)] border border-white/80 overflow-hidden">
-            <div className="px-6 py-6 border-b border-gray-100 font-medium text-gray-900 text-lg sm:px-8">欢迎使用开锤后台管理系统</div>
-            <div className="p-6 grid gap-4 text-sm text-gray-600 sm:p-8 md:grid-cols-2">
-              <p>🎉 恭喜您成功登录系统！</p>
-              <p>📊 系统运行状态正常</p>
-              <p>🔒 您的账户权限：{userInfo?.role || '普通用户'}</p>
-              <p>🏢 所属租户：{userInfo?.tenantId || '默认租户'}</p>
-            </div>
-          </div>
-        </div>
-      )
-    }
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[280px] sm:min-h-[400px] gap-4 text-gray-400">
-        <BarChart2 size={48} className="opacity-30" />
-        <p className="text-base">功能开发中...</p>
-        <button
-          onClick={() => setActiveMenu('dashboard')}
-          className="px-5 py-2.5 bg-emerald-600 text-white rounded-full text-sm hover:bg-emerald-700 transition-colors"
-        >
-          返回首页
-        </button>
-      </div>
-    )
-  }
-
-  const isNavItemActive = (key: MenuKey) => activeMenu === key || (dualViewOpen && secondaryView === key)
-  const navItemClass = (key: MenuKey) =>
-    'relative w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-all rounded-xl ' +
-    (isNavItemActive(key) ? 'bg-gray-50 text-gray-900 shadow-inner shadow-gray-100 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900')
-  const renderNavItems = () =>
-    menuItems.map(item => (
-      <button
-        key={item.key}
-        onPointerDown={() => handleNavPointerDown(item.key)}
-        onPointerUp={() => handleNavPointerUp(item.key)}
-        onPointerLeave={handleNavPointerLeave}
-        className={navItemClass(item.key)}
-      >
-        {isNavItemActive(item.key) && (
-          <span className="absolute left-2 top-1/2 h-7 w-1 rounded-full bg-emerald-500 -translate-y-1/2" aria-hidden />
-        )}
-        <span className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 p-1.5">
-          {item.icon}
-        </span>
-        <span>{item.label}</span>
-      </button>
-    ))
-
-  const navContent = (
+  /* ---------- 侧边栏内容 ---------- */
+  const sidebarContent = (
     <>
-      <div className="h-[70px] flex items-center justify-between border-b border-gray-100 px-5">
-        <div className="text-center">
+      <div className="h-[70px] flex items-center border-b border-gray-100 px-5">
+        <div>
           <h3 className="m-0 text-lg font-semibold text-emerald-600 tracking-wide">开锤后台</h3>
           <p className="m-0 text-[12px] text-gray-400">KAICHUI ADMIN</p>
         </div>
       </div>
-      <nav className="flex-1 py-4 px-4 space-y-2">{renderNavItems()}</nav>
-      {/* 底部：预订管理 + 资源管理 + 系统设置入口 */}
-      <div className="py-4 px-4 border-t border-gray-100 space-y-1">
+      <nav className="flex-1 py-4 px-4 space-y-1">
+        {/* 首页（当前页） */}
         <button
-          onClick={() => navigate('/bookings')}
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl"
+          onClick={() => {}}
+          className="relative w-full flex items-center gap-3 px-4 py-3 text-sm text-left bg-gray-50 text-gray-900 shadow-inner shadow-gray-100 font-semibold rounded-xl"
         >
-          <span className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-500 p-1.5">
-            <CalendarDays size={16} />
+          <span className="absolute left-2 top-1/2 h-7 w-1 rounded-full bg-emerald-500 -translate-y-1/2" />
+          <span className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 p-1.5">
+            <BarChart3 size={16} />
           </span>
-          <span>预订管理</span>
+          <span>管理驾驶舱</span>
         </button>
-        <button
-          onClick={() => navigate('/resources')}
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl"
-        >
-          <span className="flex items-center justify-center rounded-full bg-gray-100 text-gray-500 p-1.5">
-            <Layers size={16} />
-          </span>
-          <span>资源管理</span>
-        </button>
-        <button
-          onClick={() => navigate('/cart-management')}
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl"
-        >
-          <span className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-500 p-1.5">
-            <Car size={16} />
-          </span>
-          <span>球车管理</span>
-        </button>
-        <button
-          onClick={() => navigate('/players')}
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl"
-        >
-          <span className="flex items-center justify-center rounded-full bg-purple-50 text-purple-500 p-1.5">
-            <UserRound size={16} />
-          </span>
-          <span>球员管理</span>
-        </button>
-        <button
-          onClick={() => navigate('/settings')}
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl"
-        >
-          <span className="flex items-center justify-center rounded-full bg-gray-100 text-gray-500 p-1.5">
-            <Settings size={16} />
-          </span>
-          <span>系统设置</span>
-        </button>
-      </div>
+        {navItems.map(item => (
+          <button
+            key={item.key}
+            onClick={() => { navigate(item.path); closeDrawer() }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl"
+          >
+            <span className={`flex items-center justify-center rounded-full p-1.5 ${item.color}`}>
+              <item.icon size={16} />
+            </span>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
     </>
   )
 
-  // ---------- 渲染 ----------
+  /* ---------- 资源使用率进度条 ---------- */
+  const ResourceBar = ({ label, icon: Icon, used, total, color }: {
+    label: string; icon: any; used: number; total: number; color: string
+  }) => {
+    const pct = total > 0 ? Math.round((used / total) * 100) : 0
+    return (
+      <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Icon size={18} className={color} />
+            <span className="text-sm font-medium text-gray-700">{label}</span>
+          </div>
+          <span className="text-xs text-gray-400">{used}/{total}</span>
+        </div>
+        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-700 ${
+              pct > 80 ? 'bg-red-400' : pct > 50 ? 'bg-amber-400' : 'bg-emerald-400'
+            }`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
+          <span>使用率 {pct}%</span>
+          <span className="text-emerald-600 font-medium">{total - used} 可用</span>
+        </div>
+      </div>
+    )
+  }
+
+  /* ---------- 骨架屏 ---------- */
+  const Skeleton = ({ className = '' }: { className?: string }) => (
+    <div className={`animate-pulse bg-gray-100 rounded-2xl ${className}`} />
+  )
+
+  /* ========== 渲染 ========== */
   return (
     <div className="min-h-screen bg-[#f4f7fb] flex">
-      {/* 放置模式提示条 */}
-      {placementMode && (
-        <p className="fixed top-4 left-1/2 -translate-x-1/2 text-sm text-gray-600 z-50 bg-white/95 px-4 py-2 rounded-full shadow-lg border border-gray-200">
-          拖动到目标区域后释放 · 按 Esc 取消
-        </p>
-      )}
-
-      {/* 桌面端：左侧触发区 + 隐藏式侧边栏，鼠标靠近左边缘展开 */}
+      {/* 桌面侧边栏 */}
       <div
         className="hidden lg:block fixed left-0 top-0 z-20 h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
         style={{ width: sidebarOpen ? 230 : 8 }}
@@ -350,207 +198,302 @@ export default function Home() {
         onMouseLeave={() => setSidebarOpen(false)}
       >
         <div className="h-full w-[230px] flex flex-col bg-white rounded-r-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] border border-l-0 border-white/80">
-          {navContent}
+          {sidebarContent}
         </div>
       </div>
 
-      {/* 移动端：抽屉 */}
+      {/* 移动端抽屉 */}
       {drawerOpen && (
         <>
-          <div
-            className="lg:hidden fixed inset-0 z-30 bg-black/40 transition-opacity duration-300 ease-out"
-            onClick={closeDrawer}
-            aria-hidden
-          />
-          <aside
-            className="lg:hidden fixed left-0 top-0 z-40 h-full w-[260px] max-w-[85vw] bg-white rounded-r-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] border-l-0 border-white/80 flex flex-col animate-slide-in-left"
-            role="dialog"
-            aria-label="导航菜单"
-          >
+          <div className="lg:hidden fixed inset-0 z-30 bg-black/40" onClick={closeDrawer} />
+          <aside className="lg:hidden fixed left-0 top-0 z-40 h-full w-[260px] max-w-[85vw] bg-white rounded-r-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] flex flex-col animate-slide-in-left">
             <div className="h-[70px] flex items-center justify-between border-b border-gray-100 px-5">
               <h3 className="m-0 text-lg font-semibold text-emerald-600">开锤后台</h3>
-              <button
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
-                onClick={closeDrawer}
-                aria-label="关闭菜单"
-              >
-                <X size={20} />
-              </button>
+              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500" onClick={closeDrawer}><X size={20} /></button>
             </div>
-            <nav className="flex-1 py-4 px-4 space-y-2 overflow-auto">{renderNavItems()}</nav>
+            <nav className="flex-1 py-4 px-4 space-y-1 overflow-auto">
+              <button className="relative w-full flex items-center gap-3 px-4 py-3 text-sm text-left bg-gray-50 text-gray-900 font-semibold rounded-xl">
+                <span className="absolute left-2 top-1/2 h-7 w-1 rounded-full bg-emerald-500 -translate-y-1/2" />
+                <span className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 p-1.5"><BarChart3 size={16} /></span>
+                <span>管理驾驶舱</span>
+              </button>
+              {navItems.map(item => (
+                <button key={item.key} onClick={() => { navigate(item.path); closeDrawer() }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl">
+                  <span className={`flex items-center justify-center rounded-full p-1.5 ${item.color}`}><item.icon size={16} /></span>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
           </aside>
         </>
       )}
 
       {/* 主内容区 */}
-      <div
-        className={`flex-1 flex flex-col min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ml-0 ${sidebarOpen ? 'lg:ml-[230px]' : 'lg:ml-[8px]'}`}
-      >
+      <div className={`flex-1 flex flex-col min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ml-0 ${sidebarOpen ? 'lg:ml-[230px]' : 'lg:ml-[8px]'}`}>
         <div className="min-h-screen pt-0 pb-6 px-4 sm:px-5 lg:px-5">
-        <div className="flex flex-col gap-6">
-          <div className="flex-1 flex flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.12)] border border-white/80">
-          {/* 顶部导航 */}
-          <header className="border-b border-gray-100 flex flex-col gap-4 px-6 py-5 sm:h-[70px] sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-0">
-            <div className="flex items-center gap-3">
-              <button
-                className="lg:hidden p-2 rounded-full hover:bg-gray-100 text-gray-600"
-                onClick={() => setDrawerOpen(true)}
-                aria-label="打开菜单"
-              >
-                <Menu size={22} />
-              </button>
-              <nav className="flex items-center gap-1 text-sm text-gray-500">
-                <span>首页</span>
-                <span className="mx-1">/</span>
-                <span className="text-gray-900 font-medium">
-                  {placementMode ? '选择放置位置' : dualViewOpen ? `${getMenuLabel(activeMenu)} + ${getMenuLabel(secondaryView)}` : currentMenuLabel}
-                </span>
-              </nav>
-              {dualViewOpen && (
-                <button
-                  onClick={() => setDualViewOpen(false)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition-colors"
-                  title="关闭双视图"
-                >
-                  <PanelRightClose size={16} />
-                  关闭双视图
-                </button>
-              )}
-            </div>
+          <div className="flex flex-col gap-6">
+            <div className="flex-1 flex flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.12)] border border-white/80">
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 cursor-pointer bg-gray-50 px-3 py-2 rounded-full shadow-inner shadow-white/40">
-                  <UserCircle size={18} />
-                  <span>{userInfo?.nickname || userInfo?.openid || '用户'}</span>
-                  <ChevronDown size={14} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => toast.info('个人信息功能开发中...')}>
-                  个人信息
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {/* 退出登录需要二次确认 */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem onSelect={e => e.preventDefault()} className="text-red-500 focus:text-red-500">
-                      退出登录
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>提示</AlertDialogTitle>
-                      <AlertDialogDescription>确定要退出登录吗？</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>取消</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleLogout}>确定</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </header>
+              {/* 顶部导航 */}
+              <header className="border-b border-gray-100 flex items-center justify-between px-6 py-4 sm:px-8 sm:h-[70px]">
+                <div className="flex items-center gap-3">
+                  <button className="lg:hidden p-2 rounded-full hover:bg-gray-100 text-gray-600" onClick={() => setDrawerOpen(true)}>
+                    <Menu size={22} />
+                  </button>
+                  <nav className="flex items-center gap-1 text-sm text-gray-500">
+                    <span>首页</span>
+                    <span className="mx-1">/</span>
+                    <span className="text-gray-900 font-medium">管理驾驶舱</span>
+                  </nav>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={fetchDashboard}
+                    disabled={loading}
+                    className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                    title="刷新数据"
+                  >
+                    <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 cursor-pointer bg-gray-50 px-3 py-2 rounded-full shadow-inner shadow-white/40">
+                        <UserCircle size={18} />
+                        <span>{userInfo?.nickname || userInfo?.openid || '用户'}</span>
+                        <ChevronDown size={14} />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => toast.info('个人信息功能开发中...')}>个人信息</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem onSelect={e => e.preventDefault()} className="text-red-500 focus:text-red-500">退出登录</DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>提示</AlertDialogTitle>
+                            <AlertDialogDescription>确定要退出登录吗？</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>取消</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleLogout}>确定</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </header>
 
-          {/* 主要内容：放置模式 | 双视图 | 单视图 */}
-          <main className="flex-1 overflow-hidden flex flex-col p-0 bg-gradient-to-b from-white to-gray-50/30">
-            {placementMode ? (
-              <div ref={placementContainerRef} className="flex-1 flex overflow-hidden min-h-0">
-                <div
-                  className={`flex-1 overflow-auto p-6 sm:p-8 min-w-0 transition-all duration-200 ${
-                    placementHoverZone === 'left'
-                      ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50/30'
-                      : 'ring-0'
-                  }`}
-                >
-                  {renderPanelContent(placementMode.currentActive)}
-                </div>
-                <div
-                  className={`flex-1 flex flex-col items-center justify-center min-w-0 p-6 transition-all duration-200 ${
-                    placementHoverZone === 'right'
-                      ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50/30'
-                      : 'ring-2 ring-dashed ring-gray-300 bg-gray-50/50'
-                  }`}
-                >
-                  <span className="text-sm text-gray-500 mb-2">{getMenuLabel(placementMode.module)}</span>
-                  <span className="text-xs text-gray-400">
-                    {placementHoverZone === 'right' ? '→ 放置到这里' : '拖动到此处后释放'}
-                  </span>
-                </div>
-              </div>
-            ) : dualViewOpen ? (
-              <div ref={splitContainerRef} className="flex-1 flex overflow-hidden min-h-0">
-                <div
-                  className={`overflow-auto p-6 sm:p-8 animate-slide-in-left ${isDraggingSplit ? 'transition-none' : 'transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]'}`}
-                  style={{ width: `${splitRatio}%`, minWidth: 0 }}
-                >
-                  {renderPanelContent(activeMenu)}
-                </div>
-                <div
-                  className={`w-2 flex-shrink-0 cursor-col-resize transition-all flex items-center justify-center relative group ${
-                    splitRatio === 50
-                      ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
-                      : 'bg-gray-200 hover:bg-emerald-400'
-                  }`}
-                  onMouseDown={handleSplitMouseDown}
-                  title={splitRatio === 50 ? '已居中 50% · 拖拽调整比例' : '拖拽调整比例'}
-                >
-                  <div className={`w-0.5 h-12 rounded-full ${splitRatio === 50 ? 'bg-white' : 'bg-gray-400'}`} />
-                  {splitRatio === 50 && (
-                    <span className="absolute left-1/2 -translate-x-1/2 -translate-y-full -top-1 px-2 py-0.5 text-xs font-medium text-emerald-600 bg-emerald-50 rounded shadow-sm whitespace-nowrap pointer-events-none border border-emerald-200">
-                      50% 居中
-                    </span>
-                  )}
-                </div>
-                <div className="overflow-auto p-6 sm:p-8 flex-1 min-w-0 animate-slide-in-right">
-                  {renderPanelContent(secondaryView)}
-                </div>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-auto p-6 sm:p-8">
-                {activeMenu === 'dashboard' ? (
-                  <div className="space-y-8">
-                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-                      {statCards.map(card => (
-                        <div key={card.label} className="bg-white rounded-2xl p-6 shadow-[0_12px_35px_rgba(15,23,42,0.08)] border border-white/80">
-                          <div className="flex items-center gap-4">
-                            <span className={`${card.color} flex items-center justify-center w-12 h-12 rounded-2xl bg-gray-50`}>{card.icon}</span>
-                            <div>
-                              <div className="text-3xl font-semibold text-gray-900 tracking-tight">{card.value}</div>
-                              <div className="text-sm text-gray-500 mt-1">{card.label}</div>
-                            </div>
-                          </div>
+              {/* 仪表盘主体 */}
+              <main className="flex-1 overflow-auto p-6 sm:p-8 bg-gradient-to-b from-white to-gray-50/30 space-y-6">
+
+                {/* -------- 第一行：KPI 卡片 -------- */}
+                {loading && !data ? (
+                  <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+                    {[1,2,3,4].map(i => <Skeleton key={i} className="h-28" />)}
+                  </div>
+                ) : (
+                  <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+                    {/* 今日预订 */}
+                    <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-200/50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-3xl font-bold tracking-tight">{kpi?.todayBookings ?? 0}</div>
+                          <div className="text-emerald-100 text-sm mt-1">今日预订</div>
                         </div>
-                      ))}
+                        <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                          <CalendarDays size={24} />
+                        </div>
+                      </div>
+                      <div className="mt-3 text-xs text-emerald-200 flex items-center gap-3">
+                        <span>待处理 {kpi?.todayPending ?? 0}</span>
+                        <span>·</span>
+                        <span>已签到 {kpi?.todayCheckedIn ?? 0}</span>
+                        <span>·</span>
+                        <span>已完赛 {kpi?.todayCompleted ?? 0}</span>
+                      </div>
                     </div>
-                    <div className="bg-white rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.08)] border border-white/80 overflow-hidden">
-                      <div className="px-6 py-6 border-b border-gray-100 font-medium text-gray-900 text-lg sm:px-8">欢迎使用开锤后台管理系统</div>
-                      <div className="p-6 grid gap-4 text-sm text-gray-600 sm:p-8 md:grid-cols-2">
-                        <p>🎉 恭喜您成功登录系统！</p>
-                        <p>📊 系统运行状态正常</p>
-                        <p>🔒 您的账户权限：{userInfo?.role || '普通用户'}</p>
-                        <p>🏢 所属租户：{userInfo?.tenantId || '默认租户'}</p>
+
+                    {/* 已签到 */}
+                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{kpi?.todayCheckedIn ?? 0}</div>
+                          <div className="text-gray-500 text-sm mt-1">今日签到</div>
+                        </div>
+                        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500">
+                          <CalendarCheck size={24} />
+                        </div>
+                      </div>
+                      <div className="mt-3 text-xs text-gray-400 flex items-center gap-1">
+                        <TrendingUp size={12} className="text-emerald-500" />
+                        <span>签到率 {(kpi?.todayBookings ?? 0) > 0 ? Math.round(((kpi?.todayCheckedIn ?? 0) + (kpi?.todayCompleted ?? 0)) / (kpi?.todayBookings ?? 1) * 100) : 0}%</span>
+                      </div>
+                    </div>
+
+                    {/* 今日营收 */}
+                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-3xl font-bold text-gray-900 tracking-tight">
+                            <span className="text-lg font-normal text-gray-400 mr-0.5">¥</span>
+                            {((kpi?.todayRevenue ?? 0) / 1).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          </div>
+                          <div className="text-gray-500 text-sm mt-1">今日营收</div>
+                        </div>
+                        <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
+                          <DollarSign size={24} />
+                        </div>
+                      </div>
+                      <div className="mt-3 text-xs text-gray-400 flex items-center gap-3">
+                        <span className="text-emerald-600">已收 ¥{(kpi?.todayPaid ?? 0).toLocaleString()}</span>
+                        {(kpi?.todayPendingFee ?? 0) > 0 && (
+                          <span className="text-amber-600">待收 ¥{(kpi?.todayPendingFee ?? 0).toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 待处理 */}
+                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{kpi?.todayPending ?? 0}</div>
+                          <div className="text-gray-500 text-sm mt-1">待处理</div>
+                        </div>
+                        <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-400">
+                          <Clock size={24} />
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <button
+                          onClick={() => navigate('/bookings')}
+                          className="text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+                        >
+                          前往处理 <ArrowRight size={12} />
+                        </button>
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center min-h-[280px] sm:min-h-[400px] gap-4 text-gray-400">
-                    <BarChart2 size={48} className="opacity-30" />
-                    <p className="text-base">功能开发中...</p>
-                    <button
-                      onClick={() => setActiveMenu('dashboard')}
-                      className="px-5 py-2.5 bg-emerald-600 text-white rounded-full text-sm hover:bg-emerald-700 transition-colors shadow-[0_10px_25px_rgba(16,185,129,0.35)]"
-                    >
-                      返回首页
-                    </button>
-                  </div>
                 )}
-              </div>
-            )}
-          </main>
+
+                {/* -------- 第二行：资源使用概况 -------- */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                    <Layers size={16} className="text-gray-400" />
+                    资源使用概况
+                  </h3>
+                  {loading && !data ? (
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
+                      {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-28" />)}
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
+                      <ResourceBar label="球车" icon={Car}         used={res?.carts?.inUse ?? 0}     total={res?.carts?.total ?? 0}    color="text-amber-500" />
+                      <ResourceBar label="球童" icon={Users}       used={res?.caddies?.busy ?? 0}    total={res?.caddies?.total ?? 0}  color="text-purple-500" />
+                      <ResourceBar label="更衣柜" icon={Armchair}  used={res?.lockers?.occupied ?? 0} total={res?.lockers?.total ?? 0}  color="text-blue-500" />
+                      <ResourceBar label="客房" icon={BedDouble}   used={res?.rooms?.occupied ?? 0}   total={res?.rooms?.total ?? 0}    color="text-emerald-500" />
+                      <ResourceBar label="消费卡" icon={CreditCard} used={res?.tempCards?.inUse ?? 0}  total={res?.tempCards?.total ?? 0} color="text-rose-500" />
+                    </div>
+                  )}
+                </div>
+
+                {/* -------- 第三行：近期预订 + 快捷入口 -------- */}
+                <div className="grid gap-6 grid-cols-1 xl:grid-cols-3">
+                  {/* 近期预订列表 */}
+                  <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-gray-700">近期预订动态</h4>
+                      <button onClick={() => navigate('/bookings')} className="text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
+                        查看全部 <ArrowRight size={12} />
+                      </button>
+                    </div>
+                    {loading && !data ? (
+                      <div className="p-6 space-y-3">
+                        {[1,2,3,4].map(i => <Skeleton key={i} className="h-12" />)}
+                      </div>
+                    ) : recent.length === 0 ? (
+                      <div className="p-12 text-center text-gray-400 text-sm">暂无预订数据</div>
+                    ) : (
+                      <div className="divide-y divide-gray-50">
+                        {recent.map(b => {
+                          const st = STATUS_MAP[b.status] || { label: b.status, cls: 'bg-gray-100 text-gray-600' }
+                          return (
+                            <div key={b._id} className="px-6 py-3.5 flex items-center gap-4 hover:bg-gray-50/50 transition-colors">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-gray-900 truncate">{b.playerName || '未知球员'}</span>
+                                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${st.cls}`}>{st.label}</span>
+                                </div>
+                                <div className="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                                  <span>{b.date}</span>
+                                  <span>{b.teeTime}</span>
+                                  {b.courseName && <span>· {b.courseName}</span>}
+                                  {b.orderNo && <span className="text-gray-300">#{b.orderNo}</span>}
+                                </div>
+                              </div>
+                              {b.totalFee > 0 && (
+                                <span className="text-sm font-medium text-gray-700 whitespace-nowrap">¥{b.totalFee.toLocaleString()}</span>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 快捷入口 */}
+                  <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100 p-6">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-4">快捷操作</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {navItems.map(item => (
+                        <button
+                          key={item.key}
+                          onClick={() => navigate(item.path)}
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-gray-50 transition-colors group"
+                        >
+                          <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
+                            <item.icon size={20} />
+                          </div>
+                          <span className="text-xs text-gray-600 font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* 今日概要 */}
+                    <div className="mt-6 pt-5 border-t border-gray-100">
+                      <h5 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">今日概要</h5>
+                      <div className="space-y-2.5 text-sm">
+                        <div className="flex items-center justify-between text-gray-600">
+                          <span>球车使用中</span>
+                          <span className="font-medium text-gray-900">{res?.carts?.inUse ?? 0} / {res?.carts?.total ?? 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-gray-600">
+                          <span>球童工作中</span>
+                          <span className="font-medium text-gray-900">{res?.caddies?.busy ?? 0} / {res?.caddies?.total ?? 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-gray-600">
+                          <span>更衣柜占用</span>
+                          <span className="font-medium text-gray-900">{res?.lockers?.occupied ?? 0} / {res?.lockers?.total ?? 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-gray-600">
+                          <span>客房入住</span>
+                          <span className="font-medium text-gray-900">{res?.rooms?.occupied ?? 0} / {res?.rooms?.total ?? 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-gray-600">
+                          <span>消费卡使用中</span>
+                          <span className="font-medium text-gray-900">{res?.tempCards?.inUse ?? 0} / {res?.tempCards?.total ?? 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </main>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
