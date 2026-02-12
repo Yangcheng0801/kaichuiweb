@@ -274,12 +274,35 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
       }
 
       const whereExpr = conds.length === 1 ? conds[0] : _.and(conds);
-      const [countRes, listRes] = await Promise.all([
-        db.collection('carts').where(whereExpr).count(),
-        db.collection('carts').where(whereExpr).orderBy('createdAt', 'desc').skip(skip).limit(limitNum).get()
-      ]);
-      const list = listRes.data || [];
-      const total = countRes.total || 0;
+      let list = [];
+      let total = 0;
+      try {
+        const [countRes, listRes] = await Promise.all([
+          db.collection('carts').where(whereExpr).count(),
+          db.collection('carts').where(whereExpr).orderBy('createdAt', 'desc').skip(skip).limit(limitNum).get()
+        ]);
+        list = listRes.data || [];
+        total = countRes.total || 0;
+      } catch (orderByErr) {
+        // 部分环境（如 HTTP DB）orderBy 可能失败或需索引，回退为按 _id 倒序
+        console.warn('[Carts] orderBy createdAt 失败，回退 _id:', orderByErr && orderByErr.message);
+        try {
+          const [countRes, listRes] = await Promise.all([
+            db.collection('carts').where(whereExpr).count(),
+            db.collection('carts').where(whereExpr).orderBy('_id', 'desc').skip(skip).limit(limitNum).get()
+          ]);
+          list = listRes.data || [];
+          total = countRes.total || 0;
+        } catch (fallbackErr) {
+          // 再回退：无 orderBy
+          const [countRes, listRes] = await Promise.all([
+            db.collection('carts').where(whereExpr).count(),
+            db.collection('carts').where(whereExpr).skip(skip).limit(limitNum).get()
+          ]);
+          list = listRes.data || [];
+          total = countRes.total || 0;
+        }
+      }
 
       res.json({ success: true, data: list, total, page: pageNum, hasMore: skip + list.length < total });
     } catch (error) {
