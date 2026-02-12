@@ -291,13 +291,29 @@ function createHttpDb(env) {
             },
             field(projection) {
               const fieldStr = JSON.stringify(projection);
-              return {
-                async get() {
-                  const q = `db.collection("${name}").where(${condStr}).field(${fieldStr}).get()`;
-                  const res = await query(env, q);
-                  return { data: res.data };
-                }
-              };
+              // 返回完整链式对象，支持 .field().limit().get() / .field().skip().limit().get() 等
+              function buildFieldChain(extraParts) {
+                const parts = extraParts || [];
+                const partsStr = parts.join('');
+                return {
+                  limit(n) {
+                    return buildFieldChain([...parts, `.limit(${n})`]);
+                  },
+                  skip(s) {
+                    return buildFieldChain([...parts, `.skip(${s})`]);
+                  },
+                  orderBy(f, o) {
+                    const d = o === 'desc' ? 'desc' : 'asc';
+                    return buildFieldChain([...parts, `.orderBy("${f}","${d}")`]);
+                  },
+                  async get() {
+                    const q = `db.collection("${name}").where(${condStr}).field(${fieldStr})${partsStr}.get()`;
+                    const res = await query(env, q);
+                    return { data: res.data };
+                  }
+                };
+              }
+              return buildFieldChain();
             },
             orderBy(field, order) {
               const dir = order === 'desc' ? 'desc' : 'asc';
