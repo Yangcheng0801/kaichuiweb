@@ -1,31 +1,33 @@
 /**
- * 新建预订表单（v3 — 自动定价引擎）
+ * 新建预订表单（v4 — 动态身份 + 加打/减打）
  *
- * 核心升级：
- *   1. 选日期/时间 → 右侧自动显示「平日/周末/假日」「早场/午场/黄昏」标签
- *   2. 添加球员 → 调用 /api/rate-sheets/calculate 获取每人果岭费
- *   3. 价格面板自动填充（果岭费/球童费/球车费/保险费/客房费/折扣）
- *   4. 每个费用项可手动解锁覆盖
- *   5. 套餐选择（可选）→ 整单替换为套餐价
- *   6. 团队标记（可选）→ 8人以上自动提示可享团队价
- *   7. 底部价格明细汇总卡
- *   8. stayType 统一枚举：day | overnight_1 | overnight_2 | overnight_3 | custom
+ * 核心升级（v4）：
+ *   1. 球员身份下拉：从 identity_types 集合动态加载，替代硬编码 member/guest/walkin
+ *   2. 加打模式：勾选后自动计算加打 9 洞费用
+ *   3. 减打模式：支持设定实际打球洞数，按减打策略计算
+ *   4. 定价引擎 v2 对接：传 identityCode、isAddOn、isReduced
+ *   5. 保留 v3 所有功能（自动定价、套餐、团队折扣、价格锁定/覆盖）
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
-import { X, Plus, Trash2, UserPlus, Search, Check, Lock, Unlock, Package, Users, Info } from 'lucide-react'
+import { X, Plus, Trash2, UserPlus, Search, Check, Lock, Unlock, Package, Users, Info, PlusCircle, MinusCircle } from 'lucide-react'
 import { api } from '@/utils/api'
 
 // ─── 类型 ─────────────────────────────────────────────────────────────────────
 
+interface IdentityType {
+  _id: string; code: string; name: string; category: string; color: string; memberLevel: number | null; status: string
+}
+
 interface BookingPlayer {
-  name:        string
-  type:        'member' | 'guest' | 'walkin'
-  memberType:  string
-  memberLevel: number | null
-  phone:       string
-  memberId:    string
-  playerNo:    string
+  name:         string
+  identityCode: string       // v4: 动态身份代码
+  type:         string       // 兼容旧版
+  memberType:   string       // 兼容旧版
+  memberLevel:  number | null
+  phone:        string
+  memberId:     string
+  playerNo:     string
 }
 
 interface BookingFormData {
@@ -56,7 +58,7 @@ interface BookingFormData {
   discount:       number
   totalFee:       number
   // 引擎控制
-  priceSource:    'auto' | 'manual' | 'package'
+  priceSource:    'auto' | 'manual' | 'package' | 'addOn' | 'reduced'
   priceOverride:  boolean
   // 团队
   isTeam:         boolean
@@ -64,6 +66,10 @@ interface BookingFormData {
   totalPlayers:   number
   contactName:    string
   contactPhone:   string
+  // 加打/减打
+  isAddOn:        boolean
+  isReduced:      boolean
+  holesPlayed:    number
 }
 
 interface Course { _id: string; name: string; holes: number; status: string }
@@ -82,38 +88,37 @@ interface PricingResult {
   timeSlot: string; timeSlotName: string; hasRateSheet: boolean
   greenFee: number; caddyFee: number; cartFee: number; insuranceFee: number
   roomFee: number; otherFee: number; discount: number; totalFee: number
-  playerBreakdown: { name: string; memberType: string; greenFee: number }[]
+  playerBreakdown: { name: string; identityCode?: string; memberType?: string; greenFee: number; addOnInfo?: any; reducedInfo?: any }[]
   teamDiscount?: { label: string; discountRate: number; discountAmount: number }
   feeStandards?: { caddyFeeUnit: number; cartFeeUnit: number; insuranceFeeUnit: number }
   isClosed?: boolean
+  addOnInfo?: any
+  reducedInfo?: any
+  addOnPricesRef?: Record<string, number>
+  reducedPolicyRef?: any
 }
 
-interface Props {
-  onClose:     () => void
-  onSuccess:   () => void
-  initialDate?: string
-}
+interface Props { onClose: () => void; onSuccess: () => void; initialDate?: string }
 
 // ─── 常量 ─────────────────────────────────────────────────────────────────────
 
 const LEVEL_MAP: Record<string, string> = { junior: '初级', senior: '中级', expert: '高级' }
 const MEMBER_LEVEL_LABEL: Record<string, string> = {
-  regular: '普通', silver: '银卡', gold: '金卡',
-  platinum: '铂金', diamond: '钻石', vip: 'VIP',
+  regular: '普通', silver: '银卡', gold: '金卡', platinum: '铂金', diamond: '钻石', vip: 'VIP',
 }
-const MEMBER_LEVEL_TO_NUM: Record<string, number> = {
-  regular: 1, silver: 1, gold: 2, platinum: 3, diamond: 4, vip: 4,
+const MEMBER_LEVEL_TO_IDENTITY: Record<string, string> = {
+  regular: 'member_1', silver: 'member_1', gold: 'member_2', platinum: 'member_3', diamond: 'member_4', vip: 'member_4',
 }
 
 const STAY_TYPES = [
-  { key: 'day',         label: '日归' },
-  { key: 'overnight_1', label: '一晚' },
-  { key: 'overnight_2', label: '两晚' },
-  { key: 'overnight_3', label: '三晚' },
-  { key: 'custom',      label: '自定义' },
+  { key: 'day', label: '日归' }, { key: 'overnight_1', label: '一晚' },
+  { key: 'overnight_2', label: '两晚' }, { key: 'overnight_3', label: '三晚' }, { key: 'custom', label: '自定义' },
 ]
 
-const EMPTY_PLAYER: BookingPlayer = { name: '', type: 'member', memberType: 'member', memberLevel: null, phone: '', memberId: '', playerNo: '' }
+const EMPTY_PLAYER: BookingPlayer = {
+  name: '', identityCode: 'walkin', type: 'walkin', memberType: 'walkin',
+  memberLevel: null, phone: '', memberId: '', playerNo: '',
+}
 const today = new Date().toISOString().slice(0, 10)
 
 function genTeeTimeOptions() {
@@ -208,15 +213,15 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     roomFee: 0, otherFee: 0, discount: 0, totalFee: 0,
     priceSource: 'auto', priceOverride: false,
     isTeam: false, teamName: '', totalPlayers: 0, contactName: '', contactPhone: '',
+    isAddOn: false, isReduced: false, holesPlayed: 9,
   })
 
+  const [identityTypes, setIdentityTypes] = useState<IdentityType[]>([])
   const [courses, setCourses] = useState<Course[]>([])
   const [caddies, setCaddies] = useState<Caddie[]>([])
   const [carts, setCarts] = useState<Cart[]>([])
   const [packages, setPackages] = useState<StayPackage[]>([])
   const [saving, setSaving] = useState(false)
-
-  // Pricing engine state
   const [pricingResult, setPricingResult] = useState<PricingResult | null>(null)
   const [pricingLoading, setPricingLoading] = useState(false)
   const [lockedFields, setLockedFields] = useState<Record<string, boolean>>({
@@ -232,22 +237,26 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
       api.resources.caddies.getList({ status: 'available' }),
       api.resources.carts.getList({ status: 'available' }),
       api.stayPackages.getList({ status: 'active' }),
-    ]).then(([c, ca, ct, pk]: any[]) => {
+      api.identityTypes.getList({ status: 'active' }),
+    ]).then(([c, ca, ct, pk, ids]: any[]) => {
       const courseList = c.data || []
       setCourses(courseList)
       setCaddies(ca.data || [])
       setCarts(ct.data || [])
       setPackages(pk.data || [])
+      setIdentityTypes(ids.data || [])
       if (courseList.length > 0 && !form.courseId) {
         setForm(p => ({ ...p, courseId: courseList[0]._id, courseName: courseList[0].name }))
       }
     }).catch(() => toast.error('加载资源数据失败'))
   }, [])
 
+  const activeIdentities = identityTypes.filter(i => i.status === 'active')
+
   // ── 调用定价引擎 ──
   const calculatePrice = useCallback(async () => {
     if (!form.date || !form.teeTime || form.players.length === 0) return
-    if (form.priceOverride) return // 手动模式不调引擎
+    if (form.priceOverride) return
 
     setPricingLoading(true)
     try {
@@ -259,6 +268,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
         holes: form.holes,
         players: form.players.map(p => ({
           name: p.name,
+          identityCode: p.identityCode || 'walkin',
           memberType: p.memberType || p.type || 'walkin',
           memberLevel: p.memberLevel,
         })),
@@ -266,13 +276,15 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
         needCart: form.needCart,
         packageId: form.packageId || undefined,
         totalPlayers: form.isTeam ? (form.totalPlayers || form.players.length) : form.players.length,
+        isAddOn: form.isAddOn,
+        isReduced: form.isReduced,
+        holesPlayed: form.isReduced ? form.holesPlayed : undefined,
       })
 
       const data = res.data as PricingResult
       setPricingResult(data)
 
       if (data && data.success) {
-        // 仅更新锁定状态的字段（未被用户手动解锁的字段）
         setForm(p => ({
           ...p,
           ...(lockedFields.greenFee     ? { greenFee: data.greenFee } : {}),
@@ -289,9 +301,8 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     } finally {
       setPricingLoading(false)
     }
-  }, [form.date, form.teeTime, form.courseId, form.holes, form.players, form.needCaddy, form.needCart, form.packageId, form.isTeam, form.totalPlayers, form.priceOverride, lockedFields])
+  }, [form.date, form.teeTime, form.courseId, form.holes, form.players, form.needCaddy, form.needCart, form.packageId, form.isTeam, form.totalPlayers, form.priceOverride, form.isAddOn, form.isReduced, form.holesPlayed, lockedFields])
 
-  // 触发定价（防抖）
   const calcTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     if (calcTimer.current) clearTimeout(calcTimer.current)
@@ -299,19 +310,16 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     return () => { if (calcTimer.current) clearTimeout(calcTimer.current) }
   }, [calculatePrice])
 
-  // 自动重算总费用
   useEffect(() => {
     const total = form.greenFee + form.caddyFee + form.cartFee + form.insuranceFee + form.roomFee + form.otherFee - form.discount
     setForm(p => ({ ...p, totalFee: Math.max(0, Math.round(total * 100) / 100) }))
   }, [form.greenFee, form.caddyFee, form.cartFee, form.insuranceFee, form.roomFee, form.otherFee, form.discount])
 
-  // ── 球场选择 ──
+  // ── 选择处理 ──
   const handleCourseChange = (id: string) => {
     const c = courses.find(c => c._id === id)
     setForm(p => ({ ...p, courseId: id, courseName: c?.name || '', holes: c?.holes || 18 }))
   }
-
-  // ── 球童/球车选择 ──
   const handleCaddyChange = (id: string) => {
     const c = caddies.find(c => c._id === id)
     setForm(p => ({ ...p, caddyId: id, caddyName: c?.name || '', needCaddy: !!id }))
@@ -321,7 +329,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     setForm(p => ({ ...p, cartId: id, cartNo: c?.cartNo || '', needCart: !!id }))
   }
 
-  // ── 球员行操作 ──
+  // ── 球员操作 ──
   const setPlayer = (idx: number, key: keyof BookingPlayer, val: any) => {
     const next = [...form.players]
     next[idx] = { ...next[idx], [key]: val }
@@ -331,11 +339,13 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
   const selectPlayerFromSearch = (idx: number, p: PlayerSuggestion) => {
     const next = [...form.players]
     const mLevel = p.profile?.memberLevel
+    const identityCode = mLevel ? (MEMBER_LEVEL_TO_IDENTITY[mLevel] || 'member_1') : 'walkin'
     next[idx] = {
       name: p.name,
+      identityCode,
       type: 'member',
       memberType: 'member',
-      memberLevel: mLevel ? (MEMBER_LEVEL_TO_NUM[mLevel] || 1) : 1,
+      memberLevel: mLevel ? (Number(identityCode.split('_')[1]) || 1) : null,
       phone: p.phoneNumber || '',
       memberId: p._id,
       playerNo: p.playerNo,
@@ -353,10 +363,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     set('players', form.players.filter((_: any, i: number) => i !== idx))
   }
 
-  // ── 锁定/解锁费用字段 ──
-  const toggleLock = (field: string) => {
-    setLockedFields(p => ({ ...p, [field]: !p[field] }))
-  }
+  const toggleLock = (field: string) => setLockedFields(p => ({ ...p, [field]: !p[field] }))
 
   // ── 提交 ──
   const handleSave = async () => {
@@ -369,12 +376,11 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     try {
       const payload: any = {
         date: form.date, teeTime: form.teeTime,
-        courseId: form.courseId, courseName: form.courseName,
-        holes: form.holes,
+        courseId: form.courseId, courseName: form.courseName, holes: form.holes,
         players: form.players.map(p => ({
-          name: p.name, type: p.type, memberType: p.memberType,
-          memberLevel: p.memberLevel, phone: p.phone,
-          memberId: p.memberId, playerNo: p.playerNo,
+          name: p.name, identityCode: p.identityCode,
+          type: p.type, memberType: p.memberType, memberLevel: p.memberLevel,
+          phone: p.phone, memberId: p.memberId, playerNo: p.playerNo,
         })),
         caddyId: form.caddyId || undefined, caddyName: form.caddyName,
         cartId: form.cartId || undefined, cartNo: form.cartNo,
@@ -385,20 +391,17 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
         cartFee: form.cartFee, insuranceFee: form.insuranceFee,
         roomFee: form.roomFee, otherFee: form.otherFee,
         discount: form.discount, totalFee: form.totalFee,
-        priceSource: form.priceSource,
-        priceOverride: form.priceOverride,
-        note: form.note,
-        createdBy: form.createdBy, createdByName: form.createdByName,
+        priceSource: form.priceSource, priceOverride: form.priceOverride,
+        isAddOn: form.isAddOn, isReduced: form.isReduced,
+        holesPlayed: form.isReduced ? form.holesPlayed : undefined,
+        note: form.note, createdBy: form.createdBy, createdByName: form.createdByName,
       }
 
-      // 团队信息
       if (form.isTeam) {
         payload.teamBooking = {
-          isTeam: true,
-          teamName: form.teamName,
+          isTeam: true, teamName: form.teamName,
           totalPlayers: form.totalPlayers || form.players.length,
-          contactName: form.contactName,
-          contactPhone: form.contactPhone,
+          contactName: form.contactName, contactPhone: form.contactPhone,
         }
       }
 
@@ -411,6 +414,16 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     }
   }
 
+  // ── 找到身份名称 ──
+  const getIdentityName = (code: string) => {
+    const found = activeIdentities.find(i => i.code === code)
+    return found?.name || code
+  }
+  const getIdentityColor = (code: string) => {
+    const found = activeIdentities.find(i => i.code === code)
+    return found?.color || '#6b7280'
+  }
+
   // ── 费用行渲染 ──
   const feeFields = [
     { key: 'greenFee',     label: '果岭费',   color: 'text-emerald-600' },
@@ -420,9 +433,10 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     { key: 'roomFee',      label: '客房费',   color: 'text-purple-600' },
     { key: 'otherFee',     label: '其他费用', color: 'text-gray-500' },
   ]
-
-  // 汇总
   const feeItems = feeFields.filter(f => (form as any)[f.key] > 0)
+
+  const priceSourceLabel = form.priceSource === 'auto' ? '系统定价' : form.priceSource === 'package' ? '套餐价' : form.priceSource === 'addOn' ? '加打价' : form.priceSource === 'reduced' ? '减打价' : '手动'
+  const priceSourceStyle = form.priceSource === 'auto' ? 'bg-emerald-100 text-emerald-700' : form.priceSource === 'package' ? 'bg-purple-100 text-purple-700' : form.priceSource === 'addOn' ? 'bg-blue-100 text-blue-700' : form.priceSource === 'reduced' ? 'bg-amber-100 text-amber-700' : 'bg-amber-100 text-amber-700'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-6">
@@ -522,18 +536,47 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                           onSelect={p => selectPlayerFromSearch(idx, p)} placeholder="搜索球员姓名 / 手机 / 球员号" />
                       )}
                     </div>
-                    <select value={player.type} onChange={e => { setPlayer(idx, 'type', e.target.value); setPlayer(idx, 'memberType', e.target.value) }}
-                      className="w-20 px-2 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none bg-white flex-shrink-0">
-                      <option value="member">会员</option>
-                      <option value="guest">嘉宾</option>
-                      <option value="walkin">散客</option>
+                    {/* 动态身份选择 */}
+                    <select value={player.identityCode} onChange={e => {
+                      const code = e.target.value
+                      const idType = activeIdentities.find(i => i.code === code)
+                      const next = [...form.players]
+                      next[idx] = {
+                        ...next[idx],
+                        identityCode: code,
+                        type: idType?.category === 'member' ? 'member' : (code === 'guest' ? 'guest' : (code === 'walkin' ? 'walkin' : code)),
+                        memberType: idType?.category === 'member' ? 'member' : code,
+                        memberLevel: idType?.memberLevel || null,
+                      }
+                      set('players', next)
+                    }}
+                      className="w-24 px-2 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none bg-white flex-shrink-0">
+                      {activeIdentities.length > 0 ? (
+                        activeIdentities.map(id => (
+                          <option key={id.code} value={id.code}>{id.name}</option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="walkin">散客</option>
+                          <option value="guest">嘉宾</option>
+                          <option value="member_1">会员</option>
+                        </>
+                      )}
                     </select>
                     <button onClick={() => removePlayer(idx)} className="p-1 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
                   </div>
-                  {/* 定价引擎返回的每人明细 */}
+                  {/* 每人明细 */}
                   {pricingResult?.playerBreakdown?.[idx] && (
-                    <div className="pl-6 text-xs text-gray-400">
-                      果岭费 ¥{pricingResult.playerBreakdown[idx].greenFee}
+                    <div className="pl-6 text-xs text-gray-400 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getIdentityColor(player.identityCode) }} />
+                      {getIdentityName(player.identityCode)}
+                      {' '}¥{pricingResult.playerBreakdown[idx].greenFee}
+                      {pricingResult.playerBreakdown[idx].addOnInfo && (
+                        <span className="text-blue-500">（加打）</span>
+                      )}
+                      {pricingResult.playerBreakdown[idx].reducedInfo && (
+                        <span className="text-amber-500">（{pricingResult.playerBreakdown[idx].reducedInfo.description}）</span>
+                      )}
                     </div>
                   )}
                   {!player.memberId && (
@@ -545,6 +588,61 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* ── 加打/减打模式 ── */}
+          <section>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">特殊场景</h3>
+            <div className="flex gap-3">
+              {/* 加打 */}
+              <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                form.isAddOn ? 'border-blue-300 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+              }`}>
+                <input type="checkbox" checked={form.isAddOn} onChange={e => {
+                  const v = e.target.checked
+                  set('isAddOn', v)
+                  if (v) set('isReduced', false)
+                }} className="w-4 h-4 rounded text-blue-600 focus:ring-blue-400" />
+                <PlusCircle size={16} className="text-blue-600" />
+                <div>
+                  <span className="text-sm text-blue-800 font-medium">加打模式</span>
+                  <p className="text-[10px] text-blue-500">完赛后加打 9 洞</p>
+                </div>
+              </label>
+              {/* 减打 */}
+              <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                form.isReduced ? 'border-amber-300 bg-amber-50' : 'border-gray-200 hover:bg-gray-50'
+              }`}>
+                <input type="checkbox" checked={form.isReduced} onChange={e => {
+                  const v = e.target.checked
+                  set('isReduced', v)
+                  if (v) set('isAddOn', false)
+                }} className="w-4 h-4 rounded text-amber-600 focus:ring-amber-400" />
+                <MinusCircle size={16} className="text-amber-600" />
+                <div>
+                  <span className="text-sm text-amber-800 font-medium">减打模式</span>
+                  <p className="text-[10px] text-amber-500">未打满预定洞数</p>
+                </div>
+              </label>
+            </div>
+            {form.isReduced && (
+              <div className="mt-3 flex items-center gap-3 pl-3">
+                <label className="text-xs text-gray-600">实际打球洞数：</label>
+                <input type="number" value={form.holesPlayed} min={1} max={form.holes} onChange={e => set('holesPlayed', Number(e.target.value) || 9)}
+                  className="w-20 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                <span className="text-xs text-gray-400">/ {form.holes} 洞</span>
+                {pricingResult?.reducedInfo && (
+                  <span className="text-xs text-amber-600">{pricingResult.reducedInfo.description}</span>
+                )}
+              </div>
+            )}
+            {form.isAddOn && pricingResult?.addOnInfo && (
+              <div className="mt-3 p-2.5 bg-blue-50 rounded-lg text-xs text-blue-700 flex items-center gap-2">
+                <PlusCircle size={12} />
+                {pricingResult.addOnInfo.description}
+                {pricingResult.addOnInfo.hasCustomPrices ? '（使用自定义加打价）' : '（默认估算）'}
+              </div>
+            )}
           </section>
 
           {/* ── 团队模式 ── */}
@@ -609,7 +707,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
             </div>
           </section>
 
-          {/* ── 费用信息（自动算价 + 可覆盖）── */}
+          {/* ── 费用信息 ── */}
           <section>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">费用信息</h3>
@@ -619,7 +717,6 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                   set('priceOverride', override)
                   if (override) {
                     set('priceSource', 'manual')
-                    // 解锁所有字段
                     setLockedFields({ greenFee: false, caddyFee: false, cartFee: false, insuranceFee: false, roomFee: false, otherFee: false, discount: false })
                   } else {
                     set('priceSource', 'auto')
@@ -644,25 +741,18 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                     {!form.priceOverride && (
                       <button onClick={() => toggleLock(f.key)} className="p-0.5"
                         title={lockedFields[f.key] ? '系统自动（点击解锁手动输入）' : '已手动覆盖（点击恢复自动）'}>
-                        {lockedFields[f.key]
-                          ? <Lock size={10} className="text-emerald-400" />
-                          : <Unlock size={10} className="text-amber-500" />
-                        }
+                        {lockedFields[f.key] ? <Lock size={10} className="text-emerald-400" /> : <Unlock size={10} className="text-amber-500" />}
                       </button>
                     )}
                   </div>
-                  <input
-                    type="number"
-                    value={(form as any)[f.key] || ''}
+                  <input type="number" value={(form as any)[f.key] || ''}
                     readOnly={!form.priceOverride && lockedFields[f.key]}
                     onChange={e => set(f.key as keyof BookingFormData, parseFloat(e.target.value) || 0)}
                     className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
                       !form.priceOverride && lockedFields[f.key] ? 'border-emerald-200 bg-emerald-50/50 text-emerald-700' : 'border-gray-200 bg-white'
-                    }`}
-                  />
+                    }`} />
                 </div>
               ))}
-              {/* 折扣 */}
               <div className="relative">
                 <div className="flex items-center gap-1 mb-1">
                   <label className="text-xs font-medium text-red-500">折扣减免</label>
@@ -680,11 +770,9 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
               </div>
             </div>
 
-            {/* 团队折扣提示 */}
             {pricingResult?.teamDiscount && (
               <div className="mt-3 p-2.5 bg-blue-50 rounded-lg text-xs text-blue-700 flex items-center gap-2">
-                <Users size={12} />
-                团队折扣已应用：{pricingResult.teamDiscount.label}，减免 ¥{pricingResult.teamDiscount.discountAmount}
+                <Users size={12} /> 团队折扣已应用：{pricingResult.teamDiscount.label}，减免 ¥{pricingResult.teamDiscount.discountAmount}
               </div>
             )}
           </section>
@@ -697,14 +785,14 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
           </section>
         </div>
 
-        {/* 底部：费用汇总 + 操作 */}
+        {/* 底部 */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex-shrink-0">
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-sm text-gray-500">应收合计：</span>
               <span className="text-xl font-bold text-emerald-600">¥{form.totalFee}</span>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${form.priceSource === 'auto' ? 'bg-emerald-100 text-emerald-700' : form.priceSource === 'package' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'}`}>
-                {form.priceSource === 'auto' ? '系统定价' : form.priceSource === 'package' ? '套餐价' : '手动'}
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${priceSourceStyle}`}>
+                {priceSourceLabel}
               </span>
             </div>
             {feeItems.length > 0 && (

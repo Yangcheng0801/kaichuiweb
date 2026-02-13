@@ -1,14 +1,20 @@
 /**
- * 定价引擎 (Pricing Engine)
+ * 定价引擎 (Pricing Engine) v2
  *
- * 核心职责：根据日期/时段/球场/身份自动计算价格
+ * 核心升级：
+ *   1. 动态身份定价 — prices: Record<string, number> 代替固定 priceWalkin/priceGuest/priceMember1-4
+ *   2. 加打定价 (addOnPrices) — 完赛后追加 9 洞的折扣价
+ *   3. 减打定价 (reducedPlayPolicy) — 未打满全程的退款/折扣策略
+ *   4. 向后兼容旧版 rate_sheets（自动将 priceWalkin 等字段映射为 prices 对象）
  *
  * 数据流：
  *   1. determineDayType()  → 查 special_dates → 或按星期判断 → weekday|weekend|holiday
  *   2. determineTimeSlot() → 根据 teeTime 映射 → morning|afternoon|twilight
  *   3. matchRateSheet()    → 从 rate_sheets 中按优先级匹配最佳规则
- *   4. getGreenFee()       → 从规则中取对应身份价格
- *   5. calculateBookingPrice() → 主函数，组合以上逻辑
+ *   4. getGreenFee()       → 从规则 prices{} 中取对应身份价格
+ *   5. getAddOnFee()       → 从规则 addOnPrices{} 中取加打价格
+ *   6. getReducedFee()     → 根据 reducedPlayPolicy 计算减打价格
+ *   7. calculateBookingPrice() → 主函数，组合以上逻辑
  *
  * @param {Function} getDb - 注入的数据库获取函数
  */
@@ -18,11 +24,6 @@
  * 判定某个日期的定价类型
  * 优先查 special_dates 集合（节假日/会员日/赛事日/封场），
  * 无匹配时按星期几自动判断
- *
- * @param {object} db - 数据库实例
- * @param {string} clubId
- * @param {string} dateStr - YYYY-MM-DD
- * @returns {Promise<{dayType: string, dateName: string|null, isClosed: boolean}>}
  */
 async function determineDayType(db, clubId, dateStr) {
   try {
@@ -43,9 +44,8 @@ async function determineDayType(db, clubId, dateStr) {
     console.warn('[PricingEngine] 查询 special_dates 失败:', e.message);
   }
 
-  // 无特殊日期标记 → 按星期判断
   const d = new Date(dateStr + 'T12:00:00');
-  const day = d.getDay(); // 0=Sun, 6=Sat
+  const day = d.getDay();
   const isWeekend = day === 0 || day === 6;
 
   return {
@@ -56,11 +56,6 @@ async function determineDayType(db, clubId, dateStr) {
 }
 
 // ─── 时段判定 ────────────────────────────────────────────────────────────────
-/**
- * 根据发球时间判定时段
- * @param {string} teeTime - HH:mm 格式
- * @returns {string} morning | afternoon | twilight
- */
 function determineTimeSlot(teeTime) {
   if (!teeTime) return 'morning';
   const hour = parseInt(teeTime.split(':')[0], 10);
@@ -70,30 +65,9 @@ function determineTimeSlot(teeTime) {
 }
 
 // ─── 匹配价格规则 ────────────────────────────────────────────────────────────
-/**
- * 从 rate_sheets 集合中找到最高优先级的匹配规则
- *
- * 匹配维度：clubId + dayType + timeSlot + courseId(可选) + holes(可选) + 有效期
- * 排序：priority 降序，第一条即为最佳匹配
- *
- * @param {object} db
- * @param {string} clubId
- * @param {string|null} courseId
- * @param {string} dayType
- * @param {string} timeSlot
- * @param {number} holes - 18 或 9
- * @param {string} dateStr - YYYY-MM-DD 用于有效期判断
- * @returns {Promise<object|null>} 匹配到的价格规则，或 null
- */
 async function matchRateSheet(db, clubId, courseId, dayType, timeSlot, holes, dateStr) {
   try {
-    // 查询条件：clubId + dayType + timeSlot + status=active
-    const cond = {
-      clubId,
-      dayType,
-      timeSlot,
-      status: 'active',
-    };
+    const cond = { clubId, dayType, timeSlot, status: 'active' };
 
     const res = await db.collection('rate_sheets')
       .where(cond)
@@ -105,27 +79,21 @@ async function matchRateSheet(db, clubId, courseId, dayType, timeSlot, holes, da
 
     const now = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
 
-    // 在客户端侧过滤：courseId、holes、有效期
     for (const rule of res.data) {
-      // courseId 匹配：规则的 courseId 为 null/空 表示适用所有球场
       if (rule.courseId && courseId && rule.courseId !== courseId) continue;
-
-      // holes 匹配：规则的 holes 为 0 或未设置表示不限
       if (rule.holes && holes && rule.holes !== holes) continue;
 
-      // 有效期匹配
       if (rule.validFrom) {
         const from = new Date(rule.validFrom);
         if (now < from) continue;
       }
       if (rule.validTo) {
         const to = new Date(rule.validTo);
-        // validTo 当天有效（包含）
         to.setHours(23, 59, 59, 999);
         if (now > to) continue;
       }
 
-      return rule; // 第一条有效的 = 最高优先级
+      return rule;
     }
 
     return null;
@@ -135,44 +103,152 @@ async function matchRateSheet(db, clubId, courseId, dayType, timeSlot, holes, da
   }
 }
 
-// ─── 从规则中提取果岭费 ──────────────────────────────────────────────────────
+// ─── 从规则中提取标准化 prices 对象 ──────────────────────────────────────────
 /**
- * 根据球员身份和会员等级，从匹配的价格规则中取出果岭费
- *
- * @param {object} rateSheet - matchRateSheet 返回的规则
- * @param {string} memberType - member | guest | walkin
- * @param {number|null} memberLevel - 1~4（仅 member 时有效）
- * @returns {number} 果岭费
+ * 兼容旧版：如果 rate_sheet 没有 prices{}，从 priceWalkin/priceGuest/priceMember1-4 构建
  */
-function getGreenFee(rateSheet, memberType, memberLevel) {
+function normalizePrices(rateSheet) {
+  if (!rateSheet) return {};
+  if (rateSheet.prices && typeof rateSheet.prices === 'object' && Object.keys(rateSheet.prices).length > 0) {
+    return rateSheet.prices;
+  }
+  // 向后兼容：从旧字段构建
+  const prices = {};
+  if (rateSheet.priceWalkin !== undefined)  prices.walkin    = Number(rateSheet.priceWalkin);
+  if (rateSheet.priceGuest !== undefined)   prices.guest     = Number(rateSheet.priceGuest);
+  if (rateSheet.priceMember1 !== undefined) prices.member_1  = Number(rateSheet.priceMember1);
+  if (rateSheet.priceMember2 !== undefined) prices.member_2  = Number(rateSheet.priceMember2);
+  if (rateSheet.priceMember3 !== undefined) prices.member_3  = Number(rateSheet.priceMember3);
+  if (rateSheet.priceMember4 !== undefined) prices.member_4  = Number(rateSheet.priceMember4);
+  return prices;
+}
+
+// ─── 从 prices 中取果岭费 ────────────────────────────────────────────────────
+/**
+ * 根据球员身份 code，从 prices 中取对应价格
+ *
+ * 降级逻辑：
+ *   1. 精确匹配 identityCode（如 'member_2'、'junior'、'coach'）
+ *   2. 如果是 member 类型但无精确匹配 → 取 member_1
+ *   3. 如果是 guest → 取 guest → walkin
+ *   4. 兜底 → walkin
+ *
+ * @param {object} rateSheet - 匹配到的价格规则
+ * @param {string} identityCode - 身份代码（如 'walkin'、'member_2'、'junior'、'coach'）
+ * @returns {number}
+ */
+function getGreenFee(rateSheet, identityCode) {
   if (!rateSheet) return 0;
+  const prices = normalizePrices(rateSheet);
+  if (!identityCode) identityCode = 'walkin';
 
-  if (memberType === 'member' && memberLevel) {
-    const key = `priceMember${memberLevel}`;
-    if (rateSheet[key] !== undefined && rateSheet[key] !== null) {
-      return Number(rateSheet[key]);
+  // 精确匹配
+  if (prices[identityCode] !== undefined && prices[identityCode] !== null) {
+    return Number(prices[identityCode]);
+  }
+
+  // 会员降级
+  if (identityCode.startsWith('member_')) {
+    if (prices.member_1 !== undefined) return Number(prices.member_1);
+  }
+
+  // 嘉宾降级
+  if (identityCode === 'guest') {
+    return Number(prices.walkin || 0);
+  }
+
+  // 兜底散客
+  return Number(prices.walkin || 0);
+}
+
+// ─── 加打定价 (Add-On Round) ─────────────────────────────────────────────────
+/**
+ * 获取加打价格（完赛后追加 9 洞）
+ *
+ * @param {object} rateSheet - 匹配到的价格规则
+ * @param {string} identityCode - 身份代码
+ * @returns {{ fee: number, available: boolean, description: string }}
+ */
+function getAddOnFee(rateSheet, identityCode) {
+  if (!rateSheet) return { fee: 0, available: false, description: '无价格规则' };
+  if (!identityCode) identityCode = 'walkin';
+
+  const addOnPrices = rateSheet.addOnPrices || {};
+
+  // 如果有 addOnPrices 配置
+  if (Object.keys(addOnPrices).length > 0) {
+    // 精确匹配
+    if (addOnPrices[identityCode] !== undefined && addOnPrices[identityCode] !== null) {
+      return { fee: Number(addOnPrices[identityCode]), available: true, description: '加打9洞' };
     }
-    // 降级：没有对应等级价格，取 priceMember1
-    if (rateSheet.priceMember1 !== undefined) return Number(rateSheet.priceMember1);
+    // 会员降级
+    if (identityCode.startsWith('member_') && addOnPrices.member_1 !== undefined) {
+      return { fee: Number(addOnPrices.member_1), available: true, description: '加打9洞' };
+    }
+    // 散客兜底
+    if (addOnPrices.walkin !== undefined) {
+      return { fee: Number(addOnPrices.walkin), available: true, description: '加打9洞' };
+    }
   }
 
-  if (memberType === 'guest') {
-    return Number(rateSheet.priceGuest || rateSheet.priceWalkin || 0);
-  }
+  // 无专门加打价 → 按标准价的 50% 估算（行业惯例：加9洞 ≈ 标准18洞的 40%-60%）
+  const standardFee = getGreenFee(rateSheet, identityCode);
+  const estimatedFee = Math.round(standardFee * 0.5);
+  return { fee: estimatedFee, available: true, description: '加打9洞（估算50%）' };
+}
 
-  // 散客 / 默认
-  return Number(rateSheet.priceWalkin || 0);
+// ─── 减打定价 (Reduced Play) ─────────────────────────────────────────────────
+/**
+ * 计算减打价格（未打满全程）
+ *
+ * 策略类型：
+ *   - proportional: 按比例（如打了9洞 = 标准价 × rate）
+ *   - fixed_rate:   固定减打价（从 fixedPrices 中取）
+ *   - no_refund:    不退款（全额收费）
+ *
+ * @param {object} rateSheet - 匹配到的价格规则
+ * @param {string} identityCode - 身份代码
+ * @param {number} holesPlayed - 实际打了几洞
+ * @param {number} holesBooked - 预订的洞数
+ * @returns {{ fee: number, policy: string, description: string }}
+ */
+function getReducedFee(rateSheet, identityCode, holesPlayed, holesBooked) {
+  if (!rateSheet) return { fee: 0, policy: 'none', description: '无价格规则' };
+  if (!identityCode) identityCode = 'walkin';
+
+  const standardFee = getGreenFee(rateSheet, identityCode);
+  const policy = rateSheet.reducedPlayPolicy || {};
+  const policyType = policy.type || 'proportional';
+
+  switch (policyType) {
+    case 'no_refund':
+      return { fee: standardFee, policy: 'no_refund', description: '全额收费（不退减打差额）' };
+
+    case 'fixed_rate': {
+      const fixedPrices = policy.fixedPrices || {};
+      let fixedFee = fixedPrices[identityCode];
+      if (fixedFee === undefined && identityCode.startsWith('member_')) fixedFee = fixedPrices.member_1;
+      if (fixedFee === undefined) fixedFee = fixedPrices.walkin;
+      if (fixedFee !== undefined) {
+        return { fee: Number(fixedFee), policy: 'fixed_rate', description: `减打固定价` };
+      }
+      // 无固定价则降级为比例
+      const rate = policy.rate || 0.6;
+      return { fee: Math.round(standardFee * rate), policy: 'fixed_rate_fallback', description: `减打按${Math.round(rate * 100)}%收费` };
+    }
+
+    case 'proportional':
+    default: {
+      const rate = policy.rate || 0.6;
+      // 如果打了 9 洞（18 洞预订），按比例
+      const ratio = holesBooked > 0 ? (holesPlayed / holesBooked) : 1;
+      const adjustedRate = Math.max(ratio, rate); // 不低于最低收费比例
+      return { fee: Math.round(standardFee * adjustedRate), policy: 'proportional', description: `减打按${Math.round(adjustedRate * 100)}%收费` };
+    }
+  }
 }
 
 // ─── 团队折扣 ────────────────────────────────────────────────────────────────
-/**
- * 根据团队人数查找适用的团队折扣率
- *
- * @param {object} db
- * @param {string} clubId
- * @param {number} totalPlayers - 总人数
- * @returns {Promise<{discountRate: number, label: string, floorPriceRate: number}>}
- */
 async function getTeamDiscount(db, clubId, totalPlayers) {
   const noDiscount = { discountRate: 1, label: '', floorPriceRate: 0.6 };
   if (!totalPlayers || totalPlayers < 2) return noDiscount;
@@ -189,7 +265,6 @@ async function getTeamDiscount(db, clubId, totalPlayers) {
     if (!config.enabled) return noDiscount;
 
     const tiers = config.tiers || [];
-    // 按 minPlayers 降序排列，找到第一个匹配的
     const sorted = [...tiers].sort((a, b) => b.minPlayers - a.minPlayers);
 
     for (const tier of sorted) {
@@ -210,19 +285,9 @@ async function getTeamDiscount(db, clubId, totalPlayers) {
 }
 
 // ─── 套餐价格计算 ────────────────────────────────────────────────────────────
-/**
- * 根据套餐ID获取套餐价格
- *
- * @param {object} db
- * @param {string} clubId
- * @param {string} packageId
- * @param {string} memberType
- * @param {number|null} memberLevel
- * @param {string} dayType
- * @returns {Promise<object|null>}
- */
-async function calculatePackagePrice(db, clubId, packageId, memberType, memberLevel, dayType) {
+async function calculatePackagePrice(db, clubId, packageId, identityCode, dayType) {
   if (!packageId) return null;
+  if (!identityCode) identityCode = 'walkin';
 
   try {
     const res = await db.collection('stay_packages').doc(packageId).get();
@@ -232,14 +297,20 @@ async function calculatePackagePrice(db, clubId, packageId, memberType, memberLe
     const pricing = pkg.pricing || {};
     let price = 0;
 
-    // 按身份取价格
-    if (memberType === 'member' && memberLevel) {
-      const key = `priceMember${memberLevel}`;
-      price = Number(pricing[key] || pricing.memberPrice || pricing.basePrice || 0);
-    } else if (memberType === 'guest') {
-      price = Number(pricing.priceGuest || pricing.basePrice || 0);
+    // 先尝试动态 prices 对象
+    if (pricing.prices && typeof pricing.prices === 'object') {
+      price = Number(pricing.prices[identityCode] || pricing.prices.walkin || pricing.basePrice || 0);
     } else {
-      price = Number(pricing.priceWalkin || pricing.basePrice || 0);
+      // 向后兼容旧字段
+      if (identityCode.startsWith('member_')) {
+        const level = identityCode.split('_')[1];
+        const key = `priceMember${level}`;
+        price = Number(pricing[key] || pricing.memberPrice || pricing.basePrice || 0);
+      } else if (identityCode === 'guest') {
+        price = Number(pricing.priceGuest || pricing.basePrice || 0);
+      } else {
+        price = Number(pricing.priceWalkin || pricing.basePrice || 0);
+      }
     }
 
     // 周末加价
@@ -261,6 +332,27 @@ async function calculatePackagePrice(db, clubId, packageId, memberType, memberLe
   }
 }
 
+// ─── 解析身份代码 ────────────────────────────────────────────────────────────
+/**
+ * 将前端传入的球员对象标准化为 identityCode
+ *
+ * 支持的输入格式：
+ *   - { identityCode: 'junior' }   → 'junior'（新版）
+ *   - { memberType: 'member', memberLevel: 2 } → 'member_2'（旧版兼容）
+ *   - { type: 'walkin' }           → 'walkin'（旧版兼容）
+ */
+function resolveIdentityCode(player) {
+  if (!player) return 'walkin';
+  // 新版：直接有 identityCode
+  if (player.identityCode) return player.identityCode;
+  // 旧版兼容
+  const mType = player.memberType || player.type || 'walkin';
+  if (mType === 'member' && player.memberLevel) {
+    return `member_${player.memberLevel}`;
+  }
+  return mType;
+}
+
 // ─── 主函数：计算预订价格 ────────────────────────────────────────────────────
 /**
  * 计算一个预订的完整价格明细
@@ -272,12 +364,15 @@ async function calculatePackagePrice(db, clubId, packageId, memberType, memberLe
  * @param {string} input.teeTime - HH:mm
  * @param {string} [input.courseId]
  * @param {number} [input.holes=18]
- * @param {Array}  input.players - [{ memberType, memberLevel, name }]
+ * @param {Array}  input.players - [{ identityCode?, memberType?, memberLevel?, name }]
  * @param {boolean} [input.needCaddy=false]
  * @param {boolean} [input.needCart=false]
- * @param {string} [input.packageId] - 套餐ID（可选）
- * @param {number} [input.totalPlayers] - 总人数（用于团队折扣，可选）
- * @returns {Promise<object>} 完整的价格计算结果
+ * @param {string} [input.packageId]
+ * @param {number} [input.totalPlayers]
+ * @param {boolean} [input.isAddOn=false] - 是否为加打
+ * @param {boolean} [input.isReduced=false] - 是否为减打
+ * @param {number} [input.holesPlayed] - 实际打的洞数（减打时使用）
+ * @returns {Promise<object>}
  */
 async function calculateBookingPrice(db, input) {
   const {
@@ -291,6 +386,9 @@ async function calculateBookingPrice(db, input) {
     needCart = false,
     packageId = null,
     totalPlayers = 0,
+    isAddOn = false,
+    isReduced = false,
+    holesPlayed = 0,
   } = input;
 
   // 1. 判定日期类型
@@ -311,14 +409,10 @@ async function calculateBookingPrice(db, input) {
   const rateSheet = await matchRateSheet(db, clubId, courseId, dayInfo.dayType, timeSlot, holes, date);
 
   // 4. 如果有套餐，走套餐定价
-  if (packageId) {
+  if (packageId && !isAddOn && !isReduced) {
     const firstPlayer = players[0] || {};
-    const pkgResult = await calculatePackagePrice(
-      db, clubId, packageId,
-      firstPlayer.memberType || firstPlayer.type || 'walkin',
-      firstPlayer.memberLevel || null,
-      dayInfo.dayType
-    );
+    const firstIdentity = resolveIdentityCode(firstPlayer);
+    const pkgResult = await calculatePackagePrice(db, clubId, packageId, firstIdentity, dayInfo.dayType);
 
     if (pkgResult) {
       return {
@@ -332,16 +426,17 @@ async function calculateBookingPrice(db, input) {
         rateSheetId: rateSheet ? rateSheet._id : null,
         rateSheetName: rateSheet ? rateSheet.ruleName : null,
         package: pkgResult,
-        // 套餐价 = 整单总价
         greenFee: pkgResult.packagePrice,
         caddyFee: pkgResult.includes.caddyIncluded ? 0 : (rateSheet ? Number(rateSheet.caddyFee || 0) : 0),
         cartFee: pkgResult.includes.cartIncluded ? 0 : (rateSheet ? Number(rateSheet.cartFee || 0) : 0),
         insuranceFee: rateSheet ? Number(rateSheet.insuranceFee || 0) * players.length : 0,
-        roomFee: 0, // 套餐已包含
+        roomFee: 0,
         otherFee: 0,
         discount: 0,
-        totalFee: 0, // 下面计算
+        totalFee: 0,
         playerBreakdown: [],
+        addOnInfo: null,
+        reducedInfo: null,
       };
     }
   }
@@ -351,34 +446,52 @@ async function calculateBookingPrice(db, input) {
   let totalGreenFee = 0;
 
   for (const p of players) {
-    const mType = p.memberType || p.type || 'walkin';
-    const mLevel = p.memberLevel || null;
-    const fee = getGreenFee(rateSheet, mType, mLevel);
+    const identityCode = resolveIdentityCode(p);
+    let fee = 0;
+    let addOnInfo = null;
+    let reducedInfo = null;
+
+    if (isAddOn) {
+      // 加打模式
+      const addOnResult = getAddOnFee(rateSheet, identityCode);
+      fee = addOnResult.fee;
+      addOnInfo = addOnResult;
+    } else if (isReduced) {
+      // 减打模式
+      const reducedResult = getReducedFee(rateSheet, identityCode, holesPlayed || 9, holes);
+      fee = reducedResult.fee;
+      reducedInfo = reducedResult;
+    } else {
+      // 标准模式
+      fee = getGreenFee(rateSheet, identityCode);
+    }
+
     totalGreenFee += fee;
 
     playerBreakdown.push({
       name: p.name || '',
-      memberType: mType,
-      memberLevel: mLevel,
+      identityCode,
       greenFee: fee,
+      addOnInfo,
+      reducedInfo,
     });
   }
 
   // 6. 附加费
   const caddyFee = needCaddy ? Number(rateSheet ? rateSheet.caddyFee || 0 : 0) : 0;
   const cartFee = needCart ? Number(rateSheet ? rateSheet.cartFee || 0 : 0) : 0;
-  const insuranceFee = Number(rateSheet ? rateSheet.insuranceFee || 0 : 0) * players.length;
+  // 加打时保险费通常不再重复收取
+  const insuranceFee = isAddOn ? 0 : (Number(rateSheet ? rateSheet.insuranceFee || 0 : 0) * players.length);
 
   // 7. 团队折扣
   let discount = 0;
   let teamDiscountInfo = null;
   const effectiveTotal = totalPlayers || players.length;
-  if (effectiveTotal >= 8) {
+  if (effectiveTotal >= 8 && !isAddOn && !isReduced) {
     const teamInfo = await getTeamDiscount(db, clubId, effectiveTotal);
     if (teamInfo.discountRate < 1) {
       const baseAmount = totalGreenFee;
       const discountedAmount = baseAmount * teamInfo.discountRate;
-      // 底价保护
       const floorAmount = baseAmount * teamInfo.floorPriceRate;
       const finalAmount = Math.max(discountedAmount, floorAmount);
       discount = Math.round((baseAmount - finalAmount) * 100) / 100;
@@ -396,9 +509,25 @@ async function calculateBookingPrice(db, input) {
   // 8. 合计
   const totalFee = Math.round((totalGreenFee + caddyFee + cartFee + insuranceFee - discount) * 100) / 100;
 
+  // 9. 加打/减打汇总信息
+  const addOnSummary = isAddOn ? {
+    isAddOn: true,
+    addOnHoles: 9,
+    description: '加打9洞',
+    hasCustomPrices: rateSheet?.addOnPrices && Object.keys(rateSheet.addOnPrices).length > 0,
+  } : null;
+
+  const reducedSummary = isReduced ? {
+    isReduced: true,
+    holesBooked: holes,
+    holesPlayed: holesPlayed || 9,
+    policy: rateSheet?.reducedPlayPolicy?.type || 'proportional',
+    description: playerBreakdown[0]?.reducedInfo?.description || '减打',
+  } : null;
+
   return {
     success: true,
-    priceSource: 'auto',
+    priceSource: isAddOn ? 'addOn' : (isReduced ? 'reduced' : 'auto'),
     dayType: dayInfo.dayType,
     dayTypeName: DAY_TYPE_LABELS[dayInfo.dayType] || dayInfo.dayType,
     dateName: dayInfo.dateName,
@@ -420,12 +549,18 @@ async function calculateBookingPrice(db, input) {
     playerBreakdown,
     // 团队折扣
     teamDiscount: teamDiscountInfo,
-    // 附加费标准（方便前端显示单价）
+    // 加打/减打信息
+    addOnInfo: addOnSummary,
+    reducedInfo: reducedSummary,
+    // 附加费标准
     feeStandards: rateSheet ? {
       caddyFeeUnit: Number(rateSheet.caddyFee || 0),
       cartFeeUnit: Number(rateSheet.cartFee || 0),
       insuranceFeeUnit: Number(rateSheet.insuranceFee || 0),
     } : null,
+    // 加打/减打价格参考表（供前端预览）
+    addOnPricesRef: rateSheet?.addOnPrices || null,
+    reducedPolicyRef: rateSheet?.reducedPlayPolicy || null,
   };
 }
 
@@ -447,10 +582,14 @@ module.exports = {
   determineDayType,
   determineTimeSlot,
   matchRateSheet,
+  normalizePrices,
   getGreenFee,
+  getAddOnFee,
+  getReducedFee,
   getTeamDiscount,
   calculatePackagePrice,
   calculateBookingPrice,
+  resolveIdentityCode,
   DAY_TYPE_LABELS,
   TIME_SLOT_LABELS,
 };

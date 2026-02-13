@@ -106,6 +106,9 @@ app.use('/api/rate-sheets', require('./routes/rate-sheets')(getDb));
 // 特殊日期管理（节假日/会员日/赛事日/封场日）
 app.use('/api/special-dates', require('./routes/special-dates')(getDb));
 
+// 身份类型管理（球员身份：散客/嘉宾/会员/青少年/教练/长者/礼遇/员工等）
+app.use('/api/identity-types', require('./routes/identity-types')(getDb));
+
 // 餐饮 POS 系统
 app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
 app.use('/api/tables', require('./routes/tables')(getDb));

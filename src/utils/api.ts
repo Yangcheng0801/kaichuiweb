@@ -339,4 +339,13 @@ export const api = {
     remove:       (id: string) => service.delete(`/special-dates/${id}`),
     getHolidays:  (year?: number) => service.get('/special-dates/holidays', { params: { year } }),
   },
+
+  // 身份类型管理（球员身份：散客/嘉宾/各级会员/青少年/教练/长者/礼遇/员工等）
+  identityTypes: {
+    getList:  (params?: object) => service.get('/identity-types', { params }),
+    create:   (data: object) => service.post('/identity-types', data),
+    update:   (id: string, data: object) => service.put(`/identity-types/${id}`, data),
+    remove:   (id: string) => service.delete(`/identity-types/${id}`),
+    seed:     (data?: { clubId?: string }) => service.post('/identity-types/seed', data || {}),
+  },
 }
