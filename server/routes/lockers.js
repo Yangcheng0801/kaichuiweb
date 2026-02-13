@@ -191,6 +191,114 @@ function createLockersRouter(getDb) {
     }
   })
 
+  // ══════════════════════════════════════════════════════════════════════════════
+  // POST /api/lockers/:id/issue-key  发放钥匙/手环
+  // ══════════════════════════════════════════════════════════════════════════════
+  router.post('/:id/issue-key', async (req, res) => {
+    try {
+      const db = getDb()
+      const { id } = req.params
+      const { keyType = 'physical_key', keyNo, issuedTo, playerName, bookingId, contractId, operatorId, operatorName } = req.body
+      if (!keyNo) return res.status(400).json({ success: false, error: '钥匙/手环编号不能为空' })
+
+      const now = new Date()
+      await db.collection(COLLECTION).doc(id).update({
+        data: {
+          keyInfo: { keyType, keyNo, issuedTo: issuedTo || null, issuedAt: now, returnedAt: null },
+          updateTime: now,
+        }
+      })
+
+      // 记录使用日志
+      await db.collection('locker_usage_logs').add({
+        clubId: req.body.clubId || 'default',
+        lockerId: id,
+        lockerNo: req.body.lockerNo || '',
+        action: 'key_issued',
+        playerId: issuedTo || null,
+        playerName: playerName || '',
+        bookingId: bookingId || null,
+        contractId: contractId || null,
+        keyNo,
+        operatorId: operatorId || null,
+        operatorName: operatorName || '',
+        actionTime: now,
+        note: `发放${keyType === 'wristband' ? '手环' : keyType === 'card' ? '门禁卡' : '钥匙'} ${keyNo}`,
+        createdAt: now,
+      })
+
+      res.json({ success: true, message: '钥匙/手环已发放' })
+    } catch (error) {
+      console.error('[Lockers] 发放钥匙失败:', error)
+      res.status(500).json({ success: false, error: error.message })
+    }
+  })
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // POST /api/lockers/:id/return-key  回收钥匙/手环
+  // ══════════════════════════════════════════════════════════════════════════════
+  router.post('/:id/return-key', async (req, res) => {
+    try {
+      const db = getDb()
+      const { id } = req.params
+      const { operatorId, operatorName, playerName, bookingId, contractId } = req.body
+      const now = new Date()
+
+      // 读取当前钥匙信息
+      const lockerRes = await db.collection(COLLECTION).doc(id).get()
+      const locker = Array.isArray(lockerRes.data) ? lockerRes.data[0] : lockerRes.data
+      const keyNo = locker?.keyInfo?.keyNo || ''
+
+      await db.collection(COLLECTION).doc(id).update({
+        data: {
+          'keyInfo.returnedAt': now,
+          'keyInfo.issuedTo': null,
+          updateTime: now,
+        }
+      })
+
+      await db.collection('locker_usage_logs').add({
+        clubId: req.body.clubId || locker?.clubId || 'default',
+        lockerId: id,
+        lockerNo: locker?.lockerNo || '',
+        action: 'key_returned',
+        playerId: null,
+        playerName: playerName || '',
+        bookingId: bookingId || null,
+        contractId: contractId || null,
+        keyNo,
+        operatorId: operatorId || null,
+        operatorName: operatorName || '',
+        actionTime: now,
+        note: `回收钥匙 ${keyNo}`,
+        createdAt: now,
+      })
+
+      res.json({ success: true, message: '钥匙/手环已回收' })
+    } catch (error) {
+      console.error('[Lockers] 回收钥匙失败:', error)
+      res.status(500).json({ success: false, error: error.message })
+    }
+  })
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // GET /api/lockers/:id/usage-logs  使用记录
+  // ══════════════════════════════════════════════════════════════════════════════
+  router.get('/:id/usage-logs', async (req, res) => {
+    try {
+      const db = getDb()
+      const r = await db.collection('locker_usage_logs')
+        .where({ lockerId: req.params.id })
+        .orderBy('actionTime', 'desc')
+        .limit(200)
+        .get()
+      res.json({ success: true, data: r.data || [] })
+    } catch (error) {
+      console.error('[Lockers] 获取使用记录失败:', error)
+      res.status(500).json({ success: false, error: error.message })
+    }
+  })
+
   return router
 }
 

@@ -48,7 +48,11 @@ interface Booking {
     parking:     { plateNo: string; companions?: string[] } | null
     tempCardId?: string
     tempCardNo?: string
+    folioId?:    string
+    folioNo?:    string
   }
+  playerId?:  string
+  playerName?: string
 }
 
 interface Course { _id: string; name: string; holes: number }
@@ -632,7 +636,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
   )
 }
 
-// ─── 收银台弹窗 ───────────────────────────────────────────────────────────────
+// ─── 收银台弹窗（Folio 版） ──────────────────────────────────────────────────
 
 interface CashierDialogProps {
   booking:   Booking
@@ -640,53 +644,109 @@ interface CashierDialogProps {
   onSuccess: () => void
 }
 
-function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
-  const p = booking.pricing || {} as Pricing
-  const pendingFee = p.pendingFee ?? (p.totalFee - (p.paidFee || 0))
-  const [payMethod,   setPayMethod]   = useState('cash')
-  const [payAmount,   setPayAmount]   = useState(String(Math.max(0, pendingFee || booking.totalFee || 0)))
-  const [note,        setNote]        = useState('')
-  const [saving,      setSaving]      = useState(false)
+const CHARGE_TYPE_LABELS: Record<string, string> = {
+  green_fee: '果岭费', caddy_fee: '球童费', cart_fee: '球车费',
+  insurance: '保险费', locker_daily: '更衣柜', room: '客房费',
+  dining: '餐饮', proshop: '球具店', minibar: '迷你吧', other: '其他',
+}
 
-  const feeRows = [
-    { label: '果岭费',  value: p.greenFee     },
-    { label: '球童费',  value: p.caddyFee     },
-    { label: '球车费',  value: p.cartFee      },
-    { label: '保险费',  value: p.insuranceFee },
-    { label: '客房费',  value: p.roomFee      },
-    { label: '其他费',  value: p.otherFee     },
-    { label: '折扣',    value: p.discount ? -p.discount : undefined, className: 'text-emerald-600' },
-  ].filter(r => r.value !== undefined && r.value !== 0)
+function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
+  const folioId = booking.assignedResources?.folioId
+  const [folioData, setFolioData] = useState<any>(null)
+  const [loadingFolio, setLoadingFolio] = useState(true)
+  const [payMethod, setPayMethod] = useState('cash')
+  const [payAmount, setPayAmount] = useState('')
+  const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  // 加载 Folio 数据（charges + payments）
+  useEffect(() => {
+    const load = async () => {
+      setLoadingFolio(true)
+      try {
+        if (folioId) {
+          const res: any = await api.folios.getDetail(folioId)
+          setFolioData(res.data)
+          const bal = res.data?.balance ?? 0
+          setPayAmount(String(Math.max(0, bal)))
+        } else {
+          // 无 Folio 时回退到 booking.pricing
+          const p = booking.pricing || {} as Pricing
+          const pending = p.pendingFee ?? (p.totalFee - (p.paidFee || 0))
+          setPayAmount(String(Math.max(0, pending || booking.totalFee || 0)))
+        }
+      } catch { /* fallback */ }
+      setLoadingFolio(false)
+    }
+    load()
+  }, [folioId, booking])
+
+  const charges  = (folioData?.charges || []).filter((c: any) => c.status === 'posted')
+  const payments = folioData?.payments || []
+  const totalCharges  = folioData?.totalCharges  ?? (booking.pricing?.totalFee || booking.totalFee || 0)
+  const totalPayments = folioData?.totalPayments ?? (booking.pricing?.paidFee || 0)
+  const balance       = folioData?.balance       ?? Math.max(0, totalCharges - totalPayments)
+
+  // 冲销某项消费
+  const handleVoid = async (chargeId: string) => {
+    if (!folioId) return
+    try {
+      await api.folios.voidCharge(folioId, chargeId, { reason: '前台冲销' })
+      const res: any = await api.folios.getDetail(folioId)
+      setFolioData(res.data)
+      toast.success('已冲销')
+    } catch { /* 拦截器 */ }
+  }
 
   const handleConfirm = async () => {
     const amt = parseFloat(payAmount)
     if (isNaN(amt) || amt <= 0) { toast.error('请输入有效的收款金额'); return }
     setSaving(true)
     try {
-      // 先收款
+      if (folioId) {
+        // Folio 路径：收款 → 结算 → 完赛
+        await api.folios.addPayment(folioId, { amount: amt, payMethod, note })
+        await api.folios.settle(folioId, { force: true })
+      }
+      // 同步到 booking 旧字段（兼容）
       await api.bookings.pay(booking._id, { amount: amt, payMethod, note })
-      // 再完赛
       await api.bookings.complete(booking._id)
-      toast.success('收款并标记完赛成功 ✓')
+      toast.success('收款并标记完赛成功')
       onSuccess()
       onClose()
-    } catch {
-      /* 拦截器处理 */
-    } finally {
-      setSaving(false)
-    }
+    } catch { /* 拦截器 */ }
+    finally { setSaving(false) }
+  }
+
+  // 只收款不完赛
+  const handlePayOnly = async () => {
+    const amt = parseFloat(payAmount)
+    if (isNaN(amt) || amt <= 0) { toast.error('请输入有效的收款金额'); return }
+    setSaving(true)
+    try {
+      if (folioId) {
+        await api.folios.addPayment(folioId, { amount: amt, payMethod, note })
+        const res: any = await api.folios.getDetail(folioId)
+        setFolioData(res.data)
+        setPayAmount(String(Math.max(0, res.data?.balance || 0)))
+      }
+      await api.bookings.pay(booking._id, { amount: amt, payMethod, note })
+      toast.success(`收款 ¥${amt} 成功`)
+    } catch { /* 拦截器 */ }
+    finally { setSaving(false) }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
           <div>
-            <h2 className="font-semibold text-gray-900">收银台</h2>
+            <h2 className="font-semibold text-gray-900">结算工作台</h2>
             <p className="text-xs text-gray-400 mt-0.5">
               {booking.orderNo && <span className="mr-2">{booking.orderNo}</span>}
               {booking.teeTime} · {booking.courseName}
+              {folioData?.folioNo && <span className="ml-2 text-emerald-600">Folio#{folioData.folioNo}</span>}
             </p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
@@ -706,45 +766,57 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
             ))}
           </div>
 
-          {/* 费用明细 */}
-          {feeRows.length > 0 && (
+          {/* Folio 消费明细 */}
+          {loadingFolio ? (
+            <div className="flex items-center justify-center py-8 text-gray-400 text-sm">加载账单...</div>
+          ) : (
             <div className="bg-gray-50 rounded-xl overflow-hidden">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <span className="text-xs font-medium text-gray-500">费用明细</span>
+              <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500">消费明细</span>
+                <span className="text-xs text-gray-400">{charges.length} 项</span>
               </div>
-              <div className="divide-y divide-gray-100">
-                {feeRows.map(r => (
-                  <div key={r.label} className="flex justify-between items-center px-4 py-2.5">
-                    <span className="text-sm text-gray-600">{r.label}</span>
-                    <span className={`text-sm font-medium ${(r as any).className || 'text-gray-800'}`}>
-                      {(r.value! > 0 ? '' : '')}¥{Math.abs(r.value!)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {/* 合计行 */}
+              {charges.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {charges.map((c: any) => (
+                    <div key={c._id} className="flex items-center justify-between px-4 py-2.5 group">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-gray-700">{c.description || CHARGE_TYPE_LABELS[c.chargeType] || c.chargeType}</div>
+                        <div className="text-[11px] text-gray-400">
+                          {CHARGE_TYPE_LABELS[c.chargeType] || c.chargeType}
+                          {c.chargeSource ? ` · ${c.chargeSource}` : ''}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-800">¥{c.amount}</span>
+                        <button onClick={() => handleVoid(c._id)}
+                          className="opacity-0 group-hover:opacity-100 text-[11px] text-red-400 hover:text-red-600 transition-all px-1">
+                          冲销
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="px-4 py-6 text-center text-sm text-gray-400">
+                  {folioId ? '暂无消费记录' : '未创建 Folio，显示预订费用'}
+                </div>
+              )}
+
+              {/* 汇总 */}
               <div className="flex justify-between items-center px-4 py-3 bg-gray-100">
-                <span className="text-sm font-semibold text-gray-800">应收合计</span>
-                <span className="text-lg font-bold text-gray-900">¥{p.totalFee || booking.totalFee || 0}</span>
+                <span className="text-sm font-semibold text-gray-800">消费合计</span>
+                <span className="text-lg font-bold text-gray-900">¥{totalCharges}</span>
               </div>
-              {(p.paidFee || 0) > 0 && (
+              {totalPayments > 0 && (
                 <div className="flex justify-between items-center px-4 py-2.5 text-sm">
                   <span className="text-gray-500">已付</span>
-                  <span className="text-emerald-600 font-medium">¥{p.paidFee}</span>
+                  <span className="text-emerald-600 font-medium">¥{totalPayments}</span>
                 </div>
               )}
               <div className="flex justify-between items-center px-4 py-3 bg-orange-50">
                 <span className="text-sm font-semibold text-orange-700">待收</span>
-                <span className="text-xl font-bold text-orange-600">¥{Math.max(0, pendingFee)}</span>
+                <span className="text-xl font-bold text-orange-600">¥{Math.max(0, balance)}</span>
               </div>
-            </div>
-          )}
-
-          {/* 无明细时显示简版合计 */}
-          {feeRows.length === 0 && (
-            <div className="bg-orange-50 rounded-xl flex justify-between items-center px-5 py-4">
-              <span className="text-sm font-semibold text-orange-700">待收金额</span>
-              <span className="text-2xl font-bold text-orange-600">¥{booking.totalFee || 0}</span>
             </div>
           )}
 
@@ -785,13 +857,13 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
           </div>
 
           {/* 历史支付记录 */}
-          {booking.payments && booking.payments.length > 0 && (
+          {payments.length > 0 && (
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">历史支付记录</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">支付记录</label>
               <div className="space-y-1">
-                {booking.payments.map((pay: any, i: number) => (
+                {payments.map((pay: any, i: number) => (
                   <div key={i} className="flex justify-between text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-                    <span>{PAY_METHODS.find(m => m.value === pay.payMethod)?.label || pay.payMethod}</span>
+                    <span>{pay.payMethodName || PAY_METHODS.find(m => m.value === pay.payMethod)?.label || pay.payMethod}</span>
                     <span className="font-medium text-gray-700">¥{pay.amount}</span>
                   </div>
                 ))}
@@ -803,12 +875,16 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
         {/* Footer */}
         <div className="flex gap-3 px-6 py-4 border-t border-gray-100 sticky bottom-0 bg-white">
           <button onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors">
+            className="px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors">
             取消
+          </button>
+          <button onClick={handlePayOnly} disabled={saving}
+            className="flex-1 px-4 py-2 border border-emerald-400 text-emerald-700 text-sm rounded-lg hover:bg-emerald-50 disabled:opacity-50 transition-colors font-medium">
+            仅收款
           </button>
           <button onClick={handleConfirm} disabled={saving}
             className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-semibold">
-            {saving ? '处理中...' : `收款 ¥${payAmount || 0} 并完赛`}
+            {saving ? '处理中...' : `收款并完赛`}
           </button>
         </div>
       </div>

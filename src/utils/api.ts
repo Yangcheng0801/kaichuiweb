@@ -80,6 +80,23 @@ export const api = {
     getData: (params?: { clubId?: string }) => service.get('/dashboard', { params }),
   },
 
+  // 统一消费 / 挂账中心 (Folio)
+  folios: {
+    getList:      (params?: object) => service.get('/folios', { params }),
+    getActive:    (params?: { clubId?: string }) => service.get('/folios/active', { params }),
+    getStats:     (params?: { clubId?: string }) => service.get('/folios/stats', { params }),
+    lookup:       (params: { cardNo?: string; bookingId?: string; clubId?: string }) => service.get('/folios/lookup', { params }),
+    getDetail:    (id: string) => service.get(`/folios/${id}`),
+    getCharges:   (id: string) => service.get(`/folios/${id}/charges`),
+    create:       (data: object) => service.post('/folios', data),
+    addCharge:    (id: string, data: object) => service.post(`/folios/${id}/charges`, data),
+    addChargesBatch: (id: string, data: { items: object[] }) => service.post(`/folios/${id}/charges/batch`, data),
+    voidCharge:   (id: string, chargeId: string, data?: { reason?: string }) => service.post(`/folios/${id}/charges/${chargeId}/void`, data || {}),
+    addPayment:   (id: string, data: object) => service.post(`/folios/${id}/payments`, data),
+    settle:       (id: string, data?: { operatorId?: string; force?: boolean }) => service.post(`/folios/${id}/settle`, data || {}),
+    voidFolio:    (id: string) => service.post(`/folios/${id}/void`),
+  },
+
   // 用户管理
   users: {
     getList: (params?: object) => service.get('/users', { params }),
@@ -189,22 +206,55 @@ export const api = {
 
   // 更衣柜管理
   lockers: {
-    getList:  (params?: object) => service.get('/lockers', { params }),
-    getStats: () => service.get('/lockers/stats'),
-    getDetail:(id: string) => service.get(`/lockers/${id}`),
-    create:   (data: object) => service.post('/lockers', data),
-    update:   (id: string, data: object) => service.put(`/lockers/${id}`, data),
-    remove:   (id: string) => service.delete(`/lockers/${id}`),
+    getList:    (params?: object) => service.get('/lockers', { params }),
+    getStats:   () => service.get('/lockers/stats'),
+    getDetail:  (id: string) => service.get(`/lockers/${id}`),
+    create:     (data: object) => service.post('/lockers', data),
+    update:     (id: string, data: object) => service.put(`/lockers/${id}`, data),
+    remove:     (id: string) => service.delete(`/lockers/${id}`),
+    issueKey:   (id: string, data: object) => service.post(`/lockers/${id}/issue-key`, data),
+    returnKey:  (id: string, data?: object) => service.post(`/lockers/${id}/return-key`, data || {}),
+    getUsageLogs: (id: string) => service.get(`/lockers/${id}/usage-logs`),
+  },
+
+  // 更衣柜租赁合同
+  lockerContracts: {
+    getList:      (params?: object) => service.get('/locker-contracts', { params }),
+    getExpiring:  (params?: { clubId?: string; days?: number }) => service.get('/locker-contracts/expiring', { params }),
+    create:       (data: object) => service.post('/locker-contracts', data),
+    update:       (id: string, data: object) => service.put(`/locker-contracts/${id}`, data),
+    renew:        (id: string, data: object) => service.post(`/locker-contracts/${id}/renew`, data),
+    terminate:    (id: string) => service.post(`/locker-contracts/${id}/terminate`),
   },
 
   // 客房管理
   rooms: {
-    getList:  (params?: object) => service.get('/rooms', { params }),
-    getStats: () => service.get('/rooms/stats'),
-    getDetail:(id: string) => service.get(`/rooms/${id}`),
-    create:   (data: object) => service.post('/rooms', data),
-    update:   (id: string, data: object) => service.put(`/rooms/${id}`, data),
-    remove:   (id: string) => service.delete(`/rooms/${id}`),
+    getList:    (params?: object) => service.get('/rooms', { params }),
+    getStats:   () => service.get('/rooms/stats'),
+    getRack:    (params?: object) => service.get('/rooms/rack', { params }),
+    getDetail:  (id: string) => service.get(`/rooms/${id}`),
+    create:     (data: object) => service.post('/rooms', data),
+    update:     (id: string, data: object) => service.put(`/rooms/${id}`, data),
+    remove:     (id: string) => service.delete(`/rooms/${id}`),
+    checkIn:    (id: string, data: object) => service.put(`/rooms/${id}/check-in`, data),
+    checkOut:   (id: string) => service.put(`/rooms/${id}/check-out`),
+  },
+
+  // 客房清洁任务
+  housekeeping: {
+    getTasks:  (params?: object) => service.get('/housekeeping/tasks', { params }),
+    create:    (data: object) => service.post('/housekeeping/tasks', data),
+    start:     (id: string, data?: object) => service.put(`/housekeeping/tasks/${id}/start`, data || {}),
+    complete:  (id: string) => service.put(`/housekeeping/tasks/${id}/complete`),
+    inspect:   (id: string, data?: object) => service.put(`/housekeeping/tasks/${id}/inspect`, data || {}),
+  },
+
+  // 住宿套餐
+  stayPackages: {
+    getList:   (params?: object) => service.get('/stay-packages', { params }),
+    create:    (data: object) => service.post('/stay-packages', data),
+    update:    (id: string, data: object) => service.put(`/stay-packages/${id}`, data),
+    remove:    (id: string) => service.delete(`/stay-packages/${id}`),
   },
 
   // 临时消费卡管理
@@ -215,6 +265,46 @@ export const api = {
     returnCard: (data: { cardId: string }) => service.post('/temp-cards/return', data),
     generate:   (data: { bookingId: string; playerName?: string; clubId?: string }) => service.post('/temp-cards/generate', data),
     remove:     (id: string) => service.delete(`/temp-cards/${id}`),
+  },
+
+  // 餐饮消费点
+  diningOutlets: {
+    getList:   (params?: object) => service.get('/dining-outlets', { params }),
+    create:    (data: object) => service.post('/dining-outlets', data),
+    update:    (id: string, data: object) => service.put(`/dining-outlets/${id}`, data),
+    remove:    (id: string) => service.delete(`/dining-outlets/${id}`),
+  },
+
+  // 餐台
+  tables: {
+    getList:   (params?: object) => service.get('/tables', { params }),
+    create:    (data: object) => service.post('/tables', data),
+    createBatch: (data: object) => service.post('/tables/batch', data),
+    update:    (id: string, data: object) => service.put(`/tables/${id}`, data),
+    remove:    (id: string) => service.delete(`/tables/${id}`),
+  },
+
+  // 菜单
+  menu: {
+    getCategories:    (params?: object) => service.get('/menu/categories', { params }),
+    createCategory:   (data: object) => service.post('/menu/categories', data),
+    updateCategory:   (id: string, data: object) => service.put(`/menu/categories/${id}`, data),
+    removeCategory:   (id: string) => service.delete(`/menu/categories/${id}`),
+    getItems:         (params?: object) => service.get('/menu/items', { params }),
+    createItem:       (data: object) => service.post('/menu/items', data),
+    updateItem:       (id: string, data: object) => service.put(`/menu/items/${id}`, data),
+    soldOut:          (id: string, soldOut: boolean) => service.post(`/menu/items/${id}/sold-out`, { soldOut }),
+    removeItem:       (id: string) => service.delete(`/menu/items/${id}`),
+  },
+
+  // 餐饮订单
+  diningOrders: {
+    getList:       (params?: object) => service.get('/dining-orders', { params }),
+    create:        (data: object) => service.post('/dining-orders', data),
+    updateItems:   (id: string, data: object) => service.put(`/dining-orders/${id}/items`, data),
+    updateItemStatus: (id: string, idx: number, data: object) => service.put(`/dining-orders/${id}/items/${idx}/status`, data),
+    settle:        (id: string, data: object) => service.post(`/dining-orders/${id}/settle`, data),
+    getDailyReport:(params?: object) => service.get('/dining-orders/reports/daily', { params }),
   },
 
   // 系统设置

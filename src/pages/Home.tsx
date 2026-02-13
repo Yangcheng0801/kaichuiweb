@@ -7,7 +7,8 @@ import {
   UserCircle, ChevronDown, Menu, X,
   CalendarCheck, DollarSign, Clock, Users,
   BarChart3, RefreshCw, ArrowRight, TrendingUp,
-  Armchair, BedDouble, CreditCard, Bike
+  Armchair, BedDouble, CreditCard, Bike,
+  Receipt, UtensilsCrossed
 } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -25,7 +26,9 @@ import { api } from '@/utils/api'
 /* ========== 侧边栏导航项 ========== */
 const navItems = [
   { key: 'bookings',        label: '预订管理', path: '/bookings',        icon: CalendarDays, color: 'bg-emerald-50 text-emerald-600' },
+  { key: 'folios',          label: '账单管理', path: '/folios',          icon: Receipt,      color: 'bg-orange-50 text-orange-600' },
   { key: 'resources',       label: '资源管理', path: '/resources',       icon: Layers,       color: 'bg-blue-50 text-blue-600' },
+  { key: 'dining',          label: '餐饮管理', path: '/dining',          icon: UtensilsCrossed, color: 'bg-rose-50 text-rose-600' },
   { key: 'cart-management', label: '球车管理', path: '/cart-management', icon: Car,          color: 'bg-amber-50 text-amber-600' },
   { key: 'players',         label: '球员管理', path: '/players',         icon: UserRound,    color: 'bg-purple-50 text-purple-600' },
   { key: 'settings',        label: '系统设置', path: '/settings',        icon: Settings,     color: 'bg-gray-100 text-gray-600' },
@@ -59,6 +62,12 @@ interface DashboardData {
     rooms:    { total: number; available: number; occupied: number; cleaning: number; maintenance: number }
     caddies:  { total: number; available: number; busy: number; off: number }
     tempCards: { total: number; available: number; inUse: number }
+  }
+  folios?: {
+    openCount: number
+    openBalance: number
+    todaySettledCount: number
+    todaySettledAmount: number
   }
   recentBookings: {
     _id: string; orderNo: string; date: string; teeTime: string
@@ -356,23 +365,26 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* 待处理 */}
+                    {/* 未结算账单 */}
                     <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{kpi?.todayPending ?? 0}</div>
-                          <div className="text-gray-500 text-sm mt-1">待处理</div>
+                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{data?.folios?.openCount ?? kpi?.todayPending ?? 0}</div>
+                          <div className="text-gray-500 text-sm mt-1">未结算账单</div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-400">
-                          <Clock size={24} />
+                        <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
+                          <Receipt size={24} />
                         </div>
                       </div>
-                      <div className="mt-3">
+                      <div className="mt-3 text-xs text-gray-400 flex items-center gap-3">
+                        {(data?.folios?.openBalance ?? 0) > 0 && (
+                          <span className="text-orange-600">待收 ¥{(data?.folios?.openBalance ?? 0).toLocaleString()}</span>
+                        )}
                         <button
-                          onClick={() => navigate('/bookings')}
-                          className="text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+                          onClick={() => navigate('/folios')}
+                          className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1 ml-auto"
                         >
-                          前往处理 <ArrowRight size={12} />
+                          查看 <ArrowRight size={12} />
                         </button>
                       </div>
                     </div>

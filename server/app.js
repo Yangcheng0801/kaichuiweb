@@ -88,6 +88,24 @@ function checkStatusRateLimitMiddleware(req, res, next) {
 // 首页仪表盘路由（聚合 KPI / 资源概况 / 近期动态）
 app.use('/api/dashboard', require('./routes/dashboard')(getDb));
 
+// 统一消费 / 挂账中心（Folio 账单体系）
+app.use('/api/folios', require('./routes/folios')(getDb));
+
+// 更衣柜租赁合同管理
+app.use('/api/locker-contracts', require('./routes/locker-contracts')(getDb));
+
+// 客房清洁任务管理
+app.use('/api/housekeeping', require('./routes/housekeeping')(getDb));
+
+// 住宿套餐管理
+app.use('/api/stay-packages', require('./routes/stay-packages')(getDb));
+
+// 餐饮 POS 系统
+app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
+app.use('/api/tables', require('./routes/tables')(getDb));
+app.use('/api/menu', require('./routes/menu')(getDb));
+app.use('/api/dining-orders', require('./routes/dining-orders')(getDb));
+
 // 订单路由（与主应用共用 getDb，适配腾讯云开发云托管）
 app.use('/api/orders', require('./routes/orders')(getDb));
 

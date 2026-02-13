@@ -137,6 +137,14 @@ module.exports = function (getDb) {
         });
       } catch {}
 
+      // -------- Folio 统计 --------
+      let folioStats = { openCount: 0, openBalance: 0, todaySettledCount: 0, todaySettledAmount: 0 };
+      try {
+        const openFolios = await safeGet(db.collection('folios'), { clubId, status: 'open' });
+        folioStats.openCount = openFolios.length;
+        folioStats.openBalance = Math.round(openFolios.reduce((s, f) => s + (f.balance || 0), 0) * 100) / 100;
+      } catch {}
+
       // -------- 组装返回 --------
       res.json({
         success: true,
@@ -160,6 +168,9 @@ module.exports = function (getDb) {
             caddies:  caddieAll,
             tempCards: tempCardStats,
           },
+
+          // Folio 统计
+          folios: folioStats,
 
           // 近期预订动态
           recentBookings: recentBookings.map(b => ({

@@ -685,6 +685,73 @@ function createBookingsRouter(getDb) {
       const extraUpdate = {};
       if (stayType !== undefined) extraUpdate.stayType = stayType;
 
+      // ── Folio 自动开户 + 初始费用挂账 ──────────────────────────────────────
+      let folioId = oldAssigned.folioId || null;
+      try {
+        if (!folioId) {
+          // 签到时自动创建 Folio
+          const clubId = old.clubId || 'default';
+          const playerName = (old.players && old.players[0]?.name) || old.playerName || '';
+          const cardNo = newAssigned.tempCardNo || oldAssigned.tempCardNo || '';
+
+          // 生成 Folio 编号
+          const d = new Date();
+          const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+          const folioPrefix = `F${dateStr}`;
+          let folioNo;
+          try {
+            const cnt = await db.collection('folios')
+              .where({ clubId, folioNo: db.RegExp({ regexp: `^${folioPrefix}`, options: '' }) })
+              .count();
+            folioNo = `${folioPrefix}${String((cnt.total || 0) + 1).padStart(3, '0')}`;
+          } catch { folioNo = `${folioPrefix}${String(Date.now()).slice(-5)}`; }
+
+          const folio = {
+            clubId, folioNo, folioType: 'booking', status: 'open',
+            bookingId: id, playerId: old.playerId || null,
+            cardNo: cardNo || null, roomNo: null,
+            guestName: playerName, guestPhone: '',
+            totalCharges: 0, totalPayments: 0, balance: 0,
+            settledAt: null, settledBy: null,
+            openedAt: d, closedAt: null, createdAt: d, updatedAt: d,
+          };
+          const folioRes = await db.collection('folios').add(folio);
+          folioId = folioRes.id || folioRes._id;
+          newAssigned.folioId = folioId;
+          newAssigned.folioNo = folioNo;
+          console.log(`[Bookings] 自动创建 Folio ${folioNo} → 预订 ${id}`);
+
+          // 将预订费用作为初始 charges 写入
+          const pricing = old.pricing || {};
+          const charges = [];
+          if (pricing.greenFee > 0)     charges.push({ chargeType: 'green_fee',  description: '果岭费', amount: pricing.greenFee });
+          if (pricing.caddyFee > 0)     charges.push({ chargeType: 'caddy_fee',  description: '球童费', amount: pricing.caddyFee });
+          if (pricing.cartFee > 0)      charges.push({ chargeType: 'cart_fee',   description: '球车费', amount: pricing.cartFee });
+          if (pricing.insuranceFee > 0) charges.push({ chargeType: 'insurance',  description: '保险费', amount: pricing.insuranceFee });
+          if (pricing.roomFee > 0)      charges.push({ chargeType: 'room',       description: '客房费', amount: pricing.roomFee });
+          if (pricing.otherFee > 0)     charges.push({ chargeType: 'other',      description: '其他费用', amount: pricing.otherFee });
+
+          for (const c of charges) {
+            await db.collection('folio_charges').add({
+              clubId, folioId,
+              chargeType: c.chargeType, chargeSource: '预订系统', sourceId: id,
+              description: c.description, amount: c.amount, quantity: 1, unitPrice: c.amount,
+              operatorId: null, operatorName: '', chargeTime: d, status: 'posted', voidReason: null, createdAt: d,
+            });
+          }
+
+          // 更新 folio 汇总
+          if (charges.length > 0) {
+            const totalCharges = charges.reduce((s, c) => s + c.amount, 0);
+            await db.collection('folios').doc(folioId).update({
+              totalCharges: Math.round(totalCharges * 100) / 100,
+              balance: Math.round(totalCharges * 100) / 100,
+              updatedAt: new Date(),
+            });
+          }
+        }
+      } catch (e) { console.warn('[Bookings] Folio 开户/挂账失败:', e.message); }
+
       await db.collection('bookings').doc(id).update({
         data: {
           assignedResources: newAssigned,
@@ -696,7 +763,7 @@ function createBookingsRouter(getDb) {
         }
       });
 
-      res.json({ success: true, message: '资源分配更新成功', data: newAssigned });
+      res.json({ success: true, message: '资源分配更新成功', data: newAssigned, folioId });
     } catch (error) {
       console.error('[Bookings] 更新资源分配失败:', error);
       res.status(500).json({ success: false, error: error.message });
