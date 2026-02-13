@@ -348,4 +348,38 @@ export const api = {
     remove:   (id: string) => service.delete(`/identity-types/${id}`),
     seed:     (data?: { clubId?: string }) => service.post('/identity-types/seed', data || {}),
   },
+
+  // 报表与数据分析
+  reports: {
+    getRevenue:   (params?: object) => service.get('/reports/revenue', { params }),
+    getBookings:  (params?: object) => service.get('/reports/bookings', { params }),
+    getPlayers:   (params?: object) => service.get('/reports/players', { params }),
+    getResources: (params?: object) => service.get('/reports/resources', { params }),
+  },
+
+  // RBAC 角色与权限管理
+  roles: {
+    getList:    (params?: object) => service.get('/roles', { params }),
+    getModules: () => service.get('/roles/modules'),
+    create:     (data: object) => service.post('/roles', data),
+    update:     (id: string, data: object) => service.put(`/roles/${id}`, data),
+    remove:     (id: string) => service.delete(`/roles/${id}`),
+    seed:       (data?: object) => service.post('/roles/seed', data || {}),
+  },
+
+  // 审计日志
+  auditLogs: {
+    getList:  (params?: object) => service.get('/audit-logs', { params }),
+    getStats: (params?: object) => service.get('/audit-logs/stats', { params }),
+    create:   (data: object) => service.post('/audit-logs', data),
+  },
+
+  // 日结/夜审
+  dailyClose: {
+    getPreview:       (params?: object) => service.get('/daily-close/preview', { params }),
+    autoNoShow:       (data: object) => service.post('/daily-close/auto-noshow', data),
+    execute:          (data: object) => service.post('/daily-close/execute', data),
+    getReports:       (params?: object) => service.get('/daily-close/reports', { params }),
+    getReportDetail:  (date: string, params?: object) => service.get(`/daily-close/reports/${date}`, { params }),
+  },
 }

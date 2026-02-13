@@ -13,6 +13,8 @@ const CartManagement = lazy(() => import('@/pages/CartManagement'))
 const Players        = lazy(() => import('@/pages/Players'))
 const Folios         = lazy(() => import('@/pages/Folios'))
 const Dining         = lazy(() => import('@/pages/Dining'))
+const Reports        = lazy(() => import('@/pages/Reports'))
+const DailyClose     = lazy(() => import('@/pages/DailyClose'))
 
 // 受保护路由：未登录跳转到 /login
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -103,6 +105,22 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <Dining />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/daily-close"
+          element={
+            <ProtectedRoute>
+              <DailyClose />
             </ProtectedRoute>
           }
         />

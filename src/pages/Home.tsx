@@ -8,7 +8,7 @@ import {
   CalendarCheck, DollarSign, Clock, Users,
   BarChart3, RefreshCw, ArrowRight, TrendingUp,
   Armchair, BedDouble, CreditCard, Bike,
-  Receipt, UtensilsCrossed
+  Receipt, UtensilsCrossed, Moon
 } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -31,6 +31,8 @@ const navItems = [
   { key: 'dining',          label: '餐饮管理', path: '/dining',          icon: UtensilsCrossed, color: 'bg-rose-50 text-rose-600' },
   { key: 'cart-management', label: '球车管理', path: '/cart-management', icon: Car,          color: 'bg-amber-50 text-amber-600' },
   { key: 'players',         label: '球员管理', path: '/players',         icon: UserRound,    color: 'bg-purple-50 text-purple-600' },
+  { key: 'reports',         label: '报表分析', path: '/reports',         icon: BarChart3,    color: 'bg-cyan-50 text-cyan-600' },
+  { key: 'daily-close',     label: '日结/夜审', path: '/daily-close',     icon: Moon,         color: 'bg-indigo-50 text-indigo-600' },
   { key: 'settings',        label: '系统设置', path: '/settings',        icon: Settings,     color: 'bg-gray-100 text-gray-600' },
 ]
 

@@ -109,6 +109,18 @@ app.use('/api/special-dates', require('./routes/special-dates')(getDb));
 // 身份类型管理（球员身份：散客/嘉宾/会员/青少年/教练/长者/礼遇/员工等）
 app.use('/api/identity-types', require('./routes/identity-types')(getDb));
 
+// 报表与数据分析
+app.use('/api/reports', require('./routes/reports')(getDb));
+
+// RBAC 角色与权限管理
+app.use('/api/roles', require('./routes/roles')(getDb));
+
+// 审计日志
+app.use('/api/audit-logs', require('./routes/audit-logs')(getDb));
+
+// 日结/夜审
+app.use('/api/daily-close', require('./routes/daily-close')(getDb));
+
 // 餐饮 POS 系统
 app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
 app.use('/api/tables', require('./routes/tables')(getDb));
