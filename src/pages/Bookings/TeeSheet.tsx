@@ -122,7 +122,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
   const [consumeMode, setConsumeMode] = useState<'existing' | 'physical' | 'virtual'>('existing')
   const [selectedCardId, setSelectedCardId] = useState('')
   // 住宿类型
-  const [stayType, setStayType] = useState(booking.stayType || 'day_trip')
+  const [stayType, setStayType] = useState(booking.stayType || 'day')
   // 球车
   const [cartNo, setCartNo] = useState(existing?.cartNo || booking.cartNo || '')
   // 球童
@@ -242,7 +242,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
       }
 
       // 客房
-      if (stayType !== 'day_trip' && selectedRoomId) {
+      if (stayType !== 'day' && selectedRoomId) {
         const room = availableRooms.find(r => r._id === selectedRoomId)
         resources.rooms = [{
           roomId: selectedRoomId,
@@ -393,9 +393,11 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             </h3>
             <div className="flex gap-2">
               {[
-                { value: 'day_trip',  label: '当天往返' },
-                { value: 'overnight', label: '两球一晚' },
-                { value: 'stay_only', label: '仅住宿' },
+                { value: 'day',         label: '日归' },
+                { value: 'overnight_1', label: '一晚' },
+                { value: 'overnight_2', label: '两晚' },
+                { value: 'overnight_3', label: '三晚' },
+                { value: 'custom',      label: '自定义' },
               ].map(opt => (
                 <button key={opt.value} onClick={() => setStayType(opt.value)}
                   className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${stayType === opt.value ? 'bg-emerald-50 border-emerald-400 text-emerald-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
@@ -496,7 +498,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
           </section>
 
           {/* 6. 客房分配（两球一晚 / 仅住宿时显示） */}
-          {stayType !== 'day_trip' && (
+          {stayType !== 'day' && (
             <section>
               <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <DoorOpen size={14} /> 客房分配

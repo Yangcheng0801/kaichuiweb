@@ -286,6 +286,75 @@ function createSettingsRouter(getDb) {
     }
   });
 
+  // ─── 团队定价规则 ─────────────────────────────────────────────────────────────
+
+  const DEFAULT_TEAM_PRICING = {
+    enabled: true,
+    tiers: [
+      { minPlayers: 8,  maxPlayers: 15,  discountRate: 0.9,  label: '小型团队9折' },
+      { minPlayers: 16, maxPlayers: 23,  discountRate: 0.85, label: '中型团队85折' },
+      { minPlayers: 24, maxPlayers: 35,  discountRate: 0.8,  label: '大型团队8折' },
+      { minPlayers: 36, maxPlayers: 999, discountRate: 0.75, label: '赛事级75折' },
+    ],
+    floorPriceRate: 0.6,  // 底价保护：折扣后价格不低于散客价的 60%
+  };
+
+  /**
+   * GET /api/settings/team-pricing
+   * 返回团队定价规则
+   */
+  router.get('/team-pricing', async (req, res) => {
+    try {
+      const db = getDb();
+      const clubId = req.query.clubId || 'default';
+
+      const doc = await findOne(db, 'team_pricing', clubId);
+      const data = doc
+        ? { ...DEFAULT_TEAM_PRICING, ...doc }
+        : { ...DEFAULT_TEAM_PRICING, clubId };
+
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error('[Settings] 获取团队定价失败:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  /**
+   * PUT /api/settings/team-pricing
+   * 更新团队定价规则（upsert）
+   */
+  router.put('/team-pricing', async (req, res) => {
+    try {
+      const db = getDb();
+      const clubId = req.body.clubId || req.query.clubId || 'default';
+
+      const { _id, createTime, ...fields } = req.body;
+
+      const existing = await findOne(db, 'team_pricing', clubId);
+
+      if (existing) {
+        const updateData = { ...fields, clubId, updateTime: new Date() };
+        delete updateData._id;
+        await db.collection('team_pricing').doc(existing._id).update({ data: updateData });
+        res.json({ success: true, message: '团队定价规则更新成功' });
+      } else {
+        const insertData = {
+          ...DEFAULT_TEAM_PRICING,
+          ...fields,
+          clubId,
+          createTime: new Date(),
+          updateTime: new Date(),
+        };
+        await db.collection('team_pricing').add({ data: insertData });
+        res.json({ success: true, message: '团队定价规则创建成功' });
+      }
+    } catch (error) {
+      console.error('[Settings] 更新团队定价失败:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   return router;
 }
 

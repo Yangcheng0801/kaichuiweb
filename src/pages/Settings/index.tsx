@@ -1,16 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Building2, CalendarClock, BadgeDollarSign } from 'lucide-react'
+import { ArrowLeft, Building2, CalendarClock, BadgeDollarSign, Grid3X3, Calendar, Users } from 'lucide-react'
 import ClubInfo from './ClubInfo'
 import BookingRules from './BookingRules'
 import PricingRules from './PricingRules'
+import RateSheets from './RateSheets'
+import SpecialDates from './SpecialDates'
+import TeamPricing from './TeamPricing'
 
-type TabKey = 'club' | 'booking' | 'pricing'
+type TabKey = 'club' | 'booking' | 'pricing' | 'rate-sheets' | 'special-dates' | 'team-pricing'
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'club',    label: '球会信息', icon: <Building2 size={16} /> },
-  { key: 'booking', label: '预订规则', icon: <CalendarClock size={16} /> },
-  { key: 'pricing', label: '价格规则', icon: <BadgeDollarSign size={16} /> },
+  { key: 'club',          label: '球会信息', icon: <Building2 size={16} /> },
+  { key: 'booking',       label: '预订规则', icon: <CalendarClock size={16} /> },
+  { key: 'pricing',       label: '价格规则', icon: <BadgeDollarSign size={16} /> },
+  { key: 'rate-sheets',   label: '价格矩阵', icon: <Grid3X3 size={16} /> },
+  { key: 'special-dates', label: '日历管理', icon: <Calendar size={16} /> },
+  { key: 'team-pricing',  label: '团队定价', icon: <Users size={16} /> },
 ]
 
 export default function Settings() {
@@ -18,9 +24,15 @@ export default function Settings() {
   const [activeTab, setActiveTab] = useState<TabKey>('club')
 
   const renderContent = () => {
-    if (activeTab === 'club') return <ClubInfo />
-    if (activeTab === 'booking') return <BookingRules />
-    return <PricingRules />
+    switch (activeTab) {
+      case 'club':          return <ClubInfo />
+      case 'booking':       return <BookingRules />
+      case 'pricing':       return <PricingRules />
+      case 'rate-sheets':   return <RateSheets />
+      case 'special-dates': return <SpecialDates />
+      case 'team-pricing':  return <TeamPricing />
+      default:              return <ClubInfo />
+    }
   }
 
   return (

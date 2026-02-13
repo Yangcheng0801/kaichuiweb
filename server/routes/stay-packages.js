@@ -47,6 +47,13 @@ function createStayPackagesRouter(getDb) {
           basePrice: Number(pricing.basePrice || 0),
           memberPrice: Number(pricing.memberPrice || 0),
           weekendSurcharge: Number(pricing.weekendSurcharge || 0),
+          // v2: 按身份分价（可选，有值时覆盖 basePrice/memberPrice）
+          priceWalkin: Number(pricing.priceWalkin || pricing.basePrice || 0),
+          priceGuest: Number(pricing.priceGuest || pricing.basePrice || 0),
+          priceMember1: Number(pricing.priceMember1 || pricing.memberPrice || 0),
+          priceMember2: Number(pricing.priceMember2 || pricing.memberPrice || 0),
+          priceMember3: Number(pricing.priceMember3 || pricing.memberPrice || 0),
+          priceMember4: Number(pricing.priceMember4 || pricing.memberPrice || 0),
         },
         status: 'active',
         validFrom: validFrom || now.toISOString().slice(0, 10),

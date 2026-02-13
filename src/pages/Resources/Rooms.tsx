@@ -83,6 +83,13 @@ export default function Rooms() {
   const [pkgRounds, setPkgRounds] = useState('2')
   const [pkgBasePrice, setPkgBasePrice] = useState('0')
   const [pkgMemberPrice, setPkgMemberPrice] = useState('0')
+  // v2: 按身份分价
+  const [pkgPriceGuest, setPkgPriceGuest] = useState('')
+  const [pkgPriceMember1, setPkgPriceMember1] = useState('')
+  const [pkgPriceMember2, setPkgPriceMember2] = useState('')
+  const [pkgPriceMember3, setPkgPriceMember3] = useState('')
+  const [pkgPriceMember4, setPkgPriceMember4] = useState('')
+  const [pkgWeekendSurcharge, setPkgWeekendSurcharge] = useState('0')
 
   /* ---------- 加载 ---------- */
   const loadRooms = async () => {
@@ -161,7 +168,16 @@ export default function Rooms() {
       await api.stayPackages.create({
         packageName: pkgName.trim(), packageCode: pkgCode, description: pkgDesc,
         includes: { nights: Number(pkgNights), rounds: Number(pkgRounds), breakfast: true, dinner: false, cartIncluded: false, caddyIncluded: false },
-        pricing: { basePrice: Number(pkgBasePrice), memberPrice: Number(pkgMemberPrice), weekendSurcharge: 0 },
+        pricing: {
+          basePrice: Number(pkgBasePrice), memberPrice: Number(pkgMemberPrice),
+          weekendSurcharge: Number(pkgWeekendSurcharge) || 0,
+          priceWalkin: Number(pkgBasePrice) || 0,
+          priceGuest: Number(pkgPriceGuest || pkgBasePrice) || 0,
+          priceMember1: Number(pkgPriceMember1 || pkgMemberPrice) || 0,
+          priceMember2: Number(pkgPriceMember2 || pkgMemberPrice) || 0,
+          priceMember3: Number(pkgPriceMember3 || pkgMemberPrice) || 0,
+          priceMember4: Number(pkgPriceMember4 || pkgMemberPrice) || 0,
+        },
       })
       toast.success('套餐创建成功'); setShowPkgForm(false); setPkgName(''); loadPackages()
     } catch { /* */ }
@@ -473,9 +489,16 @@ export default function Rooms() {
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">住宿晚数</label><input type="number" value={pkgNights} onChange={e => setPkgNights(e.target.value)} min="1" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">果岭轮数</label><input type="number" value={pkgRounds} onChange={e => setPkgRounds(e.target.value)} min="0" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">标准价</label><input type="number" value={pkgBasePrice} onChange={e => setPkgBasePrice(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">会员价</label><input type="number" value={pkgMemberPrice} onChange={e => setPkgMemberPrice(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+              <div className="grid grid-cols-3 gap-3">
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">散客价</label><input type="number" value={pkgBasePrice} onChange={e => setPkgBasePrice(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+                <div><label className="block text-xs font-medium text-blue-600 mb-1">嘉宾价</label><input type="number" value={pkgPriceGuest} onChange={e => setPkgPriceGuest(e.target.value)} placeholder={pkgBasePrice} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">周末加价</label><input type="number" value={pkgWeekendSurcharge} onChange={e => setPkgWeekendSurcharge(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                <div><label className="block text-xs font-medium text-emerald-600 mb-1">普通会员</label><input type="number" value={pkgPriceMember1} onChange={e => setPkgPriceMember1(e.target.value)} placeholder={pkgMemberPrice || pkgBasePrice} className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+                <div><label className="block text-xs font-medium text-yellow-600 mb-1">金卡</label><input type="number" value={pkgPriceMember2} onChange={e => setPkgPriceMember2(e.target.value)} placeholder={pkgMemberPrice || pkgBasePrice} className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+                <div><label className="block text-xs font-medium text-purple-600 mb-1">钻石</label><input type="number" value={pkgPriceMember3} onChange={e => setPkgPriceMember3(e.target.value)} placeholder={pkgMemberPrice || pkgBasePrice} className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+                <div><label className="block text-xs font-medium text-rose-600 mb-1">白金</label><input type="number" value={pkgPriceMember4} onChange={e => setPkgPriceMember4(e.target.value)} placeholder={pkgMemberPrice || pkgBasePrice} className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
               </div>
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-gray-100">

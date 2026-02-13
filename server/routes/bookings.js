@@ -186,6 +186,8 @@ function createBookingsRouter(getDb) {
 
   // ─── 工具：构建初始 pricing 对象 ─────────────────────────────────────────────
   function buildPricing(body) {
+    const totalFee = Number(body.totalFee || 0);
+    const paidFee  = Number(body.paidFee  || 0);
     return {
       greenFee:     Number(body.greenFee     || 0),  // 果岭费
       caddyFee:     Number(body.caddyFee     || 0),  // 球童费
@@ -194,9 +196,11 @@ function createBookingsRouter(getDb) {
       roomFee:      Number(body.roomFee      || 0),  // 客房费
       otherFee:     Number(body.otherFee     || 0),  // 其他费用
       discount:     Number(body.discount     || 0),  // 折扣金额（正数表示减免）
-      totalFee:     Number(body.totalFee     || 0),  // 应收合计
-      paidFee:      Number(body.paidFee      || 0),  // 已收金额
-      pendingFee:   Number(body.totalFee     || 0),  // 待收金额（totalFee - paidFee）
+      totalFee,                                       // 应收合计
+      paidFee,                                        // 已收金额
+      pendingFee:   totalFee - paidFee,               // 待收金额（修复 bug: 旧版直接用 totalFee）
+      // v2: 定价引擎追踪字段
+      priceSource:  body.priceSource || 'manual',     // auto | manual | package
     };
   }
 
@@ -278,13 +282,15 @@ function createBookingsRouter(getDb) {
   });
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // POST /api/bookings  创建预订（v2：自动生成 orderNo / pricing / statusHistory）
+  // POST /api/bookings  创建预订（v3：自动定价引擎 + 团队支持 + 套餐关联）
   //
   // Body 必填：date, teeTime, courseId, courseName, players(array)
   // Body 可选：caddyId, caddyName, caddyFee, cartId, cartNo, cartFee,
   //            greenFee, insuranceFee, roomFee, otherFee, discount, totalFee,
   //            note, source, createdBy, createdByName, clubId,
-  //            stayType（day/overnight_1/overnight_2/custom）
+  //            stayType（day/overnight_1/overnight_2/overnight_3/custom）
+  //            packageId, priceOverride(bool), priceSource(auto/manual/package)
+  //            teamBooking: { isTeam, teamName, totalPlayers, contactName, contactPhone }
   // ══════════════════════════════════════════════════════════════════════════════
   router.post('/', async (req, res) => {
     try {
@@ -305,14 +311,57 @@ function createBookingsRouter(getDb) {
         note       = '', source    = 'staff',
         createdBy  = '', createdByName = '',
         clubId     = 'default',
-        stayType   = 'day',   // day | overnight_1 | overnight_2 | custom
+        stayType   = 'day',   // day | overnight_1 | overnight_2 | overnight_3 | custom
+        packageId  = null,    // 套餐ID（可选）
+        priceOverride = false, // true = 前端手动覆盖价格，不走引擎
+        holes      = 18,
+        needCaddy  = false,
+        needCart    = false,
+        teamBooking = null,   // { isTeam, teamName, totalPlayers, contactName, contactPhone }
       } = req.body;
 
       // 生成订单号
       const orderNo = await generateOrderNo(db, date);
 
-      // 构建费用结构
-      const pricing = buildPricing(req.body);
+      // ── 定价引擎：自动算价或手动覆盖 ─────────────────────────────────────────
+      let pricing;
+      let pricingResult = null;
+
+      if (priceOverride) {
+        // 前端手动填写，直接透传
+        pricing = buildPricing({ ...req.body, priceSource: 'manual' });
+      } else {
+        // 调用定价引擎自动计算
+        try {
+          const { calculateBookingPrice } = require('../utils/pricing-engine');
+          pricingResult = await calculateBookingPrice(db, {
+            clubId, date, teeTime, courseId, holes,
+            players, needCaddy, needCart, packageId,
+            totalPlayers: teamBooking ? (teamBooking.totalPlayers || players.length) : players.length,
+          });
+
+          if (pricingResult && pricingResult.success) {
+            pricing = buildPricing({
+              greenFee:     pricingResult.greenFee || 0,
+              caddyFee:     pricingResult.caddyFee || 0,
+              cartFee:      pricingResult.cartFee  || 0,
+              insuranceFee: pricingResult.insuranceFee || 0,
+              roomFee:      pricingResult.roomFee  || 0,
+              otherFee:     pricingResult.otherFee || 0,
+              discount:     pricingResult.discount || 0,
+              totalFee:     pricingResult.totalFee || 0,
+              priceSource:  pricingResult.priceSource || 'auto',
+            });
+          } else {
+            // 引擎返回失败（例如封场），但前端未覆盖 → 用手动兜底
+            console.warn('[Bookings] 定价引擎未命中规则，使用手动价格:', pricingResult?.error);
+            pricing = buildPricing({ ...req.body, priceSource: 'manual' });
+          }
+        } catch (engineErr) {
+          console.warn('[Bookings] 定价引擎异常，降级为手动价格:', engineErr.message);
+          pricing = buildPricing({ ...req.body, priceSource: 'manual' });
+        }
+      }
 
       // 初始状态历史
       const statusHistory = [{
@@ -328,14 +377,36 @@ function createBookingsRouter(getDb) {
         orderNo,
         // 核心信息
         date, teeTime, courseId, courseName,
-        players,          // [{ name, type: 'member'|'guest', phone?, memberId?, playerNo? }]
+        players,          // [{ name, type/memberType, memberLevel?, phone?, memberId?, playerNo? }]
         playerCount: players.length,
+        holes: Number(holes) || 18,
         // 资源（预订阶段填写，到场后可在 assignedResources 中细化）
         caddyId, caddyName,
         cartId,  cartNo,
         // 费用
         pricing,
         totalFee: pricing.totalFee,   // 冗余一份方便发球表显示
+        // 定价追踪
+        priceSource: pricing.priceSource || 'manual',
+        pricingSnapshot: pricingResult ? {
+          dayType: pricingResult.dayType,
+          timeSlot: pricingResult.timeSlot,
+          rateSheetId: pricingResult.rateSheetId,
+          playerBreakdown: pricingResult.playerBreakdown,
+          teamDiscount: pricingResult.teamDiscount,
+          packageInfo: pricingResult.package || null,
+        } : null,
+        // 套餐关联
+        packageId: packageId || null,
+        // 团队信息
+        teamBooking: teamBooking ? {
+          isTeam: !!teamBooking.isTeam,
+          teamName: teamBooking.teamName || '',
+          totalPlayers: Number(teamBooking.totalPlayers) || players.length,
+          contactName: teamBooking.contactName || '',
+          contactPhone: teamBooking.contactPhone || '',
+          discountApplied: pricingResult?.teamDiscount?.discountRate || 1,
+        } : null,
         // 支付记录（收银台完成后追加）
         payments: [],
         // 状态
@@ -353,7 +424,7 @@ function createBookingsRouter(getDb) {
           bagStorage: [],   // [{ bagNo, location }]
           parking:    null, // { plateNo, companions: [] }
         },
-        // 住宿类型
+        // 住宿类型（统一枚举：day | overnight_1 | overnight_2 | overnight_3 | custom）
         stayType,
         // 元数据
         source,       // 'staff' | 'miniprogram'
@@ -370,7 +441,7 @@ function createBookingsRouter(getDb) {
       // 占用球童
       if (caddyId) await occupyCaddy(db, caddyId);
 
-      console.log(`[Bookings] 预订创建成功: ${orderNo}`);
+      console.log(`[Bookings] 预订创建成功: ${orderNo}, 定价来源: ${pricing.priceSource}`);
       res.json({ success: true, data: { _id: result._id, ...bookingData }, message: '预订创建成功' });
     } catch (error) {
       console.error('[Bookings] 创建预订失败:', error);

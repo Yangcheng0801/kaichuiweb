@@ -100,6 +100,12 @@ app.use('/api/housekeeping', require('./routes/housekeeping')(getDb));
 // 住宿套餐管理
 app.use('/api/stay-packages', require('./routes/stay-packages')(getDb));
 
+// 价格矩阵管理（定价引擎核心数据）
+app.use('/api/rate-sheets', require('./routes/rate-sheets')(getDb));
+
+// 特殊日期管理（节假日/会员日/赛事日/封场日）
+app.use('/api/special-dates', require('./routes/special-dates')(getDb));
+
 // 餐饮 POS 系统
 app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
 app.use('/api/tables', require('./routes/tables')(getDb));

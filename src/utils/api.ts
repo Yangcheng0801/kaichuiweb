@@ -315,5 +315,28 @@ export const api = {
     updateBookingRules: (data: object) => service.put('/settings/booking-rules', data),
     getPricingRules: (clubId = 'default') => service.get('/settings/pricing-rules', { params: { clubId } }),
     updatePricingRules: (data: object) => service.put('/settings/pricing-rules', data),
-  }
+    getTeamPricing: (clubId = 'default') => service.get('/settings/team-pricing', { params: { clubId } }),
+    updateTeamPricing: (data: object) => service.put('/settings/team-pricing', data),
+  },
+
+  // 价格矩阵管理（定价引擎核心数据）
+  rateSheets: {
+    getList:    (params?: object) => service.get('/rate-sheets', { params }),
+    getMatrix:  (params?: object) => service.get('/rate-sheets/matrix', { params }),
+    create:     (data: object) => service.post('/rate-sheets', data),
+    batch:      (data: object) => service.post('/rate-sheets/batch', data),
+    update:     (id: string, data: object) => service.put(`/rate-sheets/${id}`, data),
+    remove:     (id: string) => service.delete(`/rate-sheets/${id}`),
+    calculate:  (data: object) => service.post('/rate-sheets/calculate', data),
+  },
+
+  // 特殊日期管理（节假日/会员日/赛事日/封场日）
+  specialDates: {
+    getList:      (params?: object) => service.get('/special-dates', { params }),
+    create:       (data: object) => service.post('/special-dates', data),
+    batch:        (data: object) => service.post('/special-dates/batch', data),
+    update:       (id: string, data: object) => service.put(`/special-dates/${id}`, data),
+    remove:       (id: string) => service.delete(`/special-dates/${id}`),
+    getHolidays:  (year?: number) => service.get('/special-dates/holidays', { params: { year } }),
+  },
 }
