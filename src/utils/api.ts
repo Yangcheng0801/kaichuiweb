@@ -418,4 +418,31 @@ export const api = {
     expire:     (data?: object) => service.post('/points/expire', data || {}),
     getStats:   (params?: object) => service.get('/points/stats', { params }),
   },
+
+  // 赛事与活动管理
+  tournaments: {
+    getList:          (params?: object) => service.get('/tournaments', { params }),
+    getDetail:        (id: string) => service.get(`/tournaments/${id}`),
+    create:           (data: object) => service.post('/tournaments', data),
+    update:           (id: string, data: object) => service.put(`/tournaments/${id}`, data),
+    updateStatus:     (id: string, data: { status: string }) => service.put(`/tournaments/${id}/status`, data),
+    delete:           (id: string) => service.delete(`/tournaments/${id}`),
+    getStats:         (params?: object) => service.get('/tournaments/stats/summary', { params }),
+    // 报名
+    getRegistrations: (id: string, params?: object) => service.get(`/tournaments/${id}/registrations`, { params }),
+    register:         (id: string, data: object) => service.post(`/tournaments/${id}/register`, data),
+    updateReg:        (id: string, regId: string, data: object) => service.put(`/tournaments/${id}/registrations/${regId}`, data),
+    cancelReg:        (id: string, regId: string) => service.delete(`/tournaments/${id}/registrations/${regId}`),
+    // 分组
+    getGroups:        (id: string) => service.get(`/tournaments/${id}/groups`),
+    autoGroup:        (id: string, data: object) => service.post(`/tournaments/${id}/groups/auto`, data),
+    updateGroup:      (id: string, groupId: string, data: object) => service.put(`/tournaments/${id}/groups/${groupId}`, data),
+    // 成绩
+    getScores:        (id: string, params?: object) => service.get(`/tournaments/${id}/scores`, { params }),
+    submitScore:      (id: string, data: object) => service.post(`/tournaments/${id}/scores`, data),
+    submitScoreBatch: (id: string, data: { scores: object[] }) => service.post(`/tournaments/${id}/scores/batch`, data),
+    // 排行榜 & 颁奖
+    getLeaderboard:   (id: string, params?: object) => service.get(`/tournaments/${id}/leaderboard`, { params }),
+    finalize:         (id: string) => service.post(`/tournaments/${id}/finalize`),
+  },
 }
