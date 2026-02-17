@@ -27,6 +27,16 @@ module.exports = function (getDb) {
     return req.query.clubId || req.body?.clubId || DEFAULT_CLUB_ID;
   }
 
+  // 通知引擎（惰性加载）
+  let _notifyEngine = null;
+  function getNotifyEngine() {
+    if (!_notifyEngine) {
+      try { _notifyEngine = require('../utils/notification-engine'); }
+      catch (e) { console.warn('[Tournaments] notification-engine 不可用:', e.message); }
+    }
+    return _notifyEngine;
+  }
+
   // ─── 赛事状态常量 ─────────────────────────────────────────────────────
   const STATUS = {
     DRAFT:         'draft',
@@ -304,6 +314,30 @@ module.exports = function (getDb) {
       await db.collection('tournaments').doc(req.params.id).update({
         data: { status: newStatus, updatedAt: new Date().toISOString() }
       });
+
+      // ── 通知：赛事状态变更 ────────────────────────────────────────────
+      try {
+        const ne = getNotifyEngine();
+        if (ne) {
+          const clubId = getClubId(req);
+          const statusTypeMap = {
+            [STATUS.REGISTRATION]:  ne.NOTIFICATION_TYPES.TOURNAMENT_REG_OPEN,
+            [STATUS.CLOSED]:        ne.NOTIFICATION_TYPES.TOURNAMENT_REG_CLOSE,
+            [STATUS.GROUPING]:      ne.NOTIFICATION_TYPES.TOURNAMENT_GROUPED,
+            [STATUS.IN_PROGRESS]:   ne.NOTIFICATION_TYPES.TOURNAMENT_STARTED,
+            [STATUS.COMPLETED]:     ne.NOTIFICATION_TYPES.TOURNAMENT_RESULTS,
+          };
+          const notifType = statusTypeMap[newStatus];
+          if (notifType) {
+            // 获取已报名球员ID列表
+            const regRes = await db.collection('tournament_registrations')
+              .where({ tournamentId: req.params.id, status: 'confirmed' })
+              .limit(500).get();
+            const playerIds = (regRes.data || []).map(r => r.playerId).filter(Boolean);
+            await ne.notifyTournament(db, clubId, notifType, { ...old, _id: req.params.id }, playerIds);
+          }
+        }
+      } catch (_ne) { /* 通知失败不影响主流程 */ }
 
       console.log(`[Tournaments] 赛事 ${old.tournamentNo} 状态: ${old.status} → ${newStatus}`);
       res.json({ success: true, message: `状态已变更为 ${newStatus}` });

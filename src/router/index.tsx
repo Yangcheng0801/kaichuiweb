@@ -17,6 +17,7 @@ const Reports        = lazy(() => import('@/pages/Reports'))
 const DailyClose     = lazy(() => import('@/pages/DailyClose'))
 const Memberships    = lazy(() => import('@/pages/Memberships'))
 const Tournaments    = lazy(() => import('@/pages/Tournaments'))
+const Notifications  = lazy(() => import('@/pages/Notifications'))
 
 // 受保护路由：未登录跳转到 /login
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -139,6 +140,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <Tournaments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Notifications />
             </ProtectedRoute>
           }
         />

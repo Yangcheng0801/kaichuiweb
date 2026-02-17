@@ -133,6 +133,9 @@ app.use('/api/points', require('./routes/points')(getDb));
 // 赛事与活动管理
 app.use('/api/tournaments', require('./routes/tournaments')(getDb));
 
+// 通知中心
+app.use('/api/notifications', require('./routes/notifications')(getDb));
+
 // 餐饮 POS 系统
 app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
 app.use('/api/tables', require('./routes/tables')(getDb));

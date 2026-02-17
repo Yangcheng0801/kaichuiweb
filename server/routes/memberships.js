@@ -8,6 +8,16 @@ module.exports = function (getDb) {
   const router = express.Router();
   const DEFAULT_CLUB_ID = '80a8bd4f680c3bb901e1269130e92a37';
 
+  // 通知引擎（惰性加载）
+  let _notifyEngine = null;
+  function getNotifyEngine() {
+    if (!_notifyEngine) {
+      try { _notifyEngine = require('../utils/notification-engine'); }
+      catch (e) { console.warn('[Memberships] notification-engine 不可用:', e.message); }
+    }
+    return _notifyEngine;
+  }
+
   function getClubId(req) {
     return req.query.clubId || req.body?.clubId || req.clubId || DEFAULT_CLUB_ID;
   }
@@ -198,6 +208,15 @@ module.exports = function (getDb) {
         }
       }
 
+      // ── 通知：会籍激活 ──────────────────────────────────────────────────
+      try {
+        const ne = getNotifyEngine();
+        if (ne) {
+          await ne.notifyMembership(db, clubId, ne.NOTIFICATION_TYPES.MEMBERSHIP_ACTIVATED,
+            { ...membership, _id: result._id }, playerId);
+        }
+      } catch (_ne) { /* 通知失败不影响主流程 */ }
+
       res.json({ success: true, data: { _id: result._id, membershipNo }, message: '开卡成功' });
     } catch (err) {
       console.error('[Memberships] 开卡失败:', err);
@@ -376,12 +395,22 @@ module.exports = function (getDb) {
             data: { status: 'expired', updatedAt: now.toISOString() }
           });
           expiredCount++;
+          // 通知：已过期
+          try {
+            const ne = getNotifyEngine();
+            if (ne) await ne.notifyMembership(db, clubId, ne.NOTIFICATION_TYPES.MEMBERSHIP_EXPIRED, m, m.playerId);
+          } catch (_) {}
         } else if (m.status === 'active' && end <= in30Days) {
           // 即将过期
           await db.collection('memberships').doc(m._id).update({
             data: { status: 'expiring', updatedAt: now.toISOString() }
           });
           expiringCount++;
+          // 通知：即将过期
+          try {
+            const ne = getNotifyEngine();
+            if (ne) await ne.notifyMembership(db, clubId, ne.NOTIFICATION_TYPES.MEMBERSHIP_EXPIRING, m, m.playerId);
+          } catch (_) {}
         }
       }
 

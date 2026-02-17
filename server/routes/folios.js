@@ -10,6 +10,16 @@ const express = require('express');
 module.exports = function (getDb) {
   const router = express.Router();
 
+  /* ========== 通知引擎（惰性加载） ========== */
+  let _notifyEngine = null;
+  function getNotifyEngine() {
+    if (!_notifyEngine) {
+      try { _notifyEngine = require('../utils/notification-engine'); }
+      catch (e) { console.warn('[Folio] notification-engine 不可用:', e.message); }
+    }
+    return _notifyEngine;
+  }
+
   /* ========== 会籍权益 / 积分引擎（惰性加载） ========== */
   let _benefitsEngine = null;
   function getBenefitsEngine() {
@@ -498,6 +508,24 @@ module.exports = function (getDb) {
       } catch (e) {
         console.warn('[Folio] 自动赚取积分失败（不影响结算）:', e.message);
       }
+
+      // ── 通知：账单结算完成 ─────────────────────────────────────────────
+      try {
+        const ne = getNotifyEngine();
+        if (ne) {
+          const folioClubId = folio.clubId || 'default';
+          await ne.send(db, {
+            clubId: folioClubId,
+            type: ne.NOTIFICATION_TYPES.FOLIO_SETTLED,
+            title: `账单已结算 ${folio.folioNo || ''}`,
+            content: `${folio.guestName || ''} | 总计 ¥${(totals.totalCharges || 0).toFixed(2)} | 实付 ¥${(totals.totalPayments || 0).toFixed(2)}`,
+            recipientId: folio.playerId || null,
+            sourceId: folioId,
+            sourceType: 'folio',
+            extra: { folioNo: folio.folioNo, amount: totals.totalCharges },
+          });
+        }
+      } catch (_ne) { /* 通知失败不影响主流程 */ }
 
       res.json({ success: true, message: '结算成功', totals });
     } catch (err) {

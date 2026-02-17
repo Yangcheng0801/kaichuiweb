@@ -32,6 +32,16 @@ function createBookingsRouter(getDb) {
     return _benefitsEngine;
   }
 
+  // 通知引擎（惰性加载）
+  let _notifyEngine = null;
+  function getNotifyEngine() {
+    if (!_notifyEngine) {
+      try { _notifyEngine = require('../utils/notification-engine'); }
+      catch (e) { console.warn('[Bookings] notification-engine 不可用:', e.message); }
+    }
+    return _notifyEngine;
+  }
+
   // ─── 状态常量 ────────────────────────────────────────────────────────────────
   const BOOKING_STATUS = {
     PENDING:     'pending',      // 待确认
@@ -452,6 +462,25 @@ function createBookingsRouter(getDb) {
       if (caddyId) await occupyCaddy(db, caddyId);
 
       console.log(`[Bookings] 预订创建成功: ${orderNo}, 定价来源: ${pricing.priceSource}`);
+
+      // ── 通知：预订确认 ──────────────────────────────────────────────────
+      try {
+        const ne = getNotifyEngine();
+        if (ne) {
+          await ne.notifyBooking(db, clubId || 'default', ne.NOTIFICATION_TYPES.BOOKING_CONFIRMED,
+            { ...bookingData, _id: result._id }, createdBy || null);
+          await ne.sendToRole(db, {
+            clubId: clubId || 'default',
+            type: ne.NOTIFICATION_TYPES.BOOKING_CONFIRMED,
+            title: `新预订 ${orderNo}`,
+            content: `${players?.[0]?.name || ''} | ${date} ${teeTime} | ${courseName || ''}`,
+            recipientRole: 'frontdesk',
+            sourceId: result._id,
+            sourceType: 'booking',
+          });
+        }
+      } catch (_ne) { /* 通知失败不影响主流程 */ }
+
       res.json({ success: true, data: { _id: result._id, ...bookingData }, message: '预订创建成功' });
     } catch (error) {
       console.error('[Bookings] 创建预订失败:', error);
@@ -586,6 +615,35 @@ function createBookingsRouter(getDb) {
             }
           }
         }
+      }
+
+      // ── 通知：状态变更 ─────────────────────────────────────────────────
+      if (fields.status && fields.status !== old.status) {
+        try {
+          const ne = getNotifyEngine();
+          if (ne) {
+            const statusTypeMap = {
+              [BOOKING_STATUS.CHECKED_IN]: ne.NOTIFICATION_TYPES.BOOKING_CHECKED_IN,
+              [BOOKING_STATUS.COMPLETED]:  ne.NOTIFICATION_TYPES.BOOKING_COMPLETED,
+              [BOOKING_STATUS.CANCELLED]:  ne.NOTIFICATION_TYPES.BOOKING_CANCELLED,
+            };
+            const notifType = statusTypeMap[fields.status];
+            if (notifType) {
+              const bookingClubId = old.clubId || 'default';
+              const playerIds = (old.players || []).map(p => p.playerId || p.memberId).filter(Boolean);
+              await ne.notifyBooking(db, bookingClubId, notifType, { ...old, _id: id }, fields.updatedBy || null);
+              await ne.sendToRole(db, {
+                clubId: bookingClubId,
+                type: notifType,
+                title: `预订${fields.status === BOOKING_STATUS.CANCELLED ? '取消' : fields.status === BOOKING_STATUS.CHECKED_IN ? '签到' : '完赛'} ${old.orderNo}`,
+                content: `${old.players?.[0]?.name || ''} | ${old.date} ${old.teeTime}`,
+                recipientRole: 'admin',
+                sourceId: id,
+                sourceType: 'booking',
+              });
+            }
+          }
+        } catch (_ne) { /* 通知失败不影响主流程 */ }
       }
 
       console.log(`[Bookings] 预订 ${id} 更新成功，状态: ${old.status} → ${fields.status || old.status}`);

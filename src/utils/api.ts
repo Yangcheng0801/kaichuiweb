@@ -445,4 +445,18 @@ export const api = {
     getLeaderboard:   (id: string, params?: object) => service.get(`/tournaments/${id}/leaderboard`, { params }),
     finalize:         (id: string) => service.post(`/tournaments/${id}/finalize`),
   },
+
+  // 通知中心
+  notifications: {
+    getList:         (params?: object) => service.get('/notifications', { params }),
+    getUnreadCount:  (params?: object) => service.get('/notifications/unread-count', { params }),
+    getDetail:       (id: string) => service.get(`/notifications/${id}`),
+    markRead:        (id: string) => service.put(`/notifications/${id}/read`),
+    markReadBatch:   (data: object) => service.put('/notifications/read-batch', data),
+    archive:         (id: string) => service.put(`/notifications/${id}/archive`),
+    delete:          (id: string) => service.delete(`/notifications/${id}`),
+    send:            (data: object) => service.post('/notifications/send', data),
+    getTypes:        () => service.get('/notifications/types/all'),
+    getStats:        (params?: object) => service.get('/notifications/stats/overview', { params }),
+  },
 }

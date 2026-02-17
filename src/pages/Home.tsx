@@ -8,7 +8,7 @@ import {
   CalendarCheck, DollarSign, Clock, Users,
   BarChart3, RefreshCw, ArrowRight, TrendingUp,
   Armchair, BedDouble, CreditCard, Bike,
-  Receipt, UtensilsCrossed, Moon, Crown, Trophy
+  Receipt, UtensilsCrossed, Moon, Crown, Trophy, Bell
 } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -22,6 +22,7 @@ import {
 import { selectUserInfo, selectIsLoggedIn, logout, fetchUserInfo } from '@/store/authSlice'
 import type { AppDispatch } from '@/store'
 import { api } from '@/utils/api'
+import NotificationCenter from '@/components/NotificationCenter'
 
 /* ========== 侧边栏导航项 ========== */
 const navItems = [
@@ -33,6 +34,7 @@ const navItems = [
   { key: 'players',         label: '球员管理', path: '/players',         icon: UserRound,    color: 'bg-purple-50 text-purple-600' },
   { key: 'memberships',     label: '会籍管理', path: '/memberships',     icon: Crown,        color: 'bg-amber-50 text-amber-600' },
   { key: 'tournaments',    label: '赛事管理', path: '/tournaments',    icon: Trophy,       color: 'bg-yellow-50 text-yellow-600' },
+  { key: 'notifications',  label: '通知中心', path: '/notifications',  icon: Bell,         color: 'bg-blue-50 text-blue-600' },
   { key: 'reports',         label: '报表分析', path: '/reports',         icon: BarChart3,    color: 'bg-cyan-50 text-cyan-600' },
   { key: 'daily-close',     label: '日结/夜审', path: '/daily-close',     icon: Moon,         color: 'bg-indigo-50 text-indigo-600' },
   { key: 'settings',        label: '系统设置', path: '/settings',        icon: Settings,     color: 'bg-gray-100 text-gray-600' },
@@ -269,6 +271,7 @@ export default function Home() {
                   >
                     <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
                   </button>
+                  <NotificationCenter recipientRole="admin" pollInterval={30000} />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 cursor-pointer bg-gray-50 px-3 py-2 rounded-full shadow-inner shadow-white/40">
