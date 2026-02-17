@@ -382,4 +382,40 @@ export const api = {
     getReports:       (params?: object) => service.get('/daily-close/reports', { params }),
     getReportDetail:  (date: string, params?: object) => service.get(`/daily-close/reports/${date}`, { params }),
   },
+
+  // 会籍套餐管理
+  membershipPlans: {
+    getList:   (params?: object) => service.get('/membership-plans', { params }),
+    getDetail: (id: string) => service.get(`/membership-plans/${id}`),
+    create:    (data: object) => service.post('/membership-plans', data),
+    update:    (id: string, data: object) => service.put(`/membership-plans/${id}`, data),
+    remove:    (id: string) => service.delete(`/membership-plans/${id}`),
+    seed:      (data?: object) => service.post('/membership-plans/seed', data || {}),
+    getStats:  (params?: object) => service.get('/membership-plans/stats/summary', { params }),
+  },
+
+  // 会籍订阅管理
+  memberships: {
+    getList:      (params?: object) => service.get('/memberships', { params }),
+    getDetail:    (id: string) => service.get(`/memberships/${id}`),
+    create:       (data: object) => service.post('/memberships', data),
+    renew:        (id: string, data: object) => service.post(`/memberships/${id}/renew`, data),
+    suspend:      (id: string, data?: object) => service.post(`/memberships/${id}/suspend`, data || {}),
+    resume:       (id: string) => service.post(`/memberships/${id}/resume`),
+    cancel:       (id: string, data?: object) => service.post(`/memberships/${id}/cancel`, data || {}),
+    checkExpiry:  (data?: object) => service.post('/memberships/check-expiry', data || {}),
+    getByPlayer:  (playerId: string, params?: object) => service.get(`/memberships/player/${playerId}`, { params }),
+    getStats:     (params?: object) => service.get('/memberships/stats/overview', { params }),
+  },
+
+  // 积分系统
+  points: {
+    getList:    (params?: object) => service.get('/points', { params }),
+    getBalance: (playerId: string, params?: object) => service.get(`/points/balance/${playerId}`, { params }),
+    earn:       (data: object) => service.post('/points/earn', data),
+    redeem:     (data: object) => service.post('/points/redeem', data),
+    adjust:     (data: object) => service.post('/points/adjust', data),
+    expire:     (data?: object) => service.post('/points/expire', data || {}),
+    getStats:   (params?: object) => service.get('/points/stats', { params }),
+  },
 }

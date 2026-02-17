@@ -12,9 +12,12 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   ArrowLeft, Search, Plus, X, ChevronRight,
-  User, Phone, CreditCard, Car, RefreshCw, Wallet, QrCode
+  User, Phone, CreditCard, Car, RefreshCw, Wallet, QrCode,
+  Crown, Star, Gift, Clock, Award
 } from 'lucide-react'
-import { api } from '@/utils/api'
+import { api as _api } from '@/utils/api'
+
+const api: any = _api
 
 // ─── 类型 ─────────────────────────────────────────────────────────────────────
 
@@ -302,6 +305,8 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
   const [loading,  setLoading]  = useState(true)
   const [showRecharge, setShowRecharge] = useState(false)
   const [refreshingQr, setRefreshingQr] = useState(false)
+  const [membershipInfo, setMembershipInfo] = useState<any>(null)
+  const [pointsBalance, setPointsBalance] = useState<number>(0)
 
   const load = () => {
     setLoading(true)
@@ -309,6 +314,14 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
       .then((res: any) => setPlayer(res.data || null))
       .catch(() => toast.error('加载球员信息失败'))
       .finally(() => setLoading(false))
+
+    // Load membership & points
+    api.memberships.getByPlayer(playerId)
+      .then((res: any) => setMembershipInfo(res.data?.active || null))
+      .catch(() => {})
+    api.points.getBalance(playerId)
+      .then((res: any) => setPointsBalance(res.data?.balance || 0))
+      .catch(() => {})
   }
 
   useEffect(() => { load() }, [playerId])
@@ -383,6 +396,87 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
                   className="mt-3 px-4 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors font-medium">
                   + 充值
                 </button>
+              </div>
+
+              {/* 会籍信息 */}
+              {membershipInfo ? (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">当前会籍</p>
+                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-5 text-white">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Crown size={18} className="text-amber-200" />
+                      <span className="font-bold text-lg">{membershipInfo.planName}</span>
+                      <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
+                        membershipInfo.status === 'active' ? 'bg-white/20' :
+                        membershipInfo.status === 'expiring' ? 'bg-red-400/30' : 'bg-white/10'
+                      }`}>
+                        {membershipInfo.status === 'active' ? '生效中' :
+                         membershipInfo.status === 'expiring' ? '即将到期' : membershipInfo.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-100 font-mono mb-3">{membershipInfo.membershipNo}</p>
+
+                    {/* 权益使用进度 */}
+                    {membershipInfo.benefits?.freeRounds > 0 && (
+                      <div className="mb-2">
+                        <div className="flex justify-between text-xs text-amber-100 mb-1">
+                          <span>免费轮次</span>
+                          <span>{membershipInfo.usage?.roundsUsed || 0} / {membershipInfo.benefits.freeRounds}</span>
+                        </div>
+                        <div className="bg-white/20 rounded-full h-2">
+                          <div className="bg-white h-2 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, ((membershipInfo.usage?.roundsUsed || 0) / membershipInfo.benefits.freeRounds) * 100)}%` }} />
+                        </div>
+                      </div>
+                    )}
+                    {membershipInfo.benefits?.guestQuota > 0 && (
+                      <div className="mb-2">
+                        <div className="flex justify-between text-xs text-amber-100 mb-1">
+                          <span>带客名额</span>
+                          <span>{membershipInfo.usage?.guestBrought || 0} / {membershipInfo.benefits.guestQuota}</span>
+                        </div>
+                        <div className="bg-white/20 rounded-full h-2">
+                          <div className="bg-white h-2 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, ((membershipInfo.usage?.guestBrought || 0) / membershipInfo.benefits.guestQuota) * 100)}%` }} />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-1.5 mt-3 text-xs">
+                      {membershipInfo.benefits?.discountRate < 1 && <span className="bg-white/15 px-2 py-0.5 rounded">{membershipInfo.benefits.discountRate * 10}折续打</span>}
+                      {membershipInfo.benefits?.priorityBooking && <span className="bg-white/15 px-2 py-0.5 rounded">优先预订</span>}
+                      {membershipInfo.benefits?.freeCart && <span className="bg-white/15 px-2 py-0.5 rounded">免球车</span>}
+                      {membershipInfo.benefits?.freeLocker && <span className="bg-white/15 px-2 py-0.5 rounded">免更衣柜</span>}
+                    </div>
+
+                    <p className="text-xs text-amber-200 mt-3">
+                      <Clock size={10} className="inline mr-1" />
+                      {membershipInfo.startDate?.slice(0, 10)} ~ {membershipInfo.endDate?.slice(0, 10) || '永久'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">当前会籍</p>
+                  <div className="bg-gray-50 rounded-xl p-4 text-center text-gray-400 text-sm">
+                    <Crown size={24} className="mx-auto mb-2 text-gray-300" />
+                    暂无有效会籍
+                  </div>
+                </div>
+              )}
+
+              {/* 积分余额 */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">积分账户</p>
+                <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Star size={20} className="text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">可用积分</p>
+                    <p className="text-2xl font-bold text-amber-600">{pointsBalance.toLocaleString()}</p>
+                  </div>
+                </div>
               </div>
 
               {/* 消费二维码 */}

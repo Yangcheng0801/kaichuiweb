@@ -121,6 +121,15 @@ app.use('/api/audit-logs', require('./routes/audit-logs')(getDb));
 // 日结/夜审
 app.use('/api/daily-close', require('./routes/daily-close')(getDb));
 
+// 会籍套餐管理
+app.use('/api/membership-plans', require('./routes/membership-plans')(getDb));
+
+// 会籍订阅管理
+app.use('/api/memberships', require('./routes/memberships')(getDb));
+
+// 积分系统
+app.use('/api/points', require('./routes/points')(getDb));
+
 // 餐饮 POS 系统
 app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
 app.use('/api/tables', require('./routes/tables')(getDb));
