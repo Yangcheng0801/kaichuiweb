@@ -79,7 +79,7 @@ export default function RolesManager() {
   /* ========== 初始化 ========== */
   const handleSeed = async () => {
     try {
-      const res = await api.roles.seed()
+      const res: any = await api.roles.seed()
       toast.success(res.message || '初始化完成')
       loadRoles()
     } catch (e: any) {

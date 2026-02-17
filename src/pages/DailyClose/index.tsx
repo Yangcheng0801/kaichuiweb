@@ -74,7 +74,7 @@ export default function DailyClose() {
     if (!previewData?.noShowCandidates?.length) return
     setNoShowProcessing(true)
     try {
-      const res = await api.dailyClose.autoNoShow({ date: targetDate })
+      const res: any = await api.dailyClose.autoNoShow({ date: targetDate })
       toast.success(res.message || '操作成功')
       loadPreview()
     } catch (e: any) {
@@ -89,7 +89,7 @@ export default function DailyClose() {
     if (closing) return
     setClosing(true)
     try {
-      const res = await api.dailyClose.execute({
+      const res: any = await api.dailyClose.execute({
         date: targetDate,
         cashDeclared: cashDeclared ? Number(cashDeclared) : undefined,
         notes
