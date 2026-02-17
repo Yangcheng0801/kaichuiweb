@@ -136,6 +136,9 @@ app.use('/api/tournaments', require('./routes/tournaments')(getDb));
 // 通知中心
 app.use('/api/notifications', require('./routes/notifications')(getDb));
 
+// 库存管理 / Pro Shop
+app.use('/api/inventory', require('./routes/inventory')(getDb));
+
 // 餐饮 POS 系统
 app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
 app.use('/api/tables', require('./routes/tables')(getDb));

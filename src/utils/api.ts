@@ -459,4 +459,40 @@ export const api = {
     getTypes:        () => service.get('/notifications/types/all'),
     getStats:        (params?: object) => service.get('/notifications/stats/overview', { params }),
   },
+
+  // 库存管理 / Pro Shop
+  inventory: {
+    // 分类
+    getCategories:       (params?: object) => service.get('/inventory/categories', { params }),
+    createCategory:      (data: object) => service.post('/inventory/categories', data),
+    updateCategory:      (id: string, data: object) => service.put(`/inventory/categories/${id}`, data),
+    deleteCategory:      (id: string) => service.delete(`/inventory/categories/${id}`),
+    // 商品
+    getProducts:         (params?: object) => service.get('/inventory/products', { params }),
+    getProduct:          (id: string) => service.get(`/inventory/products/${id}`),
+    createProduct:       (data: object) => service.post('/inventory/products', data),
+    updateProduct:       (id: string, data: object) => service.put(`/inventory/products/${id}`, data),
+    deleteProduct:       (id: string) => service.delete(`/inventory/products/${id}`),
+    // 库存
+    getMovements:        (params?: object) => service.get('/inventory/movements', { params }),
+    createMovement:      (data: object) => service.post('/inventory/movements', data),
+    getLowStock:         () => service.get('/inventory/low-stock'),
+    // 供应商
+    getSuppliers:        (params?: object) => service.get('/inventory/suppliers', { params }),
+    createSupplier:      (data: object) => service.post('/inventory/suppliers', data),
+    updateSupplier:      (id: string, data: object) => service.put(`/inventory/suppliers/${id}`, data),
+    deleteSupplier:      (id: string) => service.delete(`/inventory/suppliers/${id}`),
+    // 采购单
+    getPurchaseOrders:   (params?: object) => service.get('/inventory/purchase-orders', { params }),
+    getPurchaseOrder:    (id: string) => service.get(`/inventory/purchase-orders/${id}`),
+    createPurchaseOrder: (data: object) => service.post('/inventory/purchase-orders', data),
+    updatePOStatus:      (id: string, data: object) => service.put(`/inventory/purchase-orders/${id}/status`, data),
+    receivePO:           (id: string, data: object) => service.post(`/inventory/purchase-orders/${id}/receive`, data),
+    // 销售
+    getSales:            (params?: object) => service.get('/inventory/sales', { params }),
+    createSale:          (data: object) => service.post('/inventory/sales', data),
+    refundSale:          (id: string, data?: object) => service.post(`/inventory/sales/${id}/refund`, data || {}),
+    // 统计
+    getStats:            (params?: object) => service.get('/inventory/stats', { params }),
+  },
 }
