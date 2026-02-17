@@ -10,6 +10,117 @@ const express = require('express');
 module.exports = function (getDb) {
   const router = express.Router();
 
+  /* ========== 会籍权益 / 积分引擎（惰性加载） ========== */
+  let _benefitsEngine = null;
+  function getBenefitsEngine() {
+    if (!_benefitsEngine) {
+      try { _benefitsEngine = require('../utils/benefits-engine'); }
+      catch (e) { console.warn('[Folio] benefits-engine 不可用:', e.message); }
+    }
+    return _benefitsEngine;
+  }
+
+  /**
+   * 结算时自动为关联球员赚取积分
+   * 积分 = 实付金额 × 会籍积分倍率（earnRate）
+   * 生日当天额外翻倍（birthdayMultiplier）
+   */
+  async function earnPointsOnSettle(db, folio) {
+    const be = getBenefitsEngine();
+    if (!be) return;
+
+    const clubId = folio.clubId || 'default';
+    const totalPaid = Number(folio.totalPayments) || 0;
+    if (totalPaid <= 0) return;
+
+    // 通过 folio.bookingId 找到关联预订 → 球员列表
+    let players = [];
+    if (folio.bookingId) {
+      try {
+        const bookingRes = await db.collection('bookings').doc(folio.bookingId).get();
+        const booking = Array.isArray(bookingRes.data) ? bookingRes.data[0] : bookingRes.data;
+        if (booking?.players) players = booking.players;
+      } catch (e) {
+        console.warn('[Folio] 查询关联预订失败:', e.message);
+      }
+    }
+
+    // 如果没有预订关联，尝试通过 folio.playerId
+    if (players.length === 0 && folio.playerId) {
+      players = [{ playerId: folio.playerId, name: folio.guestName || '' }];
+    }
+
+    if (players.length === 0) return;
+
+    // 每位球员平均分摊消费金额赚取积分
+    const amountPerPlayer = Math.round((totalPaid / players.length) * 100) / 100;
+
+    for (const p of players) {
+      const pid = p.playerId || p.memberId;
+      if (!pid) continue;
+
+      try {
+        // 查询会籍积分规则
+        const membership = await be.getActiveMembership(db, clubId, pid);
+        if (!membership) continue;
+
+        const pointsRules = membership.pointsRules || membership.benefits?.pointsRules || {};
+        let earnRate = Number(pointsRules.earnRate) || 1;
+
+        // 检查生日翻倍
+        try {
+          const playerRes = await db.collection('players').doc(pid).get();
+          const playerData = Array.isArray(playerRes.data) ? playerRes.data[0] : playerRes.data;
+          if (playerData?.birthday) {
+            const today = new Date();
+            const bday = new Date(playerData.birthday);
+            if (bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate()) {
+              earnRate *= Number(pointsRules.birthdayMultiplier) || 1;
+            }
+          }
+        } catch { /* ignore */ }
+
+        const earnedPoints = Math.floor(amountPerPlayer * earnRate);
+        if (earnedPoints <= 0) continue;
+
+        // 读取当前积分余额
+        const profileRes = await db.collection('player_club_profiles')
+          .where({ clubId, playerId: pid })
+          .limit(1)
+          .get();
+        const profile = (profileRes.data || [])[0];
+        const balanceBefore = Number(profile?.points) || 0;
+        const balanceAfter = balanceBefore + earnedPoints;
+
+        // 记录积分流水
+        await db.collection('points_transactions').add({
+          data: {
+            clubId, playerId: pid,
+            playerName: p.name || folio.guestName || '',
+            type: 'earn',
+            amount: earnedPoints,
+            balanceBefore, balanceAfter,
+            source: 'folio_settle',
+            sourceId: folio._id || '',
+            description: `账单结算赚取积分 (¥${amountPerPlayer} × ${earnRate}倍)`,
+            createdAt: new Date().toISOString(),
+          }
+        });
+
+        // 更新积分余额
+        if (profile) {
+          await db.collection('player_club_profiles').doc(profile._id).update({
+            data: { points: balanceAfter, updatedAt: new Date().toISOString() }
+          });
+        }
+
+        console.log(`[Folio] 球员 ${pid} 赚取 ${earnedPoints} 积分（¥${amountPerPlayer} × ${earnRate}倍）`);
+      } catch (e) {
+        console.warn(`[Folio] 球员 ${pid} 积分赚取失败:`, e.message);
+      }
+    }
+  }
+
   /* ========== 辅助 ========== */
 
   /** 生成账单号 F + 日期8位 + 3位序号 */
@@ -380,6 +491,13 @@ module.exports = function (getDb) {
         closedAt: now,
         updatedAt: now,
       });
+
+      // ── 会籍积分：结算后自动赚取积分 ─────────────────────────────────────
+      try {
+        await earnPointsOnSettle(db, { ...folio, _id: folioId, totalPayments: totals.totalPayments });
+      } catch (e) {
+        console.warn('[Folio] 自动赚取积分失败（不影响结算）:', e.message);
+      }
 
       res.json({ success: true, message: '结算成功', totals });
     } catch (err) {

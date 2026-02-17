@@ -22,6 +22,16 @@ function createBookingsRouter(getDb) {
   const express = require('express');
   const router = express.Router();
 
+  // 会籍权益引擎（惰性加载）
+  let _benefitsEngine = null;
+  function getBenefitsEngine() {
+    if (!_benefitsEngine) {
+      try { _benefitsEngine = require('../utils/benefits-engine'); }
+      catch (e) { console.warn('[Bookings] benefits-engine 不可用:', e.message); }
+    }
+    return _benefitsEngine;
+  }
+
   // ─── 状态常量 ────────────────────────────────────────────────────────────────
   const BOOKING_STATUS = {
     PENDING:     'pending',      // 待确认
@@ -538,6 +548,44 @@ function createBookingsRouter(getDb) {
         old.status !== fields.status
       ) {
         await releaseAllResources(db, old);
+      }
+
+      // ── 完赛：会籍权益扣减 + 消费金额累计 ────────────────────────────────────
+      if (fields.status === BOOKING_STATUS.COMPLETED && old.status !== BOOKING_STATUS.COMPLETED) {
+        const be = getBenefitsEngine();
+        if (be) {
+          const bookingClubId = old.clubId || 'default';
+          const bookingPlayers = old.players || [];
+          const snapshot = old.pricingSnapshot || {};
+          const breakdown = snapshot.playerBreakdown || [];
+
+          for (const p of bookingPlayers) {
+            const pid = p.playerId || p.memberId;
+            if (!pid) continue;
+
+            try {
+              // 查找该球员在定价快照中是否使用了免费轮次
+              const pBreakdown = breakdown.find(b => b.playerId === pid);
+              const usedFreeRound = pBreakdown?.benefitsInfo?.type === 'freeRound';
+
+              if (usedFreeRound) {
+                const consumed = await be.consumeFreeRound(db, bookingClubId, pid);
+                console.log(`[Bookings] 球员 ${pid} 免费轮次扣减: ${consumed ? '成功' : '失败/无剩余'}`);
+              }
+
+              // 累计消费金额到会籍（用该球员的果岭费作为其个人消费）
+              const pFee = pBreakdown?.greenFee || 0;
+              const totalAmount = pFee + (old.pricing?.caddyFee || 0) / bookingPlayers.length
+                + (old.pricing?.cartFee || 0) / bookingPlayers.length;
+              if (totalAmount > 0) {
+                await be.addConsumption(db, bookingClubId, pid, Math.round(totalAmount * 100) / 100);
+                console.log(`[Bookings] 球员 ${pid} 消费累计: ¥${totalAmount.toFixed(2)}`);
+              }
+            } catch (e) {
+              console.warn(`[Bookings] 球员 ${pid} 会籍权益更新失败:`, e.message);
+            }
+          }
+        }
       }
 
       console.log(`[Bookings] 预订 ${id} 更新成功，状态: ${old.status} → ${fields.status || old.status}`);

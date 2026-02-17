@@ -353,6 +353,20 @@ function resolveIdentityCode(player) {
   return mType;
 }
 
+// ─── 会籍权益查询（惰性加载） ────────────────────────────────────────────────
+let _benefitsEngine = null;
+function getBenefitsEngine() {
+  if (!_benefitsEngine) {
+    try {
+      _benefitsEngine = require('./benefits-engine');
+    } catch (e) {
+      console.warn('[PricingEngine] benefits-engine 不可用:', e.message);
+      _benefitsEngine = null;
+    }
+  }
+  return _benefitsEngine;
+}
+
 // ─── 主函数：计算预订价格 ────────────────────────────────────────────────────
 /**
  * 计算一个预订的完整价格明细
@@ -364,7 +378,7 @@ function resolveIdentityCode(player) {
  * @param {string} input.teeTime - HH:mm
  * @param {string} [input.courseId]
  * @param {number} [input.holes=18]
- * @param {Array}  input.players - [{ identityCode?, memberType?, memberLevel?, name }]
+ * @param {Array}  input.players - [{ identityCode?, memberType?, memberLevel?, name, memberId?, playerId? }]
  * @param {boolean} [input.needCaddy=false]
  * @param {boolean} [input.needCart=false]
  * @param {string} [input.packageId]
@@ -441,45 +455,105 @@ async function calculateBookingPrice(db, input) {
     }
   }
 
-  // 5. 逐人计算果岭费
+  // 5. 逐人计算果岭费（集成会籍权益）
   const playerBreakdown = [];
   let totalGreenFee = 0;
+  let membershipBenefitsApplied = false;
+  let anyFreeCaddy = false;
+  let anyFreeCart = false;
+
+  // 预加载所有球员的权益信息（批量查询优化）
+  const benefitsEngine = getBenefitsEngine();
+  const playerBenefitsMap = {};
+  if (benefitsEngine) {
+    for (const p of players) {
+      const pid = p.playerId || p.memberId;
+      if (pid) {
+        try {
+          playerBenefitsMap[pid] = await benefitsEngine.getPlayerBenefits(db, clubId, pid);
+        } catch (e) {
+          console.warn(`[PricingEngine] 查询球员 ${pid} 权益失败:`, e.message);
+        }
+      }
+    }
+  }
 
   for (const p of players) {
     const identityCode = resolveIdentityCode(p);
     let fee = 0;
     let addOnInfo = null;
     let reducedInfo = null;
+    let benefitsInfo = null;
 
     if (isAddOn) {
-      // 加打模式
       const addOnResult = getAddOnFee(rateSheet, identityCode);
       fee = addOnResult.fee;
       addOnInfo = addOnResult;
     } else if (isReduced) {
-      // 减打模式
       const reducedResult = getReducedFee(rateSheet, identityCode, holesPlayed || 9, holes);
       fee = reducedResult.fee;
       reducedInfo = reducedResult;
     } else {
-      // 标准模式
       fee = getGreenFee(rateSheet, identityCode);
+    }
+
+    // ── 会籍权益覆盖 ─────────────────────────────────────────────────────
+    const pid = p.playerId || p.memberId;
+    const benefits = pid ? playerBenefitsMap[pid] : null;
+
+    if (benefits && benefits.hasMembership) {
+      const originalFee = fee;
+      membershipBenefitsApplied = true;
+
+      // 优先级 1: 免费轮次（有剩余免费轮次 → 果岭费=0）
+      if (benefits.canUseFreeRound && !isAddOn) {
+        fee = 0;
+        benefitsInfo = {
+          type: 'freeRound',
+          membershipNo: benefits.membershipNo,
+          planName: benefits.planName,
+          originalFee,
+          adjustedFee: 0,
+          description: `会籍免费轮次（${benefits.remaining.freeRounds === '不限' ? '不限' : '剩余' + benefits.remaining.freeRounds + '轮'}）`,
+        };
+      }
+      // 优先级 2: 折扣率（如 0.8 = 八折）
+      else if (benefits.discountRate < 1) {
+        fee = Math.round(fee * benefits.discountRate);
+        benefitsInfo = {
+          type: 'discount',
+          membershipNo: benefits.membershipNo,
+          planName: benefits.planName,
+          originalFee,
+          adjustedFee: fee,
+          discountRate: benefits.discountRate,
+          description: `会籍折扣 ${Math.round(benefits.discountRate * 100)}%`,
+        };
+      }
+
+      // 免费球童/球车标记（全组共享，任意一人有权益即生效）
+      if (benefits.freeCaddy) anyFreeCaddy = true;
+      if (benefits.freeCart)  anyFreeCart = true;
     }
 
     totalGreenFee += fee;
 
     playerBreakdown.push({
       name: p.name || '',
+      playerId: pid || null,
       identityCode,
       greenFee: fee,
       addOnInfo,
       reducedInfo,
+      benefitsInfo,
     });
   }
 
-  // 6. 附加费
-  const caddyFee = needCaddy ? Number(rateSheet ? rateSheet.caddyFee || 0 : 0) : 0;
-  const cartFee = needCart ? Number(rateSheet ? rateSheet.cartFee || 0 : 0) : 0;
+  // 6. 附加费（会籍权益：免费球童/球车覆盖）
+  let caddyFee = needCaddy ? Number(rateSheet ? rateSheet.caddyFee || 0 : 0) : 0;
+  let cartFee = needCart ? Number(rateSheet ? rateSheet.cartFee || 0 : 0) : 0;
+  if (anyFreeCaddy) caddyFee = 0;
+  if (anyFreeCart)  cartFee = 0;
   // 加打时保险费通常不再重复收取
   const insuranceFee = isAddOn ? 0 : (Number(rateSheet ? rateSheet.insuranceFee || 0 : 0) * players.length);
 
@@ -561,6 +635,17 @@ async function calculateBookingPrice(db, input) {
     // 加打/减打价格参考表（供前端预览）
     addOnPricesRef: rateSheet?.addOnPrices || null,
     reducedPolicyRef: rateSheet?.reducedPlayPolicy || null,
+    // 会籍权益应用信息
+    membershipBenefits: membershipBenefitsApplied ? {
+      applied: true,
+      freeCaddy: anyFreeCaddy,
+      freeCart: anyFreeCart,
+      playerBenefits: playerBreakdown.filter(p => p.benefitsInfo).map(p => ({
+        name: p.name,
+        playerId: p.playerId,
+        ...p.benefitsInfo,
+      })),
+    } : null,
   };
 }
 
