@@ -145,6 +145,9 @@ app.use('/api/staff', require('./routes/staff')(getDb));
 // CRM 客户关系管理
 app.use('/api/crm', require('./routes/crm')(getDb));
 
+// 出发台管理（Starter Station）
+app.use('/api/starter', require('./routes/starter')(getDb));
+
 // 餐饮 POS 系统
 app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
 app.use('/api/tables', require('./routes/tables')(getDb));

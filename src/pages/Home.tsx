@@ -8,7 +8,7 @@ import {
   CalendarCheck, DollarSign, Clock, Users,
   BarChart3, RefreshCw, ArrowRight, TrendingUp,
   Armchair, BedDouble, CreditCard, Bike,
-  Receipt, UtensilsCrossed, Moon, Crown, Trophy, Bell, Store, ClipboardCheck, Heart
+  Receipt, UtensilsCrossed, Moon, Crown, Trophy, Bell, Store, ClipboardCheck, Heart, Flag
 } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -27,6 +27,7 @@ import NotificationCenter from '@/components/NotificationCenter'
 /* ========== 侧边栏导航项 ========== */
 const navItems = [
   { key: 'bookings',        label: '预订管理', path: '/bookings',        icon: CalendarDays, color: 'bg-emerald-50 text-emerald-600' },
+  { key: 'starter',         label: '出发台',   path: '/starter',         icon: Flag,         color: 'bg-teal-50 text-teal-600' },
   { key: 'folios',          label: '账单管理', path: '/folios',          icon: Receipt,      color: 'bg-orange-50 text-orange-600' },
   { key: 'resources',       label: '资源管理', path: '/resources',       icon: Layers,       color: 'bg-blue-50 text-blue-600' },
   { key: 'dining',          label: '餐饮管理', path: '/dining',          icon: UtensilsCrossed, color: 'bg-rose-50 text-rose-600' },

@@ -43,21 +43,37 @@ function createBookingsRouter(getDb) {
   }
 
   // ─── 状态常量 ────────────────────────────────────────────────────────────────
+  // 完整状态流：
+  //   前台：pending → confirmed → checked_in
+  //   出发台：dispatched → front_9 → turning → back_9 → returned
+  //   结算：completed → settled
+  //   任意可取消阶段：→ cancelled
   const BOOKING_STATUS = {
     PENDING:     'pending',      // 待确认
     CONFIRMED:   'confirmed',    // 已确认
-    CHECKED_IN:  'checked_in',   // 已签到
+    CHECKED_IN:  'checked_in',   // 已签到（前台完成）
+    DISPATCHED:  'dispatched',   // 已出发（出发台调度完成）
+    FRONT_9:     'front_9',      // 前9洞进行中
+    TURNING:     'turning',      // 转场中
+    BACK_9:      'back_9',       // 后9洞进行中
+    RETURNED:    'returned',     // 已回场
     COMPLETED:   'completed',    // 已完赛
+    SETTLED:     'settled',      // 已结账
     CANCELLED:   'cancelled',    // 已取消
   };
 
-  // 允许的状态流转映射（key = 当前状态，value = 可流转到的状态列表）
   const ALLOWED_TRANSITIONS = {
-    pending:    ['confirmed', 'cancelled'],
-    confirmed:  ['checked_in', 'cancelled'],
-    checked_in: ['completed'],
-    completed:  [],
-    cancelled:  [],
+    pending:     ['confirmed', 'cancelled'],
+    confirmed:   ['checked_in', 'cancelled'],
+    checked_in:  ['dispatched', 'cancelled'],
+    dispatched:  ['front_9'],
+    front_9:     ['turning', 'returned'],
+    turning:     ['back_9'],
+    back_9:      ['returned'],
+    returned:    ['completed'],
+    completed:   ['settled'],
+    settled:     [],
+    cancelled:   [],
   };
 
   // ─── 工具：生成订单号 ────────────────────────────────────────────────────────
@@ -258,7 +274,7 @@ function createBookingsRouter(getDb) {
     try {
       const db = getDb();
       const { page, pageSize } = parsePage(req.query);
-      const { status, date, courseId, caddyId, orderNo } = req.query;
+      const { status, date, courseId, caddyId, orderNo, keyword } = req.query;
 
       const cond = {};
       if (status)   cond.status   = status;
@@ -266,14 +282,18 @@ function createBookingsRouter(getDb) {
       if (courseId) cond.courseId = courseId;
       if (caddyId)  cond.caddyId  = caddyId;
       if (orderNo)  cond.orderNo  = orderNo;
+      if (keyword)  cond.orderNo  = db.RegExp({ regexp: keyword, options: 'i' });
 
       const hasWhere = Object.keys(cond).length > 0;
       const base = hasWhere
         ? db.collection('bookings').where(cond)
         : db.collection('bookings');
 
+      const orderField = date ? 'teeTime' : 'createTime';
+      const orderDir   = date ? 'asc' : 'desc';
+
       const result = await base
-        .orderBy('createTime', 'desc')
+        .orderBy(orderField, orderDir)
         .skip((page - 1) * pageSize)
         .limit(pageSize)
         .get();

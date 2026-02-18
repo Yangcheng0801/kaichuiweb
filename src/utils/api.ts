@@ -145,6 +145,27 @@ export const api = {
     updateResources: (id: string, data: object) => service.put(`/bookings/${id}/resources`, data),
   },
 
+  // 出发台管理（Starter Station）
+  starter: {
+    dashboard:  (params?: object) => service.get('/starter/dashboard', { params }),
+    queue:      (params?: object) => service.get('/starter/queue', { params }),
+    onCourse:   (params?: object) => service.get('/starter/on-course', { params }),
+    returned:   (params?: object) => service.get('/starter/returned', { params }),
+    dispatch:   (id: string, data: object) => service.put(`/starter/${id}/dispatch`, data),
+    progress:   (id: string, data: object) => service.put(`/starter/${id}/progress`, data),
+    return:     (id: string, data?: object) => service.put(`/starter/${id}/return`, data || {}),
+    complete:   (id: string, data?: object) => service.put(`/starter/${id}/complete`, data || {}),
+    settle:     (id: string, data?: object) => service.put(`/starter/${id}/settle`, data || {}),
+    timeline:   (params?: object) => service.get('/starter/timeline', { params }),
+    bags: {
+      getList:  (params?: object) => service.get('/starter/bags', { params }),
+      getStats: () => service.get('/starter/bags/stats'),
+      create:   (data: object) => service.post('/starter/bags', data),
+      update:   (id: string, data: object) => service.put(`/starter/bags/${id}`, data),
+      remove:   (id: string) => service.delete(`/starter/bags/${id}`),
+    },
+  },
+
   // 资源管理
   resources: {
     courses: {

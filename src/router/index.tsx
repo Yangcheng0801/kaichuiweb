@@ -21,6 +21,7 @@ const Notifications  = lazy(() => import('@/pages/Notifications'))
 const Inventory      = lazy(() => import('@/pages/Inventory'))
 const StaffPage      = lazy(() => import('@/pages/Staff'))
 const CRM            = lazy(() => import('@/pages/CRM'))
+const StarterStation = lazy(() => import('@/pages/StarterStation'))
 
 // 受保护路由：未登录跳转到 /login
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -175,6 +176,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <CRM />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/starter"
+          element={
+            <ProtectedRoute>
+              <StarterStation />
             </ProtectedRoute>
           }
         />
