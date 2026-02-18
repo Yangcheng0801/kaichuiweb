@@ -115,16 +115,34 @@ module.exports = function (getDb) {
       let todayPending = 0;
       let todayRevenue = 0;
       let todayPaid = 0;
+      let todayPlayers = 0;
+
+      const statusCounts = {};
+      const allStatuses = [
+        'pending', 'confirmed', 'checked_in', 'dispatched',
+        'front_9', 'turning', 'back_9', 'returned',
+        'completed', 'settled', 'cancelled',
+      ];
+      allStatuses.forEach(s => { statusCounts[s] = 0; });
 
       todayBookings.forEach(b => {
-        if (b.status === 'checked_in' || b.status === 'playing') todayCheckedIn++;
-        if (b.status === 'completed') todayCompleted++;
+        statusCounts[b.status] = (statusCounts[b.status] || 0) + 1;
+        todayPlayers += (b.players?.length || b.playerCount || 0);
+        if (b.status === 'checked_in') todayCheckedIn++;
+        if (b.status === 'completed' || b.status === 'settled') todayCompleted++;
         if (b.status === 'pending' || b.status === 'confirmed') todayPending++;
         if (b.pricing) {
           todayRevenue += (b.pricing.totalFee || 0);
           todayPaid += (b.pricing.paidFee || 0);
         }
       });
+
+      const onCourseStatuses = ['dispatched', 'front_9', 'turning', 'back_9'];
+      const onCourseCount = todayBookings.filter(b => onCourseStatuses.includes(b.status)).length;
+      const onCoursePlayers = todayBookings
+        .filter(b => onCourseStatuses.includes(b.status))
+        .reduce((s, b) => s + (b.players?.length || b.playerCount || 0), 0);
+      const notArrivedCount = todayBookings.filter(b => ['pending', 'confirmed'].includes(b.status)).length;
 
       // -------- 临时消费卡统计 --------
       let tempCardStats = { total: 0, available: 0, inUse: 0 };
@@ -138,11 +156,13 @@ module.exports = function (getDb) {
       } catch {}
 
       // -------- Folio 统计 --------
-      let folioStats = { openCount: 0, openBalance: 0, todaySettledCount: 0, todaySettledAmount: 0 };
+      let folioStats = { openCount: 0, openBalance: 0, todayCharges: 0, todayPayments: 0, todaySettledCount: 0 };
       try {
         const openFolios = await safeGet(db.collection('folios'), { clubId, status: 'open' });
         folioStats.openCount = openFolios.length;
         folioStats.openBalance = Math.round(openFolios.reduce((s, f) => s + (f.balance || 0), 0) * 100) / 100;
+        folioStats.todayCharges = Math.round(openFolios.reduce((s, f) => s + (f.todayCharges || 0), 0) * 100) / 100;
+        folioStats.todayPayments = Math.round(openFolios.reduce((s, f) => s + (f.todayPayments || 0), 0) * 100) / 100;
       } catch {}
 
       // -------- 组装返回 --------
@@ -152,12 +172,17 @@ module.exports = function (getDb) {
           // KPI 卡片
           kpi: {
             todayBookings: todayTotal,
+            todayPlayers,
             todayCheckedIn,
             todayCompleted,
             todayPending,
             todayRevenue:  Math.round(todayRevenue * 100) / 100,
             todayPaid:     Math.round(todayPaid * 100) / 100,
             todayPendingFee: Math.round((todayRevenue - todayPaid) * 100) / 100,
+            onCourseCount,
+            onCoursePlayers,
+            notArrivedCount,
+            statusCounts,
           },
 
           // 资源概况

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { ChevronLeft, ChevronRight, Plus, X, CreditCard, Wallet, QrCode, Banknote, Building2, Search, UserCheck, Car, Lock, DoorOpen, Package, ParkingCircle, Zap } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, X, CreditCard, Wallet, QrCode, Banknote, Building2, Search, Lock, DoorOpen, ParkingCircle, ChevronDown, Shield, Sparkles, Check, Edit2 } from 'lucide-react'
 import { api } from '@/utils/api'
 
 // ─── 类型 ─────────────────────────────────────────────────────────────────────
@@ -36,7 +36,10 @@ interface Booking {
   status:      string
   note:        string
   version:     number
-  stayType?:   string
+  stayType?:      string
+  needCaddy?:     boolean
+  needCart?:       boolean
+  bookingSource?: string
   assignedResources?: {
     caddyId:     string | null
     caddyName:   string
@@ -92,7 +95,9 @@ function formatDisplay(s: string) {
   return d.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })
 }
 
-// ─── 签到工作台弹窗（全面升级版） ─────────────────────────────────────────────
+// ─── 签到工作台弹窗（v2 — 职责分离版） ────────────────────────────────────────
+// 前台签到核心：确认身份 → 发消费凭证 → 分配更衣柜 → 确认住宿/客房 → 完成
+// 球车/球童/球包寄存由出发台调度，不在此处处理
 
 interface CheckInDialogProps {
   booking:  Booking
@@ -103,135 +108,107 @@ interface CheckInDialogProps {
 interface AvailableLocker { _id: string; lockerNo: string; area: string; size: string; dailyFee: number; status: string }
 interface AvailableRoom   { _id: string; roomNo: string; roomType: string; floor: string; pricePerNight: number; status: string }
 interface AvailableCard   { _id: string; cardNo: string; cardType: string; status: string }
-interface AvailableCaddy  { _id: string; name: string; level: string; rating?: number; status: string }
-interface AvailableCart    { _id: string; cartNumber?: string; brand?: string; status?: string; name?: string }
-
-const LOCKER_STATUS_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-  available:   { bg: 'bg-emerald-50',  border: 'border-emerald-300', text: 'text-emerald-700' },
-  occupied:    { bg: 'bg-red-50',      border: 'border-red-300',     text: 'text-red-600' },
-  maintenance: { bg: 'bg-gray-100',    border: 'border-gray-300',    text: 'text-gray-400' },
-}
 
 const ROOM_TYPE_MAP: Record<string, string> = { standard: '标间', deluxe: '豪华', suite: '套房' }
 
 function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
   const existing = booking.assignedResources
 
-  // ── 资源选择状态 ───────────────────────────────────────────────────────────
-  // 消费凭证
-  const [consumeMode, setConsumeMode] = useState<'existing' | 'physical' | 'virtual'>('existing')
+  // ── 状态 ───────────────────────────────────────────────────────────────────
+  const [consumeMode, setConsumeMode] = useState<'qr_scan' | 'physical' | 'temp' | 'courtesy'>('temp')
   const [selectedCardId, setSelectedCardId] = useState('')
-  // 住宿类型
+  const [qrInput, setQrInput] = useState('')
+  const [qrPlayer, setQrPlayer] = useState<any>(null)
+  const [qrSearching, setQrSearching] = useState(false)
+  const [courtesyHost, setCourtesyHost] = useState('')
+  const [courtesyReason, setCourtesyReason] = useState('')
+
   const [stayType, setStayType] = useState(booking.stayType || 'day')
-  // 球车
-  const [cartNo, setCartNo] = useState(existing?.cartNo || booking.cartNo || '')
-  // 球童
-  const [caddyId, setCaddyId] = useState(existing?.caddyId || booking.caddyId || '')
-  const [caddyName, setCaddyName] = useState(existing?.caddyName || booking.caddyName || '')
-  // 更衣柜
+  const [editStayType, setEditStayType] = useState(false)
+
   const [selectedLockerIds, setSelectedLockerIds] = useState<string[]>([])
-  // 客房
   const [selectedRoomId, setSelectedRoomId] = useState('')
   const [roomCheckIn, setRoomCheckIn] = useState(booking.date || '')
   const [roomCheckOut, setRoomCheckOut] = useState('')
-  // 球包寄存
-  const [needBag, setNeedBag] = useState(false)
-  const [bagNo, setBagNo] = useState(existing?.bagStorage?.[0]?.bagNo || '')
-  const [bagDesc, setBagDesc] = useState('')
-  // 停车
-  const [plateNo, setPlateNo] = useState(existing?.parking?.plateNo || '')
-  const [companions, setCompanions] = useState<{ name: string; playerNo?: string }[]>([])
-  const [companionSearch, setCompanionSearch] = useState('')
-  const [companionResults, setCompanionResults] = useState<any[]>([])
-  const [searchingCompanion, setSearchingCompanion] = useState(false)
 
-  // ── 可用资源列表 ───────────────────────────────────────────────────────────
+  const [plateNo, setPlateNo] = useState(existing?.parking?.plateNo || '')
+  const [showMoreInfo, setShowMoreInfo] = useState(false)
+
   const [availableLockers, setAvailableLockers] = useState<AvailableLocker[]>([])
   const [availableRooms, setAvailableRooms] = useState<AvailableRoom[]>([])
   const [availableCards, setAvailableCards] = useState<AvailableCard[]>([])
-  const [availableCaddies, setAvailableCaddies] = useState<AvailableCaddy[]>([])
-  const [availableCarts, setAvailableCarts] = useState<AvailableCart[]>([])
   const [saving, setSaving] = useState(false)
   const [resourceLoading, setResourceLoading] = useState(true)
 
-  // 加载所有可用资源
+  const playerInfo = booking.players?.[0]
+  const isMember = playerInfo?.type === 'member' && playerInfo?.memberId
+  const needCaddy = booking.needCaddy
+  const needCart = booking.needCart
+
+  // 根据球员身份自动选择消费凭证模式
+  useEffect(() => {
+    if (isMember) setConsumeMode('qr_scan')
+    else setConsumeMode('temp')
+  }, [isMember])
+
   useEffect(() => {
     setResourceLoading(true)
     Promise.all([
       api.lockers.getList({ status: 'available', pageSize: 200 }).catch(() => ({ data: [] })),
       api.rooms.getList({ status: 'available', pageSize: 200 }).catch(() => ({ data: [] })),
       api.tempCards.getList({ status: 'available', cardType: 'physical' }).catch(() => ({ data: [] })),
-      api.resources.caddies.getList({ status: 'available' }).catch(() => ({ data: [] })),
-      api.resources.carts.getList({ status: 'active' }).catch(() => ({ data: [] })),
-    ]).then(([lockersRes, roomsRes, cardsRes, caddiesRes, cartsRes]) => {
+    ]).then(([lockersRes, roomsRes, cardsRes]) => {
       setAvailableLockers((lockersRes as any).data || [])
       setAvailableRooms((roomsRes as any).data || [])
       setAvailableCards((cardsRes as any).data || [])
-      setAvailableCaddies((caddiesRes as any).data || [])
-      setAvailableCarts((cartsRes as any).data || [])
     }).finally(() => setResourceLoading(false))
   }, [])
 
-  // 更衣柜选择切换
   const toggleLocker = (id: string) => {
     setSelectedLockerIds(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     )
   }
 
-  // 搜索同行人
-  const handleCompanionSearch = async (q: string) => {
-    setCompanionSearch(q)
-    if (!q || q.length < 1) { setCompanionResults([]); return }
-    setSearchingCompanion(true)
-    try {
-      const res = await api.players.search({ q })
-      setCompanionResults((res as any).data || [])
-    } catch {
-      setCompanionResults([])
-    } finally {
-      setSearchingCompanion(false)
+  const autoAssignLockers = () => {
+    const count = booking.playerCount || booking.players?.length || 1
+    const needed = count - selectedLockerIds.length
+    if (needed <= 0) { toast.info('已分配足够柜位'); return }
+    const free = availableLockers.filter(l => !selectedLockerIds.includes(l._id))
+    const toAdd = free.slice(0, needed).map(l => l._id)
+    if (toAdd.length === 0) { toast.error('可用柜位不足'); return }
+    setSelectedLockerIds(prev => [...prev, ...toAdd])
+    toast.success(`已自动分配 ${toAdd.length} 个柜位`)
+  }
+
+  // 二维码搜索
+  const qrTimer = useCallback(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null
+    return (val: string) => {
+      setQrInput(val)
+      setQrPlayer(null)
+      if (timer) clearTimeout(timer)
+      if (val.length < 3) return
+      timer = setTimeout(async () => {
+        setQrSearching(true)
+        try {
+          const res = await (api as any).players.search({ q: val, clubId: 'default' })
+          const list = (res as any).data || []
+          if (list.length > 0) setQrPlayer(list[0])
+        } catch {} finally { setQrSearching(false) }
+      }, 400)
     }
-  }
-
-  const addCompanion = (player: any) => {
-    const already = companions.some(c => c.playerNo === player.playerNo || c.name === player.name)
-    if (already) { toast.error('该同行人已添加'); return }
-    setCompanions(prev => [...prev, { name: player.name || player.nickName || '', playerNo: player.playerNo || '' }])
-    setCompanionSearch('')
-    setCompanionResults([])
-  }
-
-  const removeCompanion = (idx: number) => {
-    setCompanions(prev => prev.filter((_, i) => i !== idx))
-  }
-
-  // 球童选择
-  const handleCaddySelect = (caddy: AvailableCaddy) => {
-    if (caddyId === caddy._id) {
-      setCaddyId('')
-      setCaddyName('')
-    } else {
-      setCaddyId(caddy._id)
-      setCaddyName(caddy.name)
-    }
-  }
+  }, [])
+  const [handleQrSearch] = useState(qrTimer)
 
   // ── 提交签到 ───────────────────────────────────────────────────────────────
   const handleConfirm = async () => {
+    if (consumeMode === 'courtesy' && !courtesyHost.trim()) {
+      toast.error('接待免账需填写接待人'); return
+    }
     setSaving(true)
     try {
-      // 构建资源分配数据
-      const resources: any = {}
-
-      // 球车
-      if (cartNo) resources.cartNo = cartNo
-
-      // 球童
-      if (caddyId) {
-        resources.caddyId = caddyId
-        resources.caddyName = caddyName
-      }
+      const resources: any = { stayType }
 
       // 更衣柜
       if (selectedLockerIds.length > 0) {
@@ -245,58 +222,44 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
       if (stayType !== 'day' && selectedRoomId) {
         const room = availableRooms.find(r => r._id === selectedRoomId)
         resources.rooms = [{
-          roomId: selectedRoomId,
-          roomNo: room?.roomNo || '',
-          roomType: room?.roomType || '',
-          checkInDate: roomCheckIn,
-          checkOutDate: roomCheckOut,
+          roomId: selectedRoomId, roomNo: room?.roomNo || '',
+          roomType: room?.roomType || '', checkInDate: roomCheckIn, checkOutDate: roomCheckOut,
           nights: roomCheckOut && roomCheckIn
             ? Math.max(1, Math.round((new Date(roomCheckOut).getTime() - new Date(roomCheckIn).getTime()) / 86400000))
             : 1,
         }]
       }
 
-      // 球包寄存
-      if (needBag && bagNo) {
-        resources.bagStorage = [{ bagNo, location: '', description: bagDesc }]
-      }
-
       // 停车
-      if (plateNo || companions.length > 0) {
-        resources.parking = {
-          plateNo,
-          companions: companions.map(c => `${c.name}${c.playerNo ? `(${c.playerNo})` : ''}`),
-        }
-      }
+      if (plateNo) resources.parking = { plateNo }
 
-      // 临时消费卡
-      if (consumeMode === 'physical' && selectedCardId) {
+      // 消费凭证
+      if (consumeMode === 'qr_scan' && qrPlayer) {
+        resources.qrPlayerId = qrPlayer._id
+        resources.qrCode = qrInput
+      } else if (consumeMode === 'physical' && selectedCardId) {
         resources.tempCardId = selectedCardId
         const card = availableCards.find(c => c._id === selectedCardId)
         resources.tempCardNo = card?.cardNo || ''
-      } else if (consumeMode === 'virtual') {
+      } else if (consumeMode === 'temp') {
         resources.generateTempCard = true
+      } else if (consumeMode === 'courtesy') {
+        resources.generateTempCard = true
+        resources.accountType = 'courtesy'
+        resources.courtesy = { host: courtesyHost.trim(), reason: courtesyReason.trim() }
       }
 
-      // 住宿类型
-      resources.stayType = stayType
-
-      // 调用 API
       if (Object.keys(resources).length > 0) {
-        await api.bookings.updateResources(booking._id, resources)
+        await (api as any).bookings.updateResources(booking._id, resources)
       }
-      await api.bookings.checkIn(booking._id)
+      await (api as any).bookings.checkIn(booking._id)
       toast.success('签到成功')
       onSuccess()
       onClose()
-    } catch {
-      /* 拦截器处理 */
-    } finally {
-      setSaving(false)
-    }
+    } catch {} finally { setSaving(false) }
   }
 
-  // ── 按区域分组更衣柜 ─────────────────────────────────────────────────────
+  // 按区域分组更衣柜
   const lockersByArea = availableLockers.reduce<Record<string, AvailableLocker[]>>((acc, l) => {
     const key = l.area || '未分区'
     if (!acc[key]) acc[key] = []
@@ -304,29 +267,33 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
     return acc
   }, {})
 
-  const playerInfo = booking.players?.[0]
-  const hasExistingCard = playerInfo?.type === 'member'
+  const STAY_LABELS: Record<string, string> = {
+    day: '日归', overnight_1: '一晚', overnight_2: '两晚', overnight_3: '三晚', custom: '自定义',
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
+
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
           <div>
             <h2 className="font-semibold text-gray-900 text-lg">办理签到</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{booking.teeTime} · {booking.courseName} {booking.orderNo && `· ${booking.orderNo}`}</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {booking.teeTime} · {booking.courseName} {booking.orderNo && `· ${booking.orderNo}`}
+            </p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
             <X size={18} />
           </button>
         </div>
 
-        {/* Body - scrollable */}
+        {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-          {/* 1. 球员信息卡片 */}
+          {/* 1. 球员信息 */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               {booking.players?.map((p, i) => (
                 <span key={i} className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
                   p.type === 'guest' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'
@@ -340,32 +307,79 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
               <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                 {(playerInfo as any).playerNo && <span>球员号：{(playerInfo as any).playerNo}</span>}
                 {(playerInfo as any).phone && <span>手机：{(playerInfo as any).phone}</span>}
-                {(playerInfo as any).memberId && <span>会员卡：{(playerInfo as any).memberId}</span>}
               </div>
             )}
+            {/* 预订偏好标签 */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${needCaddy ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
+                {needCaddy ? '需要球童' : '无需球童'}
+              </span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${needCart ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
+                {needCart ? '需要球车' : '无需球车'}
+              </span>
+              <span className="text-[10px] text-gray-300 ml-1">（由出发台调度）</span>
+            </div>
           </div>
 
-          {/* 2. 消费凭证 */}
+          {/* 2. 消费凭证（4 种模式） */}
           <section>
             <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
               <CreditCard size={14} /> 消费凭证
             </h3>
-            <div className="flex gap-2">
-              <button onClick={() => setConsumeMode('existing')}
-                className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${consumeMode === 'existing' ? 'bg-blue-50 border-blue-400 text-blue-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
-                {hasExistingCard ? '已有会员卡' : '无需消费卡'}
-              </button>
-              <button onClick={() => setConsumeMode('physical')}
-                className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${consumeMode === 'physical' ? 'bg-blue-50 border-blue-400 text-blue-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
-                发放实体卡
-              </button>
-              <button onClick={() => setConsumeMode('virtual')}
-                className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${consumeMode === 'virtual' ? 'bg-purple-50 border-purple-400 text-purple-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
-                <span className="flex items-center justify-center gap-1"><Zap size={12} />系统生成</span>
-              </button>
+            <div className="grid grid-cols-4 gap-1.5">
+              {([
+                { key: 'qr_scan'  as const, label: '扫码识别', icon: <QrCode size={13} />,     active: 'bg-blue-50 border-blue-400 text-blue-700' },
+                { key: 'physical' as const, label: '刷实体卡', icon: <CreditCard size={13} />, active: 'bg-blue-50 border-blue-400 text-blue-700' },
+                { key: 'temp'     as const, label: '临时发卡', icon: <Sparkles size={13} />,   active: 'bg-purple-50 border-purple-400 text-purple-700' },
+                { key: 'courtesy' as const, label: '接待免账', icon: <Shield size={13} />,     active: 'bg-amber-50 border-amber-400 text-amber-700' },
+              ]).map(opt => (
+                <button key={opt.key} onClick={() => setConsumeMode(opt.key)}
+                  className={`py-2 text-[11px] rounded-lg border transition-all flex flex-col items-center gap-1 ${
+                    consumeMode === opt.key
+                      ? `${opt.active} font-medium`
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}>
+                  {opt.icon}
+                  {opt.label}
+                </button>
+              ))}
             </div>
+
+            {/* 扫码识别 */}
+            {consumeMode === 'qr_scan' && (
+              <div className="mt-2.5">
+                <div className="relative">
+                  <QrCode size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
+                  <input value={qrInput} onChange={e => handleQrSearch(e.target.value)}
+                    placeholder="扫描/输入消费二维码或球员号..."
+                    className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                  {qrSearching && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-300 animate-pulse">识别中...</span>}
+                </div>
+                {qrPlayer && (
+                  <div className="mt-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-200 text-emerald-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      {qrPlayer.name?.[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-emerald-800">{qrPlayer.name}</p>
+                      <p className="text-[10px] text-emerald-600">
+                        #{qrPlayer.playerNo}
+                        {qrPlayer.profile?.memberLevelLabel && ` · ${qrPlayer.profile.memberLevelLabel}`}
+                        {(qrPlayer.profile?.account?.balance ?? 0) > 0 && ` · 余额¥${qrPlayer.profile.account.balance}`}
+                      </p>
+                    </div>
+                    <Check size={16} className="text-emerald-500 flex-shrink-0" />
+                  </div>
+                )}
+                {qrInput.length >= 3 && !qrSearching && !qrPlayer && (
+                  <p className="text-xs text-red-400 mt-1.5">未找到匹配的球员，请确认二维码或球员号</p>
+                )}
+              </div>
+            )}
+
+            {/* 刷实体卡 */}
             {consumeMode === 'physical' && (
-              <div className="mt-2">
+              <div className="mt-2.5">
                 {availableCards.length === 0 ? (
                   <p className="text-xs text-gray-400 py-2">暂无可用实体卡，请先在资源管理中录入</p>
                 ) : (
@@ -379,99 +393,78 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                 )}
               </div>
             )}
-            {consumeMode === 'virtual' && (
-              <p className="text-xs text-purple-500 mt-2 bg-purple-50 rounded-lg px-3 py-2">
-                签到后系统将自动生成临时消费卡号
+
+            {/* 临时发卡 */}
+            {consumeMode === 'temp' && (
+              <p className="text-xs text-purple-500 mt-2.5 bg-purple-50 rounded-lg px-3 py-2">
+                签到后系统将自动生成临时消费卡号，用于场内挂账消费
               </p>
+            )}
+
+            {/* 接待免账 */}
+            {consumeMode === 'courtesy' && (
+              <div className="mt-2.5 p-3 bg-amber-50 border border-amber-200 rounded-lg space-y-2">
+                <p className="text-xs text-amber-700">接待模式：费用挂球会接待科目，客人无需付费。仍需绑定消费凭证以跟踪场内记录。</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <input value={courtesyHost} onChange={e => setCourtesyHost(e.target.value)}
+                    placeholder="接待人（必填）" required
+                    className="px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white" />
+                  <input value={courtesyReason} onChange={e => setCourtesyReason(e.target.value)}
+                    placeholder="接待原因（如：商务洽谈）"
+                    className="px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white" />
+                </div>
+              </div>
             )}
           </section>
 
-          {/* 3. 住宿类型 */}
+          {/* 3. 住宿类型（只读回填，可展开编辑） */}
           <section>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <DoorOpen size={14} /> 住宿类型
-            </h3>
-            <div className="flex gap-2">
-              {[
-                { value: 'day',         label: '日归' },
-                { value: 'overnight_1', label: '一晚' },
-                { value: 'overnight_2', label: '两晚' },
-                { value: 'overnight_3', label: '三晚' },
-                { value: 'custom',      label: '自定义' },
-              ].map(opt => (
-                <button key={opt.value} onClick={() => setStayType(opt.value)}
-                  className={`flex-1 py-2.5 text-xs rounded-lg border transition-all ${stayType === opt.value ? 'bg-emerald-50 border-emerald-400 text-emerald-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
-                  {opt.label}
-                </button>
-              ))}
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <DoorOpen size={14} /> 住宿
+                <span className={`text-xs font-normal px-2 py-0.5 rounded-full ${
+                  stayType === 'day' ? 'bg-gray-100 text-gray-500' : 'bg-emerald-100 text-emerald-700'
+                }`}>{STAY_LABELS[stayType] || stayType}</span>
+              </h3>
+              <button type="button" onClick={() => setEditStayType(p => !p)}
+                className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1">
+                <Edit2 size={11} /> {editStayType ? '收起' : '修改'}
+              </button>
             </div>
+            {editStayType && (
+              <div className="flex gap-1.5 mt-2">
+                {Object.entries(STAY_LABELS).map(([val, label]) => (
+                  <button key={val} onClick={() => setStayType(val)}
+                    className={`flex-1 py-2 text-xs rounded-lg border transition-all ${
+                      stayType === val
+                        ? 'bg-emerald-50 border-emerald-400 text-emerald-700 font-medium'
+                        : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                    }`}>{label}</button>
+                ))}
+              </div>
+            )}
           </section>
 
-          {/* 4. 球车 + 球童（并排） */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* 球车 */}
-            <section>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <Car size={14} /> 球车分配
-              </h3>
-              <select value={cartNo} onChange={e => setCartNo(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400">
-                <option value="">选择球车（可留空）</option>
-                {availableCarts.map(c => (
-                  <option key={c._id} value={c.cartNumber || c.name || ''}>
-                    {c.cartNumber || c.name}{c.brand ? ` (${c.brand})` : ''}
-                  </option>
-                ))}
-              </select>
-              <input value={cartNo} onChange={e => setCartNo(e.target.value)}
-                placeholder="或直接输入车号"
-                className="w-full mt-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-500 focus:outline-none focus:ring-1 focus:ring-emerald-300" />
-            </section>
-
-            {/* 球童 */}
-            <section>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <UserCheck size={14} /> 球童分配
-                {caddyName && <span className="text-xs text-emerald-600 font-normal ml-1">已选：{caddyName}</span>}
-              </h3>
-              {resourceLoading ? (
-                <p className="text-xs text-gray-400 py-2">加载中...</p>
-              ) : availableCaddies.length === 0 ? (
-                <p className="text-xs text-gray-400 py-2">当前无空闲球童</p>
-              ) : (
-                <div className="max-h-28 overflow-y-auto space-y-1 pr-1">
-                  {availableCaddies.map(c => (
-                    <button key={c._id} onClick={() => handleCaddySelect(c)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-xs transition-all ${
-                        caddyId === c._id
-                          ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                          : 'border-gray-100 text-gray-600 hover:bg-gray-50'
-                      }`}>
-                      <span className="font-medium">{c.name}</span>
-                      <span className="text-gray-400">{c.level || '普通'}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </section>
-          </div>
-
-          {/* 5. 更衣柜可视化选择 */}
+          {/* 4. 更衣柜分配 */}
           <section>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <Lock size={14} /> 更衣柜分配
-              {selectedLockerIds.length > 0 && (
-                <span className="text-xs text-emerald-600 font-normal">
-                  已选 {selectedLockerIds.length} 个
-                </span>
-              )}
-            </h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Lock size={14} /> 更衣柜
+                {selectedLockerIds.length > 0 && (
+                  <span className="text-xs text-emerald-600 font-normal">已选 {selectedLockerIds.length} 个</span>
+                )}
+              </h3>
+              <button type="button" onClick={autoAssignLockers}
+                className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition-colors">
+                <Sparkles size={11} /> 自动分配
+              </button>
+            </div>
             {resourceLoading ? (
               <p className="text-xs text-gray-400 py-2">加载中...</p>
             ) : Object.keys(lockersByArea).length === 0 ? (
-              <p className="text-xs text-gray-400 py-2">暂无可用更衣柜，请先在资源管理中录入</p>
+              <p className="text-xs text-gray-400 py-2">暂无可用更衣柜</p>
             ) : (
-              <div className="space-y-3 max-h-36 overflow-y-auto pr-1">
+              <div className="space-y-2.5 max-h-32 overflow-y-auto pr-1">
                 {Object.entries(lockersByArea).map(([area, items]) => (
                   <div key={area}>
                     <div className="text-[10px] text-gray-400 mb-1">{area}</div>
@@ -497,7 +490,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             )}
           </section>
 
-          {/* 6. 客房分配（两球一晚 / 仅住宿时显示） */}
+          {/* 5. 客房分配（仅住宿时显示） */}
           {stayType !== 'day' && (
             <section>
               <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
@@ -535,89 +528,28 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             </section>
           )}
 
-          {/* 7. 球包寄存 */}
+          {/* 6. 更多信息（可折叠：停车） */}
           <section>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={needBag} onChange={e => setNeedBag(e.target.checked)}
-                className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
-              <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Package size={14} /> 需要寄存球包
-              </span>
-            </label>
-            {needBag && (
-              <div className="grid grid-cols-2 gap-2 mt-2">
+            <button type="button" onClick={() => setShowMoreInfo(p => !p)}
+              className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition-colors w-full">
+              <ChevronDown size={14} className={`transition-transform ${showMoreInfo ? 'rotate-180' : ''}`} />
+              更多信息
+              {plateNo && !showMoreInfo && (
+                <span className="text-xs text-gray-300 font-normal">车牌：{plateNo}</span>
+              )}
+            </button>
+            {showMoreInfo && (
+              <div className="mt-2.5 space-y-3">
                 <div>
-                  <input value={bagNo} onChange={e => setBagNo(e.target.value)}
-                    placeholder="寄存编号（如 B-025）"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                </div>
-                <div>
-                  <input value={bagDesc} onChange={e => setBagDesc(e.target.value)}
-                    placeholder="球包描述（可选）"
+                  <label className="text-xs text-gray-500 mb-1 block flex items-center gap-1.5">
+                    <ParkingCircle size={12} /> 车牌号
+                  </label>
+                  <input value={plateNo} onChange={e => setPlateNo(e.target.value)}
+                    placeholder="车牌号（可留空）"
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
                 </div>
               </div>
             )}
-          </section>
-
-          {/* 8. 停车信息 */}
-          <section>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <ParkingCircle size={14} /> 停车信息
-            </h3>
-            <input value={plateNo} onChange={e => setPlateNo(e.target.value)}
-              placeholder="车牌号（可留空）"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-
-            {/* 同行人 */}
-            <div className="mt-3">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-xs font-medium text-gray-600">同行人</span>
-                {companions.length > 0 && (
-                  <span className="text-[10px] text-gray-400">({companions.length}人)</span>
-                )}
-              </div>
-              {/* 已添加的同行人 */}
-              {companions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {companions.map((c, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200">
-                      {c.name}{c.playerNo ? `(${c.playerNo})` : ''}
-                      <button onClick={() => removeCompanion(i)} className="ml-0.5 hover:text-red-500 transition-colors">
-                        <X size={10} />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-              {/* 搜索添加 */}
-              <div className="relative">
-                <div className="flex items-center gap-1">
-                  <Search size={13} className="text-gray-400 absolute left-2.5 pointer-events-none" />
-                  <input value={companionSearch} onChange={e => handleCompanionSearch(e.target.value)}
-                    placeholder="搜索球员姓名/编号添加同行人..."
-                    className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-300" />
-                </div>
-                {/* 搜索结果下拉 */}
-                {companionSearch && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-32 overflow-y-auto">
-                    {searchingCompanion ? (
-                      <div className="px-3 py-2 text-xs text-gray-400">搜索中...</div>
-                    ) : companionResults.length === 0 ? (
-                      <div className="px-3 py-2 text-xs text-gray-400">未找到匹配的球员</div>
-                    ) : (
-                      companionResults.map((p: any) => (
-                        <button key={p._id || p.playerNo} onClick={() => addCompanion(p)}
-                          className="w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-gray-50 transition-colors text-left">
-                          <span className="font-medium text-gray-700">{p.name || p.nickName}</span>
-                          <span className="text-gray-400">{p.playerNo || ''}</span>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
           </section>
 
         </div>
@@ -633,6 +565,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             {saving ? '处理中...' : '确认签到'}
           </button>
         </div>
+
       </div>
     </div>
   )

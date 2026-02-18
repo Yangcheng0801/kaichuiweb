@@ -49,8 +49,13 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   pending:    { label: '待确认', cls: 'bg-yellow-100 text-yellow-700' },
   confirmed:  { label: '已确认', cls: 'bg-blue-100 text-blue-700' },
   checked_in: { label: '已签到', cls: 'bg-emerald-100 text-emerald-700' },
-  playing:    { label: '打球中', cls: 'bg-green-100 text-green-700' },
-  completed:  { label: '已完赛', cls: 'bg-gray-100 text-gray-600' },
+  dispatched: { label: '已出发', cls: 'bg-teal-100 text-teal-700' },
+  front_9:    { label: '前9洞',  cls: 'bg-green-100 text-green-700' },
+  turning:    { label: '转场中', cls: 'bg-amber-100 text-amber-700' },
+  back_9:     { label: '后9洞',  cls: 'bg-indigo-100 text-indigo-700' },
+  returned:   { label: '已回场', cls: 'bg-gray-100 text-gray-600' },
+  completed:  { label: '已完赛', cls: 'bg-gray-100 text-gray-500' },
+  settled:    { label: '已结账', cls: 'bg-green-100 text-green-600' },
   cancelled:  { label: '已取消', cls: 'bg-red-100 text-red-600' },
   no_show:    { label: '未到场', cls: 'bg-orange-100 text-orange-600' },
 }
@@ -59,12 +64,17 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
 interface DashboardData {
   kpi: {
     todayBookings: number
+    todayPlayers: number
     todayCheckedIn: number
     todayCompleted: number
     todayPending: number
     todayRevenue: number
     todayPaid: number
     todayPendingFee: number
+    onCourseCount: number
+    onCoursePlayers: number
+    notArrivedCount: number
+    statusCounts: Record<string, number>
   }
   resources: {
     carts:    { total: number; available: number; inUse: number; maintenance: number }
@@ -76,8 +86,9 @@ interface DashboardData {
   folios?: {
     openCount: number
     openBalance: number
+    todayCharges: number
+    todayPayments: number
     todaySettledCount: number
-    todaySettledAmount: number
   }
   recentBookings: {
     _id: string; orderNo: string; date: string; teeTime: string
@@ -310,7 +321,7 @@ export default function Home() {
               {/* 仪表盘主体 */}
               <main className="flex-1 overflow-auto p-6 sm:p-8 bg-gradient-to-b from-white to-gray-50/30 space-y-6">
 
-                {/* -------- 第一行：KPI 卡片 -------- */}
+                {/* ──── 第一行：核心 KPI（4 大卡） ──── */}
                 {loading && !data ? (
                   <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
                     {[1,2,3,4].map(i => <Skeleton key={i} className="h-28" />)}
@@ -329,28 +340,29 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="mt-3 text-xs text-emerald-200 flex items-center gap-3">
-                        <span>待处理 {kpi?.todayPending ?? 0}</span>
+                        <span>{kpi?.todayPlayers ?? 0} 人</span>
+                        <span>·</span>
+                        <span>未到 {kpi?.notArrivedCount ?? 0}</span>
                         <span>·</span>
                         <span>已签到 {kpi?.todayCheckedIn ?? 0}</span>
-                        <span>·</span>
-                        <span>已完赛 {kpi?.todayCompleted ?? 0}</span>
                       </div>
                     </div>
 
-                    {/* 已签到 */}
+                    {/* 场上 */}
                     <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{kpi?.todayCheckedIn ?? 0}</div>
-                          <div className="text-gray-500 text-sm mt-1">今日签到</div>
+                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{kpi?.onCourseCount ?? 0}<span className="text-lg font-normal text-gray-400 ml-1">组</span></div>
+                          <div className="text-gray-500 text-sm mt-1">场上进行中</div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500">
-                          <CalendarCheck size={24} />
+                        <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500">
+                          <Flag size={24} />
                         </div>
                       </div>
                       <div className="mt-3 text-xs text-gray-400 flex items-center gap-1">
-                        <TrendingUp size={12} className="text-emerald-500" />
-                        <span>签到率 {(kpi?.todayBookings ?? 0) > 0 ? Math.round(((kpi?.todayCheckedIn ?? 0) + (kpi?.todayCompleted ?? 0)) / (kpi?.todayBookings ?? 1) * 100) : 0}%</span>
+                        <Users size={12} className="text-teal-500" />
+                        <span>{kpi?.onCoursePlayers ?? 0} 人在场</span>
+                        <span className="ml-2">完赛 {kpi?.todayCompleted ?? 0}</span>
                       </div>
                     </div>
 
@@ -376,12 +388,12 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* 未结算账单 */}
+                    {/* 未结账单 */}
                     <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{data?.folios?.openCount ?? kpi?.todayPending ?? 0}</div>
-                          <div className="text-gray-500 text-sm mt-1">未结算账单</div>
+                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{data?.folios?.openCount ?? 0}</div>
+                          <div className="text-gray-500 text-sm mt-1">未结账单</div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
                           <Receipt size={24} />
@@ -389,12 +401,10 @@ export default function Home() {
                       </div>
                       <div className="mt-3 text-xs text-gray-400 flex items-center gap-3">
                         {(data?.folios?.openBalance ?? 0) > 0 && (
-                          <span className="text-orange-600">待收 ¥{(data?.folios?.openBalance ?? 0).toLocaleString()}</span>
+                          <span className="text-orange-600">¥{(data?.folios?.openBalance ?? 0).toLocaleString()}</span>
                         )}
-                        <button
-                          onClick={() => navigate('/folios')}
-                          className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1 ml-auto"
-                        >
+                        <button onClick={() => navigate('/folios')}
+                          className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1 ml-auto">
                           查看 <ArrowRight size={12} />
                         </button>
                       </div>
@@ -402,28 +412,70 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* -------- 第二行：资源使用概况 -------- */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                    <Layers size={16} className="text-gray-400" />
-                    资源使用概况
-                  </h3>
-                  {loading && !data ? (
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
-                      {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-28" />)}
-                    </div>
-                  ) : (
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
-                      <ResourceBar label="球车" icon={Car}         used={res?.carts?.inUse ?? 0}     total={res?.carts?.total ?? 0}    color="text-amber-500" />
-                      <ResourceBar label="球童" icon={Users}       used={res?.caddies?.busy ?? 0}    total={res?.caddies?.total ?? 0}  color="text-purple-500" />
-                      <ResourceBar label="更衣柜" icon={Armchair}  used={res?.lockers?.occupied ?? 0} total={res?.lockers?.total ?? 0}  color="text-blue-500" />
-                      <ResourceBar label="客房" icon={BedDouble}   used={res?.rooms?.occupied ?? 0}   total={res?.rooms?.total ?? 0}    color="text-emerald-500" />
-                      <ResourceBar label="消费卡" icon={CreditCard} used={res?.tempCards?.inUse ?? 0}  total={res?.tempCards?.total ?? 0} color="text-rose-500" />
-                    </div>
-                  )}
+                {/* ──── 第二行：预订漏斗 + 资源概况 ──── */}
+                <div className="grid gap-6 grid-cols-1 xl:grid-cols-5">
+                  {/* 预订状态漏斗 */}
+                  <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100 p-5">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                      <CalendarCheck size={16} className="text-gray-400" />
+                      今日预订状态
+                    </h3>
+                    {(() => {
+                      const sc = kpi?.statusCounts || {}
+                      const funnelItems = [
+                        { label: '待确认', count: sc.pending || 0, color: 'bg-amber-400' },
+                        { label: '已确认', count: sc.confirmed || 0, color: 'bg-blue-400' },
+                        { label: '已签到', count: sc.checked_in || 0, color: 'bg-emerald-400' },
+                        { label: '已出发', count: sc.dispatched || 0, color: 'bg-teal-400' },
+                        { label: '前9洞', count: sc.front_9 || 0, color: 'bg-green-500' },
+                        { label: '转场中', count: sc.turning || 0, color: 'bg-amber-500' },
+                        { label: '后9洞', count: sc.back_9 || 0, color: 'bg-indigo-500' },
+                        { label: '已回场', count: sc.returned || 0, color: 'bg-gray-400' },
+                        { label: '已完赛', count: sc.completed || 0, color: 'bg-gray-300' },
+                        { label: '已结账', count: sc.settled || 0, color: 'bg-green-400' },
+                        { label: '已取消', count: sc.cancelled || 0, color: 'bg-red-300' },
+                      ]
+                      const maxCount = Math.max(...funnelItems.map(f => f.count), 1)
+                      return (
+                        <div className="space-y-2">
+                          {funnelItems.map(f => (
+                            <div key={f.label} className="flex items-center gap-2">
+                              <span className="text-xs text-gray-500 w-12 text-right flex-shrink-0">{f.label}</span>
+                              <div className="flex-1 h-5 bg-gray-50 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full ${f.color} transition-all duration-700`}
+                                  style={{ width: `${Math.max((f.count / maxCount) * 100, f.count > 0 ? 8 : 0)}%` }} />
+                              </div>
+                              <span className="text-xs font-bold text-gray-700 w-6 text-right">{f.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    })()}
+                  </div>
+
+                  {/* 资源使用概况 */}
+                  <div className="xl:col-span-3">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                      <Layers size={16} className="text-gray-400" />
+                      资源使用概况
+                    </h3>
+                    {loading && !data ? (
+                      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                        {[1,2,3].map(i => <Skeleton key={i} className="h-28" />)}
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                        <ResourceBar label="球车" icon={Car}         used={res?.carts?.inUse ?? 0}     total={res?.carts?.total ?? 0}    color="text-amber-500" />
+                        <ResourceBar label="球童" icon={Users}       used={res?.caddies?.busy ?? 0}    total={res?.caddies?.total ?? 0}  color="text-purple-500" />
+                        <ResourceBar label="更衣柜" icon={Armchair}  used={res?.lockers?.occupied ?? 0} total={res?.lockers?.total ?? 0}  color="text-blue-500" />
+                        <ResourceBar label="客房" icon={BedDouble}   used={res?.rooms?.occupied ?? 0}   total={res?.rooms?.total ?? 0}    color="text-emerald-500" />
+                        <ResourceBar label="消费卡" icon={CreditCard} used={res?.tempCards?.inUse ?? 0}  total={res?.tempCards?.total ?? 0} color="text-rose-500" />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* -------- 第三行：近期预订 + 快捷入口 -------- */}
+                {/* ──── 第三行：近期预订 + 快捷入口 ──── */}
                 <div className="grid gap-6 grid-cols-1 xl:grid-cols-3">
                   {/* 近期预订列表 */}
                   <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100 overflow-hidden">
@@ -470,44 +522,37 @@ export default function Home() {
                   {/* 快捷入口 */}
                   <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100 p-6">
                     <h4 className="text-sm font-semibold text-gray-700 mb-4">快捷操作</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {navItems.map(item => (
-                        <button
-                          key={item.key}
-                          onClick={() => navigate(item.path)}
-                          className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-gray-50 transition-colors group"
-                        >
-                          <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
-                            <item.icon size={20} />
+                    <div className="grid grid-cols-3 gap-2">
+                      {navItems.slice(0, 9).map(item => (
+                        <button key={item.key} onClick={() => navigate(item.path)}
+                          className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
+                            <item.icon size={18} />
                           </div>
-                          <span className="text-xs text-gray-600 font-medium">{item.label}</span>
+                          <span className="text-[11px] text-gray-600 font-medium">{item.label}</span>
                         </button>
                       ))}
                     </div>
 
-                    {/* 今日概要 */}
-                    <div className="mt-6 pt-5 border-t border-gray-100">
-                      <h5 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">今日概要</h5>
-                      <div className="space-y-2.5 text-sm">
+                    {/* Folio 速览 */}
+                    <div className="mt-5 pt-4 border-t border-gray-100">
+                      <h5 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">账务速览</h5>
+                      <div className="space-y-2 text-sm">
                         <div className="flex items-center justify-between text-gray-600">
-                          <span>球车使用中</span>
-                          <span className="font-medium text-gray-900">{res?.carts?.inUse ?? 0} / {res?.carts?.total ?? 0}</span>
+                          <span>开放 Folio</span>
+                          <span className="font-medium text-gray-900">{data?.folios?.openCount ?? 0} 张</span>
                         </div>
                         <div className="flex items-center justify-between text-gray-600">
-                          <span>球童工作中</span>
-                          <span className="font-medium text-gray-900">{res?.caddies?.busy ?? 0} / {res?.caddies?.total ?? 0}</span>
+                          <span>未结余额</span>
+                          <span className="font-medium text-orange-600">¥{(data?.folios?.openBalance ?? 0).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between text-gray-600">
-                          <span>更衣柜占用</span>
-                          <span className="font-medium text-gray-900">{res?.lockers?.occupied ?? 0} / {res?.lockers?.total ?? 0}</span>
+                          <span>今日应收</span>
+                          <span className="font-medium text-gray-900">¥{(kpi?.todayRevenue ?? 0).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between text-gray-600">
-                          <span>客房入住</span>
-                          <span className="font-medium text-gray-900">{res?.rooms?.occupied ?? 0} / {res?.rooms?.total ?? 0}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-gray-600">
-                          <span>消费卡使用中</span>
-                          <span className="font-medium text-gray-900">{res?.tempCards?.inUse ?? 0} / {res?.tempCards?.total ?? 0}</span>
+                          <span>今日已收</span>
+                          <span className="font-medium text-emerald-600">¥{(kpi?.todayPaid ?? 0).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>

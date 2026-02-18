@@ -34,6 +34,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string; dot: string 
 
 const DASHBOARD_CARDS = [
   { key: 'totalBookings', label: '总预订', icon: Users,        bg: 'bg-slate-50',   text: 'text-slate-700' },
+  { key: 'totalPlayers',  label: '总人数', icon: Users,          bg: 'bg-slate-50',   text: 'text-slate-600' },
   { key: 'notArrived',    label: '未到场', icon: Clock,         bg: 'bg-amber-50',   text: 'text-amber-600' },
   { key: 'checked_in',    label: '已签到', icon: UserCheck,     bg: 'bg-blue-50',    text: 'text-blue-600' },
   { key: 'onCourse',      label: '场上',   icon: PlayCircle,    bg: 'bg-emerald-50', text: 'text-emerald-600' },
@@ -61,6 +62,7 @@ export default function StarterStation() {
   const [date, setDate]       = useState(todayStr)
   const [tab, setTab]         = useState<TabKey>('queue')
   const [dashboard, setDash]  = useState<any>(null)
+  const [resStats, setResStats] = useState<any>(null)
   const [refreshKey, setRK]   = useState(0)
 
   const refresh = useCallback(() => setRK(k => k + 1), [])
@@ -68,11 +70,13 @@ export default function StarterStation() {
   useEffect(() => {
     api.starter.dashboard({ date }).then((r: any) => setDash(r.data))
       .catch(() => toast.error('看板数据加载失败'))
+    api.dashboard.getData().then((r: any) => setResStats(r.data?.resources))
+      .catch(() => {})
   }, [date, refreshKey])
 
   const dashVal = (key: string) => {
     if (!dashboard) return '–'
-    if (key === 'totalBookings' || key === 'notArrived' || key === 'onCourse') return dashboard[key] ?? 0
+    if (key === 'totalBookings' || key === 'notArrived' || key === 'onCourse' || key === 'totalPlayers') return dashboard[key] ?? 0
     return dashboard.counts?.[key] ?? 0
   }
 
@@ -114,7 +118,7 @@ export default function StarterStation() {
         {/* ── 日期 + 看板 ── */}
         <div className="text-sm text-gray-500 mb-1">{fmtDate(date)}</div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+        <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           {DASHBOARD_CARDS.map(c => (
             <div key={c.key} className={`${c.bg} rounded-xl p-3 border border-transparent`}>
               <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-1">
@@ -125,6 +129,32 @@ export default function StarterStation() {
             </div>
           ))}
         </div>
+
+        {/* ── 资源利用率 ── */}
+        {resStats && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: '球童', used: resStats.caddies?.busy ?? 0, total: resStats.caddies?.total ?? 0, color: 'bg-purple-400' },
+              { label: '球车', used: resStats.carts?.inUse ?? 0, total: resStats.carts?.total ?? 0, color: 'bg-amber-400' },
+              { label: '更衣柜', used: resStats.lockers?.occupied ?? 0, total: resStats.lockers?.total ?? 0, color: 'bg-blue-400' },
+              { label: '客房', used: resStats.rooms?.occupied ?? 0, total: resStats.rooms?.total ?? 0, color: 'bg-emerald-400' },
+            ].map(r => {
+              const pct = r.total > 0 ? Math.round((r.used / r.total) * 100) : 0
+              return (
+                <div key={r.label} className="bg-white rounded-xl p-3 border border-gray-100">
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="text-gray-500">{r.label}</span>
+                    <span className="font-medium text-gray-700">{r.used}/{r.total}</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${r.color} transition-all`} style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="text-[10px] text-gray-400 mt-1 text-right">{pct}%</div>
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* ── Tab 切换 ── */}
         <div className="flex gap-2 border-b border-gray-200 pb-px overflow-x-auto">

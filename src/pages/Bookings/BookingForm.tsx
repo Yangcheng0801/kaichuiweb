@@ -1,16 +1,17 @@
 /**
- * 新建预订表单（v4 — 动态身份 + 加打/减打）
+ * 新建预订表单（v5 — 职责分离 + 体验优化）
  *
- * 核心升级（v4）：
- *   1. 球员身份下拉：从 identity_types 集合动态加载，替代硬编码 member/guest/walkin
- *   2. 加打模式：勾选后自动计算加打 9 洞费用
- *   3. 减打模式：支持设定实际打球洞数，按减打策略计算
- *   4. 定价引擎 v2 对接：传 identityCode、isAddOn、isReduced
- *   5. 保留 v3 所有功能（自动定价、套餐、团队折扣、价格锁定/覆盖）
+ * v5 核心变更：
+ *   1. 球童/球车选择改为需求开关（具体分配由出发台调度）
+ *   2. 移除加打/减打区域（运营阶段由出发台处理）
+ *   3. 住宿类型降级为 pill 选择器（大多数为日归）
+ *   4. 费用区域折叠式展示，减少视觉噪音
+ *   5. 新增预订来源 & 折扣原因，便于数据分析审计
+ *   6. 发球时间间隔从 10 分钟改为 7 分钟（行业标准）
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
-import { X, Plus, Trash2, UserPlus, Search, Check, Lock, Unlock, Package, Users, Info, PlusCircle, MinusCircle } from 'lucide-react'
+import { X, Trash2, UserPlus, Search, Check, Lock, Unlock, Users, Info, ChevronDown } from 'lucide-react'
 import { api } from '@/utils/api'
 
 // ─── 类型 ─────────────────────────────────────────────────────────────────────
@@ -66,15 +67,16 @@ interface BookingFormData {
   totalPlayers:   number
   contactName:    string
   contactPhone:   string
-  // 加打/减打
+  // 来源 & 折扣原因
+  bookingSource:  string
+  discountReason: string
+  // 加打/减打（运营阶段由出发台处理，保留字段兼容后端）
   isAddOn:        boolean
   isReduced:      boolean
   holesPlayed:    number
 }
 
 interface Course { _id: string; name: string; holes: number; status: string }
-interface Caddie { _id: string; name: string; level: string; experience: number; status: string }
-interface Cart   { _id: string; cartNo: string; model: string; feePerRound: number; status: string }
 interface StayPackage { _id: string; packageName: string; packageCode: string; description: string; includes: any; pricing: any; status: string }
 
 interface PlayerSuggestion {
@@ -102,7 +104,6 @@ interface Props { onClose: () => void; onSuccess: () => void; initialDate?: stri
 
 // ─── 常量 ─────────────────────────────────────────────────────────────────────
 
-const LEVEL_MAP: Record<string, string> = { junior: '初级', senior: '中级', expert: '高级' }
 const MEMBER_LEVEL_LABEL: Record<string, string> = {
   regular: '普通', silver: '银卡', gold: '金卡', platinum: '铂金', diamond: '钻石', vip: 'VIP',
 }
@@ -115,22 +116,32 @@ const STAY_TYPES = [
   { key: 'overnight_2', label: '两晚' }, { key: 'overnight_3', label: '三晚' }, { key: 'custom', label: '自定义' },
 ]
 
+const BOOKING_SOURCES = [
+  { key: 'walkin',   label: '现场散客' },
+  { key: 'phone',    label: '电话预订' },
+  { key: 'wechat',   label: '微信/小程序' },
+  { key: 'ota',      label: 'OTA 平台' },
+  { key: 'agent',    label: '旅行社/代理' },
+  { key: 'member',   label: '会员自助' },
+  { key: 'internal', label: '内部接待' },
+]
+
 const EMPTY_PLAYER: BookingPlayer = {
   name: '', identityCode: 'walkin', type: 'walkin', memberType: 'walkin',
   memberLevel: null, phone: '', memberId: '', playerNo: '',
 }
 const today = new Date().toISOString().slice(0, 10)
 
-function genTeeTimeOptions() {
+function genTeeTimeOptions(intervalMin = 7) {
   const opts: string[] = []
   for (let h = 6; h <= 17; h++) {
-    for (let m = 0; m < 60; m += 10) {
+    for (let m = 0; m < 60; m += intervalMin) {
       opts.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
     }
   }
   return opts
 }
-const TEE_TIMES = genTeeTimeOptions()
+const TEE_TIMES = genTeeTimeOptions(7)
 
 // ─── 球员搜索下拉 ─────────────────────────────────────────────────────────────
 
@@ -205,7 +216,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     date: initialDate || today, teeTime: '08:00',
     courseId: '', courseName: '', holes: 18,
     players: [{ ...EMPTY_PLAYER }],
-    caddyId: '', caddyName: '', cartId: '', cartNo: '',
+    caddyId: '', caddyName: '', cartId: '', cartNo: '',  // 保留字段兼容后端结构
     needCaddy: false, needCart: false,
     stayType: 'day', packageId: '',
     note: '', createdBy: '前台', createdByName: '前台',
@@ -213,13 +224,12 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     roomFee: 0, otherFee: 0, discount: 0, totalFee: 0,
     priceSource: 'auto', priceOverride: false,
     isTeam: false, teamName: '', totalPlayers: 0, contactName: '', contactPhone: '',
+    bookingSource: 'walkin', discountReason: '',
     isAddOn: false, isReduced: false, holesPlayed: 9,
   })
 
   const [identityTypes, setIdentityTypes] = useState<IdentityType[]>([])
   const [courses, setCourses] = useState<Course[]>([])
-  const [caddies, setCaddies] = useState<Caddie[]>([])
-  const [carts, setCarts] = useState<Cart[]>([])
   const [packages, setPackages] = useState<StayPackage[]>([])
   const [saving, setSaving] = useState(false)
   const [pricingResult, setPricingResult] = useState<PricingResult | null>(null)
@@ -227,6 +237,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
   const [lockedFields, setLockedFields] = useState<Record<string, boolean>>({
     greenFee: true, caddyFee: true, cartFee: true, insuranceFee: true, roomFee: true, otherFee: true, discount: true,
   })
+  const [feeExpanded, setFeeExpanded] = useState(false)
 
   const set = (key: keyof BookingFormData, value: unknown) => setForm(p => ({ ...p, [key]: value }))
 
@@ -234,15 +245,11 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
   useEffect(() => {
     Promise.all([
       api.resources.courses.getList({ status: 'active' }),
-      api.resources.caddies.getList({ status: 'available' }),
-      api.resources.carts.getList({ status: 'available' }),
       api.stayPackages.getList({ status: 'active' }),
       api.identityTypes.getList({ status: 'active' }),
-    ]).then(([c, ca, ct, pk, ids]: any[]) => {
+    ]).then(([c, pk, ids]: any[]) => {
       const courseList = c.data || []
       setCourses(courseList)
-      setCaddies(ca.data || [])
-      setCarts(ct.data || [])
       setPackages(pk.data || [])
       setIdentityTypes(ids.data || [])
       if (courseList.length > 0 && !form.courseId) {
@@ -320,14 +327,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     const c = courses.find(c => c._id === id)
     setForm(p => ({ ...p, courseId: id, courseName: c?.name || '', holes: c?.holes || 18 }))
   }
-  const handleCaddyChange = (id: string) => {
-    const c = caddies.find(c => c._id === id)
-    setForm(p => ({ ...p, caddyId: id, caddyName: c?.name || '', needCaddy: !!id }))
-  }
-  const handleCartChange = (id: string) => {
-    const c = carts.find(c => c._id === id)
-    setForm(p => ({ ...p, cartId: id, cartNo: c?.cartNo || '', needCart: !!id }))
-  }
+  // caddy/cart 具体分配由出发台调度，预订仅记录需求偏好
 
   // ── 球员操作 ──
   const setPlayer = (idx: number, key: keyof BookingPlayer, val: any) => {
@@ -382,8 +382,6 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
           type: p.type, memberType: p.memberType, memberLevel: p.memberLevel,
           phone: p.phone, memberId: p.memberId, playerNo: p.playerNo,
         })),
-        caddyId: form.caddyId || undefined, caddyName: form.caddyName,
-        cartId: form.cartId || undefined, cartNo: form.cartNo,
         needCaddy: form.needCaddy, needCart: form.needCart,
         stayType: form.stayType,
         packageId: form.packageId || undefined,
@@ -392,6 +390,8 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
         roomFee: form.roomFee, otherFee: form.otherFee,
         discount: form.discount, totalFee: form.totalFee,
         priceSource: form.priceSource, priceOverride: form.priceOverride,
+        bookingSource: form.bookingSource,
+        discountReason: form.discountReason || undefined,
         isAddOn: form.isAddOn, isReduced: form.isReduced,
         holesPlayed: form.isReduced ? form.holesPlayed : undefined,
         note: form.note, createdBy: form.createdBy, createdByName: form.createdByName,
@@ -482,10 +482,10 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">住宿类型</label>
-                <select value={form.stayType} onChange={e => set('stayType', e.target.value)}
+                <label className="block text-sm font-medium text-gray-700 mb-1">预订来源</label>
+                <select value={form.bookingSource} onChange={e => set('bookingSource', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
-                  {STAY_TYPES.map(st => <option key={st.key} value={st.key}>{st.label}</option>)}
+                  {BOOKING_SOURCES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
                 </select>
               </div>
               <div className="col-span-2">
@@ -503,6 +503,20 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                   <option value="">无套餐</option>
                   {packages.map(p => <option key={p._id} value={p._id}>{p.packageName}</option>)}
                 </select>
+              </div>
+            </div>
+            {/* 次要选项：住宿类型（大多数预订为日归，折叠到此） */}
+            <div className="mt-3 flex items-center gap-3">
+              <span className="text-xs text-gray-400">住宿</span>
+              <div className="flex gap-1">
+                {STAY_TYPES.map(st => (
+                  <button key={st.key} type="button" onClick={() => set('stayType', st.key)}
+                    className={`px-2.5 py-1 text-xs rounded-full transition-all ${
+                      form.stayType === st.key
+                        ? 'bg-emerald-100 text-emerald-700 font-medium'
+                        : 'text-gray-400 hover:bg-gray-100'
+                    }`}>{st.label}</button>
+                ))}
               </div>
             </div>
           </section>
@@ -571,12 +585,6 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getIdentityColor(player.identityCode) }} />
                       {getIdentityName(player.identityCode)}
                       {' '}¥{pricingResult.playerBreakdown[idx].greenFee}
-                      {pricingResult.playerBreakdown[idx].addOnInfo && (
-                        <span className="text-blue-500">（加打）</span>
-                      )}
-                      {pricingResult.playerBreakdown[idx].reducedInfo && (
-                        <span className="text-amber-500">（{pricingResult.playerBreakdown[idx].reducedInfo.description}）</span>
-                      )}
                     </div>
                   )}
                   {!player.memberId && (
@@ -590,60 +598,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
             </div>
           </section>
 
-          {/* ── 加打/减打模式 ── */}
-          <section>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">特殊场景</h3>
-            <div className="flex gap-3">
-              {/* 加打 */}
-              <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                form.isAddOn ? 'border-blue-300 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
-              }`}>
-                <input type="checkbox" checked={form.isAddOn} onChange={e => {
-                  const v = e.target.checked
-                  set('isAddOn', v)
-                  if (v) set('isReduced', false)
-                }} className="w-4 h-4 rounded text-blue-600 focus:ring-blue-400" />
-                <PlusCircle size={16} className="text-blue-600" />
-                <div>
-                  <span className="text-sm text-blue-800 font-medium">加打模式</span>
-                  <p className="text-[10px] text-blue-500">完赛后加打 9 洞</p>
-                </div>
-              </label>
-              {/* 减打 */}
-              <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                form.isReduced ? 'border-amber-300 bg-amber-50' : 'border-gray-200 hover:bg-gray-50'
-              }`}>
-                <input type="checkbox" checked={form.isReduced} onChange={e => {
-                  const v = e.target.checked
-                  set('isReduced', v)
-                  if (v) set('isAddOn', false)
-                }} className="w-4 h-4 rounded text-amber-600 focus:ring-amber-400" />
-                <MinusCircle size={16} className="text-amber-600" />
-                <div>
-                  <span className="text-sm text-amber-800 font-medium">减打模式</span>
-                  <p className="text-[10px] text-amber-500">未打满预定洞数</p>
-                </div>
-              </label>
-            </div>
-            {form.isReduced && (
-              <div className="mt-3 flex items-center gap-3 pl-3">
-                <label className="text-xs text-gray-600">实际打球洞数：</label>
-                <input type="number" value={form.holesPlayed} min={1} max={form.holes} onChange={e => set('holesPlayed', Number(e.target.value) || 9)}
-                  className="w-20 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
-                <span className="text-xs text-gray-400">/ {form.holes} 洞</span>
-                {pricingResult?.reducedInfo && (
-                  <span className="text-xs text-amber-600">{pricingResult.reducedInfo.description}</span>
-                )}
-              </div>
-            )}
-            {form.isAddOn && pricingResult?.addOnInfo && (
-              <div className="mt-3 p-2.5 bg-blue-50 rounded-lg text-xs text-blue-700 flex items-center gap-2">
-                <PlusCircle size={12} />
-                {pricingResult.addOnInfo.description}
-                {pricingResult.addOnInfo.hasCustomPrices ? '（使用自定义加打价）' : '（默认估算）'}
-              </div>
-            )}
-          </section>
+          {/* 加打/减打属于运营阶段操作，由出发台在场上动态处理 */}
 
           {/* ── 团队模式 ── */}
           <section>
@@ -684,33 +639,46 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
             )}
           </section>
 
-          {/* ── 服务配置 ── */}
+          {/* ── 服务需求（具体分配由出发台调度） ── */}
           <section>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">服务配置</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">球童（可选）</label>
-                <select value={form.caddyId} onChange={e => handleCaddyChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
-                  <option value="">不需要球童</option>
-                  {caddies.map(c => <option key={c._id} value={c._id}>{c.name}（{LEVEL_MAP[c.level] || c.level}·{c.experience}年）</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">球车（可选）</label>
-                <select value={form.cartId} onChange={e => handleCartChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
-                  <option value="">不需要球车</option>
-                  {carts.map(c => <option key={c._id} value={c._id}>{c.cartNo}{c.model ? `（${c.model}）` : ''}</option>)}
-                </select>
-              </div>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">服务需求</h3>
+            <div className="flex gap-3">
+              <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                form.needCaddy ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'
+              }`}>
+                <input type="checkbox" checked={form.needCaddy} onChange={e => set('needCaddy', e.target.checked)}
+                  className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-400" />
+                <div>
+                  <span className={`text-sm font-medium ${form.needCaddy ? 'text-emerald-800' : 'text-gray-600'}`}>需要球童</span>
+                  <p className="text-[10px] text-gray-400">出发台统一调度分配</p>
+                </div>
+              </label>
+              <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                form.needCart ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'
+              }`}>
+                <input type="checkbox" checked={form.needCart} onChange={e => set('needCart', e.target.checked)}
+                  className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-400" />
+                <div>
+                  <span className={`text-sm font-medium ${form.needCart ? 'text-emerald-800' : 'text-gray-600'}`}>需要球车</span>
+                  <p className="text-[10px] text-gray-400">出发台统一调度分配</p>
+                </div>
+              </label>
             </div>
           </section>
 
-          {/* ── 费用信息 ── */}
+          {/* ── 费用信息（折叠式） ── */}
           <section>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">费用信息</h3>
+            <div className="flex items-center justify-between mb-2">
+              <button type="button" onClick={() => setFeeExpanded(p => !p)}
+                className="flex items-center gap-2 group">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">费用信息</h3>
+                <ChevronDown size={14} className={`text-gray-300 transition-transform ${feeExpanded ? 'rotate-180' : ''}`} />
+                {!feeExpanded && feeItems.length > 0 && (
+                  <span className="text-xs text-gray-400">
+                    {feeItems.map(r => `${r.label}¥${(form as any)[r.key]}`).join('、')}
+                  </span>
+                )}
+              </button>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.priceOverride} onChange={e => {
                   const override = e.target.checked
@@ -718,6 +686,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                   if (override) {
                     set('priceSource', 'manual')
                     setLockedFields({ greenFee: false, caddyFee: false, cartFee: false, insuranceFee: false, roomFee: false, otherFee: false, discount: false })
+                    setFeeExpanded(true)
                   } else {
                     set('priceSource', 'auto')
                     setLockedFields({ greenFee: true, caddyFee: true, cartFee: true, insuranceFee: true, roomFee: true, otherFee: true, discount: true })
@@ -733,31 +702,37 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
-              {feeFields.map(f => (
-                <div key={f.key} className="relative">
-                  <div className="flex items-center gap-1 mb-1">
-                    <label className={`text-xs font-medium ${f.color}`}>{f.label}</label>
-                    {!form.priceOverride && (
-                      <button onClick={() => toggleLock(f.key)} className="p-0.5"
-                        title={lockedFields[f.key] ? '系统自动（点击解锁手动输入）' : '已手动覆盖（点击恢复自动）'}>
-                        {lockedFields[f.key] ? <Lock size={10} className="text-emerald-400" /> : <Unlock size={10} className="text-amber-500" />}
-                      </button>
-                    )}
+            {feeExpanded && (
+              <div className="grid grid-cols-3 gap-3 mt-2">
+                {feeFields.map(f => (
+                  <div key={f.key} className="relative">
+                    <div className="flex items-center gap-1 mb-1">
+                      <label className={`text-xs font-medium ${f.color}`}>{f.label}</label>
+                      {!form.priceOverride && (
+                        <button type="button" onClick={() => toggleLock(f.key)} className="p-0.5"
+                          title={lockedFields[f.key] ? '系统自动（点击解锁手动输入）' : '已手动覆盖（点击恢复自动）'}>
+                          {lockedFields[f.key] ? <Lock size={10} className="text-emerald-400" /> : <Unlock size={10} className="text-amber-500" />}
+                        </button>
+                      )}
+                    </div>
+                    <input type="number" value={(form as any)[f.key] || ''}
+                      readOnly={!form.priceOverride && lockedFields[f.key]}
+                      onChange={e => set(f.key as keyof BookingFormData, parseFloat(e.target.value) || 0)}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                        !form.priceOverride && lockedFields[f.key] ? 'border-emerald-200 bg-emerald-50/50 text-emerald-700' : 'border-gray-200 bg-white'
+                      }`} />
                   </div>
-                  <input type="number" value={(form as any)[f.key] || ''}
-                    readOnly={!form.priceOverride && lockedFields[f.key]}
-                    onChange={e => set(f.key as keyof BookingFormData, parseFloat(e.target.value) || 0)}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
-                      !form.priceOverride && lockedFields[f.key] ? 'border-emerald-200 bg-emerald-50/50 text-emerald-700' : 'border-gray-200 bg-white'
-                    }`} />
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+
+            {/* 折扣减免（始终可见） */}
+            <div className={`grid grid-cols-2 gap-3 ${feeExpanded ? 'mt-3' : 'mt-2'}`}>
               <div className="relative">
                 <div className="flex items-center gap-1 mb-1">
                   <label className="text-xs font-medium text-red-500">折扣减免</label>
                   {!form.priceOverride && (
-                    <button onClick={() => toggleLock('discount')} className="p-0.5">
+                    <button type="button" onClick={() => toggleLock('discount')} className="p-0.5">
                       {lockedFields.discount ? <Lock size={10} className="text-emerald-400" /> : <Unlock size={10} className="text-amber-500" />}
                     </button>
                   )}
@@ -767,6 +742,12 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                   className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
                     !form.priceOverride && lockedFields.discount ? 'border-emerald-200 bg-emerald-50/50 text-emerald-700' : 'border-gray-200 bg-white'
                   }`} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1 block">折扣原因</label>
+                <input type="text" value={form.discountReason} onChange={e => set('discountReason', e.target.value)}
+                  placeholder="如：会员折扣、赛事赞助…"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
               </div>
             </div>
 
