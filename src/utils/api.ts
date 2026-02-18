@@ -495,4 +495,44 @@ export const api = {
     // 统计
     getStats:            (params?: object) => service.get('/inventory/stats', { params }),
   },
+
+  // 员工排班与考勤
+  staff: {
+    // 部门
+    getDepartments:       () => service.get('/staff/departments'),
+    createDepartment:     (data: object) => service.post('/staff/departments', data),
+    updateDepartment:     (id: string, data: object) => service.put(`/staff/departments/${id}`, data),
+    deleteDepartment:     (id: string) => service.delete(`/staff/departments/${id}`),
+    // 员工
+    getEmployees:         (params?: object) => service.get('/staff/employees', { params }),
+    getEmployee:          (id: string) => service.get(`/staff/employees/${id}`),
+    createEmployee:       (data: object) => service.post('/staff/employees', data),
+    updateEmployee:       (id: string, data: object) => service.put(`/staff/employees/${id}`, data),
+    deleteEmployee:       (id: string) => service.delete(`/staff/employees/${id}`),
+    // 班次模板
+    getShifts:            () => service.get('/staff/shifts'),
+    createShift:          (data: object) => service.post('/staff/shifts', data),
+    updateShift:          (id: string, data: object) => service.put(`/staff/shifts/${id}`, data),
+    deleteShift:          (id: string) => service.delete(`/staff/shifts/${id}`),
+    // 排班
+    getSchedules:         (params?: object) => service.get('/staff/schedules', { params }),
+    createSchedule:       (data: object) => service.post('/staff/schedules', data),
+    autoSchedule:         (data: object) => service.post('/staff/schedules/auto', data),
+    updateSchedule:       (id: string, data: object) => service.put(`/staff/schedules/${id}`, data),
+    deleteSchedule:       (id: string) => service.delete(`/staff/schedules/${id}`),
+    publishSchedules:     (data: object) => service.post('/staff/schedules/publish', data),
+    // 考勤
+    getAttendance:        (params?: object) => service.get('/staff/attendance', { params }),
+    recordAttendance:     (data: object) => service.post('/staff/attendance', data),
+    // 请假
+    getLeaves:            (params?: object) => service.get('/staff/leaves', { params }),
+    createLeave:          (data: object) => service.post('/staff/leaves', data),
+    approveLeave:         (id: string, data: object) => service.put(`/staff/leaves/${id}/approve`, data),
+    // 换班
+    getSwapRequests:      () => service.get('/staff/swap-requests'),
+    createSwapRequest:    (data: object) => service.post('/staff/swap-requests', data),
+    approveSwapRequest:   (id: string, data: object) => service.put(`/staff/swap-requests/${id}/approve`, data),
+    // 统计
+    getStats:             (params?: object) => service.get('/staff/stats', { params }),
+  },
 }

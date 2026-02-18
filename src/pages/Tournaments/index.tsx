@@ -119,9 +119,9 @@ export default function Tournaments() {
         {activeTab === 'list' && (
           <TournamentList
             tournaments={tournaments} loading={loading}
-            onSelect={(id) => { selectTournament(id); setActiveTab('registration') }}
+            onSelect={(id: string) => { selectTournament(id); setActiveTab('registration') }}
             onChangeStatus={changeStatus}
-            onDelete={async (id) => {
+            onDelete={async (id: string) => {
               if (!confirm('确认删除？')) return
               try { await api.tournaments.delete(id); toast.success('已删除'); loadList() }
               catch (e: any) { toast.error(e.message) }
@@ -154,7 +154,7 @@ export default function Tournaments() {
           <LeaderboardTab
             tournaments={tournaments}
             selectedId={selectedId} onSelectId={setSelectedId}
-            onFinalize={async (id) => {
+            onFinalize={async (id: string) => {
               try { await api.tournaments.finalize(id); toast.success('赛事已完赛，积分已发放'); loadList() }
               catch (e: any) { toast.error(e.message) }
             }}
@@ -295,7 +295,7 @@ function CreateTournament({ onCreated }: { onCreated: (t: any) => void }) {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    api.resources.getCourses().then((r: any) => setCourses(r.data || [])).catch(() => {})
+    api.resources.courses.getList().then((r: any) => setCourses(r.data?.data ?? [])).catch(() => {})
   }, [])
 
   const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }))
