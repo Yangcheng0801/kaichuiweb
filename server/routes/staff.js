@@ -347,10 +347,12 @@ module.exports = function (getDb) {
       const shifts = shiftRes.data || [];
       if (shifts.length === 0) return res.status(400).json({ success: false, message: '请先创建班次模板' });
 
-      // 获取已有排班（避免冲突）
-      const existRes = await db.collection('schedules').where({ clubId }).limit(2000).get();
+      // 获取已有排班（避免冲突）— 按日期范围过滤，避免超出 TCB 单次 1000 限制
+      const _ = db.command;
+      const existRes = await db.collection('schedules').where({
+        clubId, date: _.gte(startDate).and(_.lte(endDate))
+      }).limit(1000).get();
       const existSet = new Set((existRes.data || [])
-        .filter(s => s.date >= startDate && s.date <= endDate)
         .map(s => `${s.date}_${s.employeeId}`));
 
       // 简单轮转排班算法
@@ -438,10 +440,11 @@ module.exports = function (getDb) {
       const clubId = getClubId(req);
       const { startDate, endDate } = req.body;
 
-      const r = await db.collection('schedules').where({ clubId }).limit(2000).get();
-      const toPublish = (r.data || []).filter(s =>
-        s.date >= startDate && s.date <= endDate && s.status === 'scheduled'
-      );
+      const _ = db.command;
+      const r = await db.collection('schedules').where({
+        clubId, date: _.gte(startDate).and(_.lte(endDate)), status: 'scheduled'
+      }).limit(1000).get();
+      const toPublish = r.data || [];
 
       const now = new Date().toISOString();
       for (const s of toPublish) {
@@ -910,16 +913,18 @@ module.exports = function (getDb) {
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       const monthEnd = nextMonth.toISOString().slice(0, 10);
 
+      const _ = db.command;
+      const dateRange = _.gte(monthStart).and(_.lt(monthEnd));
       const [empRes, attRes, schedRes, leaveRes] = await Promise.all([
         db.collection('employees').where({ clubId, status: 'active' }).limit(200).get(),
-        db.collection('attendance_records').where({ clubId }).limit(2000).get(),
-        db.collection('schedules').where({ clubId }).limit(2000).get(),
+        db.collection('attendance_records').where({ clubId, date: dateRange }).limit(1000).get(),
+        db.collection('schedules').where({ clubId, date: dateRange }).limit(1000).get(),
         db.collection('leave_requests').where({ clubId }).limit(500).get(),
       ]);
 
       const employees = empRes.data || [];
-      const attendance = (attRes.data || []).filter(a => a.date >= monthStart && a.date < monthEnd);
-      const schedules = (schedRes.data || []).filter(s => s.date >= monthStart && s.date < monthEnd);
+      const attendance = attRes.data || [];
+      const schedules = schedRes.data || [];
       const leaves = (leaveRes.data || []).filter(l => l.status === 'approved');
 
       // 个人统计
