@@ -20,6 +20,7 @@ const Tournaments    = lazy(() => import('@/pages/Tournaments'))
 const Notifications  = lazy(() => import('@/pages/Notifications'))
 const Inventory      = lazy(() => import('@/pages/Inventory'))
 const StaffPage      = lazy(() => import('@/pages/Staff'))
+const CRM            = lazy(() => import('@/pages/CRM'))
 
 // 受保护路由：未登录跳转到 /login
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -166,6 +167,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <StaffPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/crm"
+          element={
+            <ProtectedRoute>
+              <CRM />
             </ProtectedRoute>
           }
         />

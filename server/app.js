@@ -142,6 +142,9 @@ app.use('/api/inventory', require('./routes/inventory')(getDb));
 // 员工排班与考勤
 app.use('/api/staff', require('./routes/staff')(getDb));
 
+// CRM 客户关系管理
+app.use('/api/crm', require('./routes/crm')(getDb));
+
 // 餐饮 POS 系统
 app.use('/api/dining-outlets', require('./routes/dining-outlets')(getDb));
 app.use('/api/tables', require('./routes/tables')(getDb));

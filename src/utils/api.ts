@@ -496,6 +496,48 @@ export const api = {
     getStats:            (params?: object) => service.get('/inventory/stats', { params }),
   },
 
+  // CRM 客户关系管理
+  crm: {
+    // 标签
+    getTags:          (params?: object) => service.get('/crm/tags', { params }),
+    createTag:        (data: object) => service.post('/crm/tags', data),
+    updateTag:        (id: string, data: object) => service.put(`/crm/tags/${id}`, data),
+    deleteTag:        (id: string) => service.delete(`/crm/tags/${id}`),
+    // 客户总览
+    getCustomers:     (params?: object) => service.get('/crm/customers', { params }),
+    getCustomer360:   (id: string, params?: object) => service.get(`/crm/customers/${id}/360`, { params }),
+    updateTags:       (id: string, data: object) => service.post(`/crm/customers/${id}/tags`, data),
+    // 互动记录
+    getInteractions:       (params?: object) => service.get('/crm/interactions', { params }),
+    getCustomerInteractions: (id: string) => service.get(`/crm/customers/${id}/interactions`),
+    createInteraction:     (data: object) => service.post('/crm/interactions', data),
+    // 跟进任务
+    getFollowups:          (params?: object) => service.get('/crm/followups', { params }),
+    getCustomerFollowups:  (id: string) => service.get(`/crm/customers/${id}/followups`),
+    createFollowup:        (data: object) => service.post('/crm/followups', data),
+    updateFollowup:        (id: string, data: object) => service.put(`/crm/followups/${id}`, data),
+    // 分群
+    getSegments:       (params?: object) => service.get('/crm/segments', { params }),
+    createSegment:     (data: object) => service.post('/crm/segments', data),
+    updateSegment:     (id: string, data: object) => service.put(`/crm/segments/${id}`, data),
+    deleteSegment:     (id: string) => service.delete(`/crm/segments/${id}`),
+    refreshSegment:    (id: string) => service.post(`/crm/segments/${id}/refresh`),
+    getSegmentCustomers: (id: string) => service.get(`/crm/segments/${id}/customers`),
+    // RFM
+    calculateRFM:      (data?: object) => service.post('/crm/rfm/calculate', data || {}),
+    getRFMStats:       (params?: object) => service.get('/crm/rfm/stats', { params }),
+    // 自动跟进
+    generateAutoFollowups: (data?: object) => service.post('/crm/auto-followups/generate', data || {}),
+    // 营销活动
+    getCampaigns:      (params?: object) => service.get('/crm/campaigns', { params }),
+    createCampaign:    (data: object) => service.post('/crm/campaigns', data),
+    updateCampaign:    (id: string, data: object) => service.put(`/crm/campaigns/${id}`, data),
+    deleteCampaign:    (id: string) => service.delete(`/crm/campaigns/${id}`),
+    launchCampaign:    (id: string) => service.post(`/crm/campaigns/${id}/launch`),
+    // 数据洞察
+    getInsights:       (params?: object) => service.get('/crm/insights', { params }),
+  },
+
   // 员工排班与考勤
   staff: {
     // 部门
