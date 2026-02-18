@@ -136,6 +136,7 @@ export default function Login() {
   const canvasRef      = useRef<HTMLCanvasElement>(null)
   const wxContainerRef = useRef<HTMLDivElement>(null)
   const checkTimerRef  = useRef<ReturnType<typeof setInterval> | null>(null)
+  const loginHandledRef = useRef(false)
 
   // ---------- 微信官方 WxLogin ----------
   const initWxLogin = useCallback((appId: string, redirectUri: string, state: string) => {
@@ -162,19 +163,21 @@ export default function Login() {
   }, [])
 
   const doCheck = useCallback(async (currentQrId: string) => {
+    if (loginHandledRef.current) return
     try {
       const result = await dispatch(checkLoginStatusByQRCode(currentQrId)).unwrap()
-      if (result.success) {
+      if (result.success && !loginHandledRef.current) {
         const { status, token, user } = result.data
         if (status === 'scanned') {
           setScanned(true)
           toast.info('已扫描，请在手机上确认登录')
         } else if (status === 'confirmed') {
-          setScanned(true)
-          dispatch(loginSuccess({ token, userInfo: user }))
-          toast.success('登录成功')
+          loginHandledRef.current = true
           stopCheck()
-          setTimeout(() => navigate('/home'), 800)
+          setScanned(true)
+          toast.success('登录成功')
+          dispatch(loginSuccess({ token, userInfo: user }))
+          setTimeout(() => navigate('/home', { replace: true }), 800)
         }
       }
     } catch {
@@ -192,6 +195,7 @@ export default function Login() {
     else setLoading(true)
     setScanned(false)
     setQrLoadFailed(false)
+    loginHandledRef.current = false
     stopCheck()
 
     try {
@@ -219,6 +223,25 @@ export default function Login() {
       toast.error('生成二维码失败，请稍后重试')
     }
   }, [dispatch, stopCheck, initWxLogin, startCheck])
+
+  // ---------- 接收 iframe postMessage（替代 window.top.location 劫持） ----------
+  useEffect(() => {
+    function handleMessage(e: MessageEvent) {
+      if (e.data?.type === 'WX_LOGIN_SUCCESS' && e.data.token && !loginHandledRef.current) {
+        loginHandledRef.current = true
+        try { (e.source as Window)?.postMessage({ type: 'WX_LOGIN_ACK' }, '*') } catch {}
+        stopCheck()
+        setScanned(true)
+        setTimeout(() => {
+          toast.success('登录成功')
+          dispatch(loginSuccess({ token: e.data.token, userInfo: {} }))
+          setTimeout(() => navigate('/home', { replace: true }), 600)
+        }, 500)
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [dispatch, navigate, stopCheck])
 
   // ---------- 生命周期 ----------
   useEffect(() => {

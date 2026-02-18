@@ -660,7 +660,7 @@ app.get('/api/auth/callback', async (req, res) => {
     const redirectUrl = `${frontendBase}/auth/callback?token=${encodeURIComponent(token)}`;
     console.log('[AuthCallback] 重定向到前端完成登录');
     // 用 HTML + window.top.location 跳转：无论微信在顶层还是 iframe 内打开回调，都让顶层窗口跳转到前端，避免“二维码框内缩小版网页”
-    return res.send(buildRedirectHtml(redirectUrl));
+    return res.send(buildRedirectHtml(redirectUrl, token));
     
   } catch (error) {
     console.error('[AuthCallback] 处理授权回调失败:', error);
@@ -938,9 +938,14 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-/** 登录成功后跳转到前端：用 window.top.location 保证无论回调在顶层还是 iframe 内打开，都让整页跳转 */
-function buildRedirectHtml(redirectUrl) {
-  const escaped = redirectUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\u003c');
+/**
+ * 登录成功后通知父窗口（Login.tsx）完成登录动效，再由前端自行跳转。
+ * 若 postMessage 未被 3 秒内确认（如 iframe 被跨域阻断或直接打开），
+ * 兜底使用 window.top.location 跳转到 /auth/callback。
+ */
+function buildRedirectHtml(redirectUrl, token) {
+  const escapedUrl   = redirectUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\u003c');
+  const escapedToken = token.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\u003c');
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -950,7 +955,18 @@ function buildRedirectHtml(redirectUrl) {
 </head>
 <body>
   <p style="font-family:sans-serif;text-align:center;margin-top:40px;">登录成功，正在跳转...</p>
-  <script>window.top.location.href='${escaped}';<\/script>
+  <script>
+    var acked = false;
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'WX_LOGIN_SUCCESS', token: '${escapedToken}' }, '*');
+        window.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'WX_LOGIN_ACK') acked = true;
+        });
+      }
+    } catch(e) {}
+    setTimeout(function() { if (!acked) window.top.location.href = '${escapedUrl}'; }, 3000);
+  <\/script>
 </body>
 </html>`;
 }
