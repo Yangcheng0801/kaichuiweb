@@ -137,15 +137,12 @@ export default function Login() {
   const canvasRef      = useRef<HTMLCanvasElement>(null)
   const wxContainerRef = useRef<HTMLDivElement>(null)
   const checkTimerRef  = useRef<ReturnType<typeof setInterval> | null>(null)
-  const loginHandledRef    = useRef(false)
-  const scannedByIframeRef = useRef(false)
-  const iframeSetupTimeRef = useRef(0)
+  const loginHandledRef = useRef(false)
 
   // ---------- 微信官方 WxLogin ----------
   const initWxLogin = useCallback((appId: string, redirectUri: string, state: string) => {
     if (!window.WxLogin || !wxContainerRef.current) return
     wxContainerRef.current.innerHTML = ''
-    scannedByIframeRef.current = false
     new window.WxLogin({
       self_redirect: true,
       id: 'wx_login_container',
@@ -155,21 +152,6 @@ export default function Login() {
       state,
       style: 'black',
       href: ''
-    })
-    // WxLogin 同步创建 iframe；挂载 load 监听检测扫码引起的页面切换
-    requestAnimationFrame(() => {
-      const iframe = wxContainerRef.current?.querySelector('iframe')
-      if (!iframe) return
-      iframeSetupTimeRef.current = Date.now()
-      iframe.addEventListener('load', () => {
-        // 初始二维码页面在 ~2s 内加载完毕，用户不可能在 3s 内完成扫码
-        // 3s 后的 load 事件 = 用户扫码导致 iframe 内页面切换
-        if (Date.now() - iframeSetupTimeRef.current < 3000) return
-        if (!scannedByIframeRef.current && !loginHandledRef.current) {
-          scannedByIframeRef.current = true
-          setScanned(true)
-        }
-      })
     })
   }, [])
 
@@ -192,14 +174,16 @@ export default function Login() {
         } else if (status === 'confirmed') {
           loginHandledRef.current = true
           stopCheck()
-          const alreadyScanned = scannedByIframeRef.current
           setScanned(true)
           setTimeout(() => {
             setLoginDone(true)
-            toast.success('登录成功，正在跳转...')
-            dispatch(loginSuccess({ token, userInfo: user }))
-            setTimeout(() => navigate('/home', { replace: true }), 800)
-          }, alreadyScanned ? 300 : 1000)
+            // loginSuccess 和 navigate 同步执行，避免路由守卫抢跑
+            // 不用 toast，Login 页 UI 已显示"登录成功 / 正在跳转到首页..."
+            setTimeout(() => {
+              dispatch(loginSuccess({ token, userInfo: user }))
+              navigate('/home', { replace: true })
+            }, 800)
+          }, 1000)
         }
       }
     } catch {
@@ -219,7 +203,6 @@ export default function Login() {
     setLoginDone(false)
     setQrLoadFailed(false)
     loginHandledRef.current = false
-    scannedByIframeRef.current = false
     stopCheck()
 
     try {
@@ -289,7 +272,7 @@ export default function Login() {
           --card-bg: rgba(255,255,255,0.95);
           --radius-sm: 8px;
           --radius-md: 12px;
-          --qr-iframe-offset: 12px;
+          --qr-iframe-offset: -6px;
         }
         @media (prefers-color-scheme: dark) {
           .login-page {
@@ -336,15 +319,15 @@ export default function Login() {
         .login-card.is-entered { opacity: 1; transform: translateY(0) scale(1); }
 
         .qr-code {
-          width: 280px; height: 280px;
-          margin: 0 auto 16px;
+          width: 280px; height: 264px;
+          margin: 0 auto 8px;
           background: var(--surface-subtle);
           border: 1px solid #e5e7eb;
           border-radius: var(--radius-md);
           display: flex; align-items: center; justify-content: center;
           position: relative; overflow: hidden;
           transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-          min-height: 280px;
+          min-height: 264px;
         }
         .qr-code:hover {
           border-color: var(--primary);
@@ -443,9 +426,9 @@ export default function Login() {
         .qr-loading { animation: qr-loading-fade 0.4s ease; }
 
         @media (max-width: 480px) {
-          .login-card { padding: 28px 20px; }
+          .login-card { padding: 24px 16px 12px; }
           .login-title { font-size: 22px !important; }
-          .qr-code { width: 240px !important; height: 240px !important; }
+          .qr-code { width: 240px !important; height: 228px !important; min-height: 228px !important; }
         }
         @media (max-width: 360px) {
           .login-title { font-size: 20px !important; }
@@ -463,8 +446,8 @@ export default function Login() {
         <div id="login-main" className="w-full max-w-[360px] relative z-10">
           <div className={`login-card${cardEntered ? ' is-entered' : ''}`}>
             {/* 品牌区 */}
-            <div className="text-center mb-3 relative z-[1]">
-              <div className="w-12 h-12 mx-auto mb-3" role="img" aria-label="开锤品牌标识" style={{ color: 'var(--primary-deep)' }}>
+            <div className="text-center mb-2 relative z-[1]">
+              <div className="w-11 h-11 mx-auto mb-2" role="img" aria-label="开锤品牌标识" style={{ color: 'var(--primary-deep)' }}>
                 <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                   <path d="M12 8v32M12 24l12-16M12 24l12 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -478,7 +461,7 @@ export default function Login() {
             </div>
 
             {/* 二维码区域 */}
-            <div className="text-center relative z-[1] mt-4 flex flex-col items-center">
+            <div className="text-center relative z-[1] mt-2 flex flex-col items-center">
               <div
                 ref={wxContainerRef}
                 id="wx_login_container"
@@ -543,7 +526,7 @@ export default function Login() {
             </div>
 
             {/* 底部 */}
-            <div className="text-center mt-auto pt-6 text-sm relative z-[1]" style={{ color: 'var(--text-muted)' }}>
+            <div className="text-center mt-auto pt-4 text-sm relative z-[1]" style={{ color: 'var(--text-muted)' }}>
               <a
                 href="#"
                 className="interactive-element"
