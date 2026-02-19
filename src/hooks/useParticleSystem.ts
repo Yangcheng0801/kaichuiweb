@@ -12,7 +12,8 @@ export function useParticleSystem() {
     if (!canvas) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const ctx = canvas.getContext('2d')!
+    const el: HTMLCanvasElement = canvas
+    const ctx = el.getContext('2d')!
     const COUNT = 80
     const MAX_SPEED = 1.5
     const LINK_DIST = 150
@@ -25,11 +26,11 @@ export function useParticleSystem() {
     let rafId = 0
 
     function resize() {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      el.width = window.innerWidth
+      el.height = window.innerHeight
       particles = Array.from({ length: COUNT }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        x: Math.random() * el.width,
+        y: Math.random() * el.height,
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
         r: Math.random() * 2.5 + 1.5,
@@ -39,12 +40,12 @@ export function useParticleSystem() {
 
     function frame() {
       if (!running) return
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, el.width, el.height)
 
       for (const p of particles) {
         p.x += p.vx; p.y += p.vy
-        if (p.x < 0 || p.x > canvas.width)  p.vx *= -1
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1
+        if (p.x < 0 || p.x > el.width)  p.vx *= -1
+        if (p.y < 0 || p.y > el.height) p.vy *= -1
         const dx = p.x - mouse.x, dy = p.y - mouse.y
         const d = Math.hypot(dx, dy)
         if (d < REPEL_DIST && d > 0) {
