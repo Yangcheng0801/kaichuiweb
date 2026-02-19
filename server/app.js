@@ -660,7 +660,7 @@ app.get('/api/auth/callback', async (req, res) => {
     const redirectUrl = `${frontendBase}/auth/callback?token=${encodeURIComponent(token)}`;
     console.log('[AuthCallback] 重定向到前端完成登录');
     // 用 HTML + window.top.location 跳转：无论微信在顶层还是 iframe 内打开回调，都让顶层窗口跳转到前端，避免“二维码框内缩小版网页”
-    return res.send(buildRedirectHtml(redirectUrl, token));
+    return res.send(buildRedirectHtml(redirectUrl));
     
   } catch (error) {
     console.error('[AuthCallback] 处理授权回调失败:', error);
@@ -939,33 +939,44 @@ function escapeHtml(str) {
 }
 
 /**
- * 登录成功后通知父窗口（Login.tsx）完成登录动效，再由前端自行跳转。
- * 若 postMessage 未被 3 秒内确认（如 iframe 被跨域阻断或直接打开），
- * 兜底使用 window.top.location 跳转到 /auth/callback。
+ * 登录确认页：不做任何主动导航，由 Login.tsx 轮询检测 confirmed 并控制跳转。
+ * - iframe 内加载（self_redirect 生效）：显示静态确认文字，Login.tsx 轮询接管。
+ * - 顶层窗口加载（self_redirect 失效）：Login.tsx 已被销毁，1.5 秒后兜底跳转到 AuthCallback。
  */
-function buildRedirectHtml(redirectUrl, token) {
-  const escapedUrl   = redirectUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\u003c');
-  const escapedToken = token.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\u003c');
+function buildRedirectHtml(redirectUrl) {
+  const escapedUrl = redirectUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\u003c');
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>登录成功，正在跳转</title>
+  <title>登录确认成功</title>
+  <style>
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f0fdf4}
+    .box{text-align:center;animation:fadeIn .4s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .ico{width:40px;height:40px;margin:0 auto 10px;color:#10b981}
+    .t{font-size:17px;font-weight:600;color:#052c22;margin:0 0 6px}
+    .s{font-size:13px;color:#6b7280;margin:0}
+  </style>
 </head>
 <body>
-  <p style="font-family:sans-serif;text-align:center;margin-top:40px;">登录成功，正在跳转...</p>
+  <div class="box">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 6L9 17l-5-5"/>
+    </svg>
+    <p class="t">登录确认成功</p>
+    <p class="s" id="hint">页面即将自动跳转...</p>
+  </div>
   <script>
-    var acked = false;
-    try {
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'WX_LOGIN_SUCCESS', token: '${escapedToken}' }, '*');
-        window.addEventListener('message', function(e) {
-          if (e.data && e.data.type === 'WX_LOGIN_ACK') acked = true;
-        });
-      }
-    } catch(e) {}
-    setTimeout(function() { if (!acked) window.top.location.href = '${escapedUrl}'; }, 3000);
+    var inIframe=false;
+    try{inIframe=(window.self!==window.top)}catch(e){inIframe=true}
+    if(inIframe){
+      document.getElementById('hint').textContent='登录已确认，请稍候...';
+    }else{
+      setTimeout(function(){window.location.href='${escapedUrl}'},1500);
+    }
   <\/script>
 </body>
 </html>`;

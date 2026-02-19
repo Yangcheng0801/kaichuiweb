@@ -131,6 +131,7 @@ export default function Login() {
   const [refreshLoading, setRefreshLoading] = useState(false)
   const [qrLoadFailed, setQrLoadFailed] = useState(false)
   const [scanned, setScanned]         = useState(false)
+  const [loginDone, setLoginDone]     = useState(false)
   const [cardEntered, setCardEntered] = useState(false)
 
   const canvasRef      = useRef<HTMLCanvasElement>(null)
@@ -170,14 +171,16 @@ export default function Login() {
         const { status, token, user } = result.data
         if (status === 'scanned') {
           setScanned(true)
-          toast.info('已扫描，请在手机上确认登录')
         } else if (status === 'confirmed') {
           loginHandledRef.current = true
           stopCheck()
           setScanned(true)
-          toast.success('登录成功')
-          dispatch(loginSuccess({ token, userInfo: user }))
-          setTimeout(() => navigate('/home', { replace: true }), 800)
+          setTimeout(() => {
+            setLoginDone(true)
+            toast.success('登录成功，正在跳转...')
+            dispatch(loginSuccess({ token, userInfo: user }))
+            setTimeout(() => navigate('/home', { replace: true }), 800)
+          }, 1000)
         }
       }
     } catch {
@@ -194,6 +197,7 @@ export default function Login() {
     if (isRefresh) setRefreshLoading(true)
     else setLoading(true)
     setScanned(false)
+    setLoginDone(false)
     setQrLoadFailed(false)
     loginHandledRef.current = false
     stopCheck()
@@ -223,25 +227,6 @@ export default function Login() {
       toast.error('生成二维码失败，请稍后重试')
     }
   }, [dispatch, stopCheck, initWxLogin, startCheck])
-
-  // ---------- 接收 iframe postMessage（替代 window.top.location 劫持） ----------
-  useEffect(() => {
-    function handleMessage(e: MessageEvent) {
-      if (e.data?.type === 'WX_LOGIN_SUCCESS' && e.data.token && !loginHandledRef.current) {
-        loginHandledRef.current = true
-        try { (e.source as Window)?.postMessage({ type: 'WX_LOGIN_ACK' }, '*') } catch {}
-        stopCheck()
-        setScanned(true)
-        setTimeout(() => {
-          toast.success('登录成功')
-          dispatch(loginSuccess({ token: e.data.token, userInfo: {} }))
-          setTimeout(() => navigate('/home', { replace: true }), 600)
-        }, 500)
-      }
-    }
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [dispatch, navigate, stopCheck])
 
   // ---------- 生命周期 ----------
   useEffect(() => {
@@ -481,8 +466,9 @@ export default function Login() {
                 role="region"
                 aria-live="polite"
                 aria-label={
-                  loading ? '正在生成二维码'
-                  : scanned ? '已扫码，请在手机上确认登录'
+                  loginDone ? '登录成功，正在跳转'
+                  : loading ? '正在生成二维码'
+                  : scanned ? '扫码成功，正在登录'
                   : qrLoadFailed ? '二维码加载失败，可点击重新生成'
                   : '请使用微信扫一扫扫描二维码'
                 }
@@ -506,12 +492,17 @@ export default function Login() {
                     </svg>
                   </span>
                 )}
-                {scanned ? '扫码成功' : '请使用微信扫一扫扫描二维码'}
+                {loginDone ? '登录成功' : scanned ? '扫码成功' : '请使用微信扫一扫扫描二维码'}
               </p>
 
-              {scanned && (
+              {scanned && !loginDone && (
                 <p className="text-[13px] -mt-1 mb-2 font-normal" style={{ color: 'var(--text-muted)' }}>
                   请在手机上点击「确认登录」完成登录
+                </p>
+              )}
+              {loginDone && (
+                <p className="text-[13px] -mt-1 mb-2 font-normal" style={{ color: 'var(--primary)' }}>
+                  正在跳转到首页...
                 </p>
               )}
 
