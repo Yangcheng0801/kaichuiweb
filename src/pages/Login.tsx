@@ -137,12 +137,15 @@ export default function Login() {
   const canvasRef      = useRef<HTMLCanvasElement>(null)
   const wxContainerRef = useRef<HTMLDivElement>(null)
   const checkTimerRef  = useRef<ReturnType<typeof setInterval> | null>(null)
-  const loginHandledRef = useRef(false)
+  const loginHandledRef    = useRef(false)
+  const scannedByIframeRef = useRef(false)
+  const iframeSetupTimeRef = useRef(0)
 
   // ---------- 微信官方 WxLogin ----------
   const initWxLogin = useCallback((appId: string, redirectUri: string, state: string) => {
     if (!window.WxLogin || !wxContainerRef.current) return
     wxContainerRef.current.innerHTML = ''
+    scannedByIframeRef.current = false
     new window.WxLogin({
       self_redirect: true,
       id: 'wx_login_container',
@@ -152,6 +155,21 @@ export default function Login() {
       state,
       style: 'black',
       href: ''
+    })
+    // WxLogin 同步创建 iframe；挂载 load 监听检测扫码引起的页面切换
+    requestAnimationFrame(() => {
+      const iframe = wxContainerRef.current?.querySelector('iframe')
+      if (!iframe) return
+      iframeSetupTimeRef.current = Date.now()
+      iframe.addEventListener('load', () => {
+        // 初始二维码页面在 ~2s 内加载完毕，用户不可能在 3s 内完成扫码
+        // 3s 后的 load 事件 = 用户扫码导致 iframe 内页面切换
+        if (Date.now() - iframeSetupTimeRef.current < 3000) return
+        if (!scannedByIframeRef.current && !loginHandledRef.current) {
+          scannedByIframeRef.current = true
+          setScanned(true)
+        }
+      })
     })
   }, [])
 
@@ -174,13 +192,14 @@ export default function Login() {
         } else if (status === 'confirmed') {
           loginHandledRef.current = true
           stopCheck()
+          const alreadyScanned = scannedByIframeRef.current
           setScanned(true)
           setTimeout(() => {
             setLoginDone(true)
             toast.success('登录成功，正在跳转...')
             dispatch(loginSuccess({ token, userInfo: user }))
             setTimeout(() => navigate('/home', { replace: true }), 800)
-          }, 1000)
+          }, alreadyScanned ? 300 : 1000)
         }
       }
     } catch {
@@ -200,6 +219,7 @@ export default function Login() {
     setLoginDone(false)
     setQrLoadFailed(false)
     loginHandledRef.current = false
+    scannedByIframeRef.current = false
     stopCheck()
 
     try {
