@@ -16,10 +16,15 @@ module.exports = {
           '0%': { transform: 'translateX(100%)' },
           '100%': { transform: 'translateX(0)' },
         },
+        'scanned-pulse': {
+          '0%, 100%': { boxShadow: '0 0 0 2px rgba(16,185,129,0.3)' },
+          '50%': { boxShadow: '0 0 0 3px rgba(16,185,129,0.45)' },
+        },
       },
       animation: {
         'slide-in-left': 'slide-in-left 0.3s cubic-bezier(0.4,0,0.2,1) forwards',
         'slide-in-right': 'slide-in-right 0.3s cubic-bezier(0.4,0,0.2,1) forwards',
+        'scanned-pulse': 'scanned-pulse 2s ease-in-out infinite',
       },
       colors: {
         primary: {
