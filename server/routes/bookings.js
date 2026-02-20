@@ -211,6 +211,35 @@ function createBookingsRouter(getDb) {
     if (res.tempCardId) await returnTempCard(db, res.tempCardId);
   }
 
+  // ─── 工具：点号球童冲突校验（原子性双重检查，防止超卖）──────────────────────────
+  const CADDY_TURNOVER_BUFFER = 20; // 分钟，球童回场周转缓冲
+  async function checkCaddyDesignationConflict(db, caddyId, date, teeTime, excludeBookingId = null) {
+    if (!caddyId || !date || !teeTime) return false;
+    const [th, tm] = teeTime.split(':').map(Number);
+    const slotStart = th * 60 + tm;
+    const slotEnd = slotStart + 270;
+
+    const res = await db.collection('bookings')
+      .where({ date })
+      .limit(500)
+      .get();
+
+    const bookings = (res.data || []).filter(b => {
+      const cid = b.caddyDesignation?.caddyId || b.caddyId || b.assignedResources?.caddyId;
+      return cid === caddyId && b.status !== 'cancelled' && b.status !== 'settled' && b._id !== excludeBookingId;
+    });
+
+    for (const b of bookings) {
+      const [bh, bm] = (b.teeTime || '08:00').split(':').map(Number);
+      const bStart = bh * 60 + bm;
+      const bEnd = bStart + 270;
+      if (slotStart < bEnd + CADDY_TURNOVER_BUFFER && slotEnd > bStart) {
+        return { conflict: true, orderNo: b.orderNo };
+      }
+    }
+    return { conflict: false };
+  }
+
   // ─── 工具：分页参数解析 ──────────────────────────────────────────────────────
   function parsePage(query) {
     let page = parseInt(query.page, 10);
@@ -227,6 +256,7 @@ function createBookingsRouter(getDb) {
     return {
       greenFee:     Number(body.greenFee     || 0),  // 果岭费
       caddyFee:     Number(body.caddyFee     || 0),  // 球童费
+      caddyDesignationFee: Number(body.caddyDesignationFee || 0),  // 点号费
       cartFee:      Number(body.cartFee      || 0),  // 球车费
       insuranceFee: Number(body.insuranceFee || 0),  // 保险费
       roomFee:      Number(body.roomFee      || 0),  // 客房费
@@ -358,6 +388,7 @@ function createBookingsRouter(getDb) {
         needCaddy  = false,
         needCart    = false,
         teamBooking = null,   // { isTeam, teamName, totalPlayers, contactName, contactPhone }
+        caddyDesignation = null, // 点号信息 { type, caddyId, caddyNo, caddyName, caddyLevel, fee, designationFeeOverride }
       } = req.body;
 
       // 生成订单号
@@ -374,16 +405,24 @@ function createBookingsRouter(getDb) {
         // 调用定价引擎自动计算
         try {
           const { calculateBookingPrice } = require('../utils/pricing-engine');
-          pricingResult = await calculateBookingPrice(db, {
+          const calcInput = {
             clubId, date, teeTime, courseId, holes,
             players, needCaddy, needCart, packageId,
             totalPlayers: teamBooking ? (teamBooking.totalPlayers || players.length) : players.length,
-          });
+          };
+          if (caddyDesignation && caddyDesignation.type === 'designated' && caddyDesignation.caddyId) {
+            calcInput.caddyDesignation = {
+              ...caddyDesignation,
+              designationFeeOverride: caddyDesignation.designationFeeOverride,
+            };
+          }
+          pricingResult = await calculateBookingPrice(db, calcInput);
 
           if (pricingResult && pricingResult.success) {
             pricing = buildPricing({
               greenFee:     pricingResult.greenFee || 0,
               caddyFee:     pricingResult.caddyFee || 0,
+              caddyDesignationFee: pricingResult.caddyDesignationFee || 0,
               cartFee:      pricingResult.cartFee  || 0,
               insuranceFee: pricingResult.insuranceFee || 0,
               roomFee:      pricingResult.roomFee  || 0,
@@ -412,6 +451,22 @@ function createBookingsRouter(getDb) {
         note:   '创建预订',
       }];
 
+      // 点号信息：若有指定球童则持久化，并占用球童（reserved）
+      const designationPayload = (caddyDesignation && caddyDesignation.type === 'designated' && caddyDesignation.caddyId)
+        ? {
+            type: 'designated',
+            caddyId: caddyDesignation.caddyId,
+            caddyNo: caddyDesignation.caddyNo || '',
+            caddyName: caddyDesignation.caddyName || '',
+            caddyLevel: caddyDesignation.caddyLevel || 'trainee',
+            fee: pricing.caddyDesignationFee || 0,
+            status: 'confirmed',
+          }
+        : { type: 'none', caddyId: null, caddyNo: '', caddyName: '', caddyLevel: '', fee: 0, status: 'pending' };
+
+      const effectiveCaddyId = designationPayload.type === 'designated' ? designationPayload.caddyId : caddyId;
+      const effectiveCaddyName = designationPayload.type === 'designated' ? designationPayload.caddyName : caddyName;
+
       const bookingData = {
         // 订单标识
         orderNo,
@@ -421,8 +476,10 @@ function createBookingsRouter(getDb) {
         playerCount: players.length,
         holes: Number(holes) || 18,
         // 资源（预订阶段填写，到场后可在 assignedResources 中细化）
-        caddyId, caddyName,
+        caddyId: effectiveCaddyId,
+        caddyName: effectiveCaddyName,
         cartId,  cartNo,
+        caddyDesignation: designationPayload,
         // 费用
         pricing,
         totalFee: pricing.totalFee,   // 冗余一份方便发球表显示
@@ -453,10 +510,10 @@ function createBookingsRouter(getDb) {
         status: BOOKING_STATUS.CONFIRMED,
         statusHistory,
         version: 1,
-        // 到访资源（签到时填写）
+        // 到访资源（签到时填写；点号时预填球童）
         assignedResources: {
-          caddyId:    caddyId || null,
-          caddyName:  caddyName || '',
+          caddyId:    effectiveCaddyId || null,
+          caddyName:  effectiveCaddyName || '',
           cartId:     cartId  || null,
           cartNo:     cartNo  || '',
           lockers:    [],   // [{ lockerNo, area }]
@@ -476,10 +533,22 @@ function createBookingsRouter(getDb) {
         updateTime: new Date(),
       };
 
+      // 原子性双重检查：插入前再次校验球童时段，防止高并发超卖
+      if (designationPayload.type === 'designated' && effectiveCaddyId) {
+        const conflictCheck = await checkCaddyDesignationConflict(db, effectiveCaddyId, date, teeTime);
+        if (conflictCheck.conflict) {
+          return res.status(400).json({
+            success: false,
+            error: `该球童当前时段已被预约（订单 ${conflictCheck.orderNo || '冲突'}），请重新选择`,
+            code: 'CADDY_CONFLICT',
+          });
+        }
+      }
+
       const result = await db.collection('bookings').add({ data: bookingData });
 
-      // 占用球童
-      if (caddyId) await occupyCaddy(db, caddyId);
+      // 占用球童（点号或手动指定时）
+      if (effectiveCaddyId) await occupyCaddy(db, effectiveCaddyId);
 
       console.log(`[Bookings] 预订创建成功: ${orderNo}, 定价来源: ${pricing.priceSource}`);
 
@@ -923,6 +992,14 @@ function createBookingsRouter(getDb) {
           const charges = [];
           if (pricing.greenFee > 0)     charges.push({ chargeType: 'green_fee',  description: '果岭费', amount: pricing.greenFee });
           if (pricing.caddyFee > 0)     charges.push({ chargeType: 'caddy_fee',  description: '球童费', amount: pricing.caddyFee });
+          if ((pricing.caddyDesignationFee || 0) > 0) {
+            const des = old.caddyDesignation || {};
+            charges.push({
+              chargeType: 'caddy_request_fee',
+              description: des.caddyNo ? `点号费（${des.caddyNo}号）` : '点号费',
+              amount: pricing.caddyDesignationFee,
+            });
+          }
           if (pricing.cartFee > 0)      charges.push({ chargeType: 'cart_fee',   description: '球车费', amount: pricing.cartFee });
           if (pricing.insuranceFee > 0) charges.push({ chargeType: 'insurance',  description: '保险费', amount: pricing.insuranceFee });
           if (pricing.roomFee > 0)      charges.push({ chargeType: 'room',       description: '客房费', amount: pricing.roomFee });

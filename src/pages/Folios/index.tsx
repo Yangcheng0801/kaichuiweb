@@ -58,7 +58,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
 }
 
 const CHARGE_LABELS: Record<string, string> = {
-  green_fee: '果岭费', caddy_fee: '球童费', cart_fee: '球车费',
+  green_fee: '果岭费', caddy_fee: '球童费', caddy_request_fee: '点号费', cart_fee: '球车费',
   insurance: '保险费', locker_daily: '更衣柜', room: '客房费',
   dining: '餐饮', proshop: '球具店', minibar: '迷你吧', other: '其他',
 }

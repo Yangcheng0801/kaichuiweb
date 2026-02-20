@@ -11,7 +11,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
-import { X, Trash2, UserPlus, Search, Check, Lock, Unlock, Users, Info, ChevronDown } from 'lucide-react'
+import { X, Trash2, UserPlus, Search, Check, Lock, Unlock, Users, Info, ChevronDown, UserCheck } from 'lucide-react'
 import { api } from '@/utils/api'
 
 // ─── 类型 ─────────────────────────────────────────────────────────────────────
@@ -70,6 +70,16 @@ interface BookingFormData {
   // 来源 & 折扣原因
   bookingSource:  string
   discountReason: string
+  // 点号（指定球童）
+  caddyDesignation: {
+    type: 'none' | 'designated'
+    caddyId: string
+    caddyNo: string
+    caddyName: string
+    caddyLevel: string
+    designationFeeOverride?: number
+  }
+  caddyDesignationFee: number
   // 加打/减打（运营阶段由出发台处理，保留字段兼容后端）
   isAddOn:        boolean
   isReduced:      boolean
@@ -88,7 +98,7 @@ interface PricingResult {
   success: boolean; error?: string
   priceSource: string; dayType: string; dayTypeName: string; dateName?: string
   timeSlot: string; timeSlotName: string; hasRateSheet: boolean
-  greenFee: number; caddyFee: number; cartFee: number; insuranceFee: number
+  greenFee: number; caddyFee: number; caddyDesignationFee?: number; cartFee: number; insuranceFee: number
   roomFee: number; otherFee: number; discount: number; totalFee: number
   playerBreakdown: { name: string; identityCode?: string; memberType?: string; greenFee: number; addOnInfo?: any; reducedInfo?: any }[]
   teamDiscount?: { label: string; discountRate: number; discountAmount: number }
@@ -98,6 +108,123 @@ interface PricingResult {
   reducedInfo?: any
   addOnPricesRef?: Record<string, number>
   reducedPolicyRef?: any
+}
+
+interface CaddieItem { _id: string; name?: string; caddyNo?: string; no?: string; level?: string }
+interface CaddieSelectDialogProps {
+  open: boolean
+  onClose: () => void
+  onSelect: (c: { caddyId: string; caddyNo: string; caddyName: string; caddyLevel: string; designationFeeOverride?: number }) => void
+  date: string
+  teeTime: string
+}
+
+function CaddieSelectDialog({ open, onClose, onSelect, date, teeTime }: CaddieSelectDialogProps) {
+  const [caddies, setCaddies] = useState<CaddieItem[]>([])
+  const [availabilityMap, setAvailabilityMap] = useState<Record<string, { available: boolean; reason?: string }>>({})
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [checking, setChecking] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (open) {
+      setSearch('')
+      setLoading(true)
+      Promise.all([
+        api.resources.caddies.getList({}),
+        api.resources.caddies.getAvailabilityMap({ date, teeTime }),
+      ])
+        .then(([listRes, availRes]: any[]) => {
+          setCaddies(listRes?.data || [])
+          setAvailabilityMap(availRes?.data || {})
+        })
+        .catch(() => toast.error('加载球童列表失败'))
+        .finally(() => setLoading(false))
+    }
+  }, [open, date, teeTime])
+
+  const filtered = caddies.filter(c => {
+    const no = (c.caddyNo || c.no || '').toString()
+    const name = (c.name || '').toLowerCase()
+    const q = search.trim().toLowerCase()
+    return !q || no.includes(q) || name.includes(q)
+  })
+
+  const handlePick = async (c: CaddieItem) => {
+    setChecking(c._id)
+    try {
+      const res: any = await api.resources.caddies.checkAvailability({ caddyId: c._id, date, teeTime })
+      if (res.available) {
+        onSelect({
+          caddyId: c._id,
+          caddyNo: (c.caddyNo || c.no || '').toString(),
+          caddyName: c.name || '',
+          caddyLevel: c.level || 'trainee',
+          designationFeeOverride: (c as any).designationFeeOverride,
+        })
+        onClose()
+      } else {
+        toast.error(res.reason || '该球童当前时段不可用')
+      }
+    } catch {
+      toast.error('校验失败，请稍后重试')
+    } finally {
+      setChecking(null)
+    }
+  }
+
+  if (!open) return null
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[70vh] flex flex-col">
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <h3 className="font-semibold text-gray-800">选择球童（点号）</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+        </div>
+        <div className="p-3 border-b">
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="工号 / 姓名"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+        </div>
+        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          {loading ? (
+            <div className="text-center py-8 text-gray-400 text-sm">加载中...</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-8 text-gray-400 text-sm">暂无球童</div>
+          ) : (
+            filtered.map(c => {
+              const avail = availabilityMap[c._id]
+              const available = avail === undefined ? true : avail.available
+              const reason = avail?.reason
+              return (
+                <button key={c._id} type="button" onClick={() => available && handlePick(c)}
+                  disabled={!!checking || !available}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                    available && !checking
+                      ? 'hover:bg-emerald-50 cursor-pointer'
+                      : 'opacity-60 cursor-not-allowed bg-gray-50'
+                  }`}>
+                  <div className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center flex-shrink-0 ${
+                    available ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'
+                  }`}>
+                    {(c.caddyNo || c.no)?.toString().slice(-2) || '?'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-gray-800">{c.name || '未命名'}</div>
+                    <div className="text-xs text-gray-500">{c.caddyNo || c.no}号 · {c.level === 'gold' ? '金牌' : c.level === 'silver' ? '特级' : '普通'}</div>
+                    {!available && reason && (
+                      <div className="text-[11px] text-amber-600 mt-0.5">{reason}</div>
+                    )}
+                  </div>
+                  {checking === c._id && <span className="text-xs text-amber-600 ml-auto">校验中…</span>}
+                </button>
+              )
+            })
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 interface Props { onClose: () => void; onSuccess: () => void; initialDate?: string }
@@ -225,6 +352,8 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     priceSource: 'auto', priceOverride: false,
     isTeam: false, teamName: '', totalPlayers: 0, contactName: '', contactPhone: '',
     bookingSource: 'walkin', discountReason: '',
+    caddyDesignation: { type: 'none', caddyId: '', caddyNo: '', caddyName: '', caddyLevel: 'trainee' },
+    caddyDesignationFee: 0,
     isAddOn: false, isReduced: false, holesPlayed: 9,
   })
 
@@ -235,9 +364,10 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
   const [pricingResult, setPricingResult] = useState<PricingResult | null>(null)
   const [pricingLoading, setPricingLoading] = useState(false)
   const [lockedFields, setLockedFields] = useState<Record<string, boolean>>({
-    greenFee: true, caddyFee: true, cartFee: true, insuranceFee: true, roomFee: true, otherFee: true, discount: true,
+    greenFee: true, caddyFee: true, caddyDesignationFee: true, cartFee: true, insuranceFee: true, roomFee: true, otherFee: true, discount: true,
   })
   const [feeExpanded, setFeeExpanded] = useState(false)
+  const [caddieSelectOpen, setCaddieSelectOpen] = useState(false)
 
   const set = (key: keyof BookingFormData, value: unknown) => setForm(p => ({ ...p, [key]: value }))
 
@@ -283,6 +413,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
         needCart: form.needCart,
         packageId: form.packageId || undefined,
         totalPlayers: form.isTeam ? (form.totalPlayers || form.players.length) : form.players.length,
+        caddyDesignation: form.caddyDesignation?.type === 'designated' ? form.caddyDesignation : undefined,
         isAddOn: form.isAddOn,
         isReduced: form.isReduced,
         holesPlayed: form.isReduced ? form.holesPlayed : undefined,
@@ -296,6 +427,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
           ...p,
           ...(lockedFields.greenFee     ? { greenFee: data.greenFee } : {}),
           ...(lockedFields.caddyFee     ? { caddyFee: data.caddyFee } : {}),
+          ...(lockedFields.caddyDesignationFee !== false ? { caddyDesignationFee: data.caddyDesignationFee || 0 } : {}),
           ...(lockedFields.cartFee      ? { cartFee: data.cartFee } : {}),
           ...(lockedFields.insuranceFee ? { insuranceFee: data.insuranceFee } : {}),
           ...(lockedFields.roomFee      ? { roomFee: data.roomFee || 0 } : {}),
@@ -308,7 +440,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
     } finally {
       setPricingLoading(false)
     }
-  }, [form.date, form.teeTime, form.courseId, form.holes, form.players, form.needCaddy, form.needCart, form.packageId, form.isTeam, form.totalPlayers, form.priceOverride, form.isAddOn, form.isReduced, form.holesPlayed, lockedFields])
+  }, [form.date, form.teeTime, form.courseId, form.holes, form.players, form.needCaddy, form.needCart, form.caddyDesignation, form.packageId, form.isTeam, form.totalPlayers, form.priceOverride, form.isAddOn, form.isReduced, form.holesPlayed, lockedFields])
 
   const calcTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
@@ -318,9 +450,9 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
   }, [calculatePrice])
 
   useEffect(() => {
-    const total = form.greenFee + form.caddyFee + form.cartFee + form.insuranceFee + form.roomFee + form.otherFee - form.discount
+    const total = form.greenFee + form.caddyFee + (form.caddyDesignationFee || 0) + form.cartFee + form.insuranceFee + form.roomFee + form.otherFee - form.discount
     setForm(p => ({ ...p, totalFee: Math.max(0, Math.round(total * 100) / 100) }))
-  }, [form.greenFee, form.caddyFee, form.cartFee, form.insuranceFee, form.roomFee, form.otherFee, form.discount])
+  }, [form.greenFee, form.caddyFee, form.caddyDesignationFee, form.cartFee, form.insuranceFee, form.roomFee, form.otherFee, form.discount])
 
   // ── 选择处理 ──
   const handleCourseChange = (id: string) => {
@@ -365,6 +497,18 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
 
   const toggleLock = (field: string) => setLockedFields(p => ({ ...p, [field]: !p[field] }))
 
+  const handleCaddieSelect = (c: { caddyId: string; caddyNo: string; caddyName: string; caddyLevel: string; designationFeeOverride?: number }) => {
+    set('caddyDesignation', {
+      type: 'designated',
+      caddyId: c.caddyId,
+      caddyNo: c.caddyNo,
+      caddyName: c.caddyName,
+      caddyLevel: c.caddyLevel || 'trainee',
+      designationFeeOverride: c.designationFeeOverride,
+    })
+    setCaddieSelectOpen(false)
+  }
+
   // ── 提交 ──
   const handleSave = async () => {
     if (!form.date) { toast.error('请选择预订日期'); return }
@@ -386,6 +530,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
         stayType: form.stayType,
         packageId: form.packageId || undefined,
         greenFee: form.greenFee, caddyFee: form.caddyFee,
+        caddyDesignationFee: form.caddyDesignationFee || 0,
         cartFee: form.cartFee, insuranceFee: form.insuranceFee,
         roomFee: form.roomFee, otherFee: form.otherFee,
         discount: form.discount, totalFee: form.totalFee,
@@ -395,6 +540,17 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
         isAddOn: form.isAddOn, isReduced: form.isReduced,
         holesPlayed: form.isReduced ? form.holesPlayed : undefined,
         note: form.note, createdBy: form.createdBy, createdByName: form.createdByName,
+      }
+
+      if (form.caddyDesignation?.type === 'designated' && form.caddyDesignation.caddyId) {
+        payload.caddyDesignation = {
+          type: 'designated',
+          caddyId: form.caddyDesignation.caddyId,
+          caddyNo: form.caddyDesignation.caddyNo,
+          caddyName: form.caddyDesignation.caddyName,
+          caddyLevel: form.caddyDesignation.caddyLevel || 'trainee',
+          designationFeeOverride: form.caddyDesignation.designationFeeOverride,
+        }
       }
 
       if (form.isTeam) {
@@ -428,6 +584,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
   const feeFields = [
     { key: 'greenFee',     label: '果岭费',   color: 'text-emerald-600' },
     { key: 'caddyFee',     label: '球童费',   color: 'text-blue-600' },
+    { key: 'caddyDesignationFee', label: '点号费', color: 'text-amber-600' },
     { key: 'cartFee',      label: '球车费',   color: 'text-indigo-600' },
     { key: 'insuranceFee', label: '保险费',   color: 'text-gray-600' },
     { key: 'roomFee',      label: '客房费',   color: 'text-purple-600' },
@@ -646,11 +803,38 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
               <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                 form.needCaddy ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'
               }`}>
-                <input type="checkbox" checked={form.needCaddy} onChange={e => set('needCaddy', e.target.checked)}
+                <input type="checkbox" checked={form.needCaddy} onChange={e => {
+                  const checked = e.target.checked
+                  set('needCaddy', checked)
+                  if (!checked) set('caddyDesignation', { type: 'none', caddyId: '', caddyNo: '', caddyName: '', caddyLevel: 'trainee' })
+                }}
                   className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-400" />
-                <div>
+                <div className="flex-1 min-w-0">
                   <span className={`text-sm font-medium ${form.needCaddy ? 'text-emerald-800' : 'text-gray-600'}`}>需要球童</span>
                   <p className="text-[10px] text-gray-400">出发台统一调度分配</p>
+                  {form.needCaddy && (
+                    <label className="mt-2 flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.caddyDesignation?.type === 'designated'}
+                        onChange={e => {
+                          if (!e.target.checked) {
+                            set('caddyDesignation', { type: 'none', caddyId: '', caddyNo: '', caddyName: '', caddyLevel: 'trainee' })
+                          } else {
+                            setCaddieSelectOpen(true)
+                          }
+                        }}
+                        className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-400" />
+                      <span className="text-xs text-amber-700 font-medium">指定球童（点号）</span>
+                    </label>
+                  )}
+                  {form.caddyDesignation?.type === 'designated' && form.caddyDesignation.caddyNo && (
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                        {form.caddyDesignation.caddyNo}号 {form.caddyDesignation.caddyName}
+                      </span>
+                      <button type="button" onClick={() => setCaddieSelectOpen(true)}
+                        className="text-amber-500 hover:text-amber-700 text-xs">更换</button>
+                    </div>
+                  )}
                 </div>
               </label>
               <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
@@ -685,11 +869,11 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                   set('priceOverride', override)
                   if (override) {
                     set('priceSource', 'manual')
-                    setLockedFields({ greenFee: false, caddyFee: false, cartFee: false, insuranceFee: false, roomFee: false, otherFee: false, discount: false })
+                    setLockedFields({ greenFee: false, caddyFee: false, caddyDesignationFee: false, cartFee: false, insuranceFee: false, roomFee: false, otherFee: false, discount: false })
                     setFeeExpanded(true)
                   } else {
                     set('priceSource', 'auto')
-                    setLockedFields({ greenFee: true, caddyFee: true, cartFee: true, insuranceFee: true, roomFee: true, otherFee: true, discount: true })
+                    setLockedFields({ greenFee: true, caddyFee: true, caddyDesignationFee: true, cartFee: true, insuranceFee: true, roomFee: true, otherFee: true, discount: true })
                   }
                 }} className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-400" />
                 <span className="text-xs text-amber-600 font-medium">手动定价</span>
@@ -792,6 +976,14 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
           </div>
         </div>
       </div>
+
+      <CaddieSelectDialog
+        open={caddieSelectOpen}
+        onClose={() => setCaddieSelectOpen(false)}
+        onSelect={handleCaddieSelect}
+        date={form.date}
+        teeTime={form.teeTime}
+      />
     </div>
   )
 }

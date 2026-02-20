@@ -181,6 +181,10 @@ export const api = {
       create: (data: object) => service.post('/resources/caddies', data),
       update: (id: string, data: object) => service.put(`/resources/caddies/${id}`, data),
       delete: (id: string) => service.delete(`/resources/caddies/${id}`),
+      checkAvailability: (params: { caddyId: string; date: string; teeTime: string; bookingId?: string }) =>
+        service.get('/resources/caddies/check-availability', { params }),
+      getAvailabilityMap: (params: { date: string; teeTime: string; bookingId?: string; clubId?: string }) =>
+        service.get('/resources/caddies/availability-map', { params }),
     },
     carts: {
       getList: (params?: object) => service.get('/resources/carts', { params }),

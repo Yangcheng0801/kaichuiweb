@@ -310,10 +310,15 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
               </div>
             )}
             {/* 预订偏好标签 */}
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
               <span className={`text-[10px] px-2 py-0.5 rounded-full ${needCaddy ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
                 {needCaddy ? '需要球童' : '无需球童'}
               </span>
+              {(booking as any).caddyDesignation?.type === 'designated' && (booking as any).caddyDesignation?.caddyNo && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                  点号：{(booking as any).caddyDesignation.caddyNo}号 {(booking as any).caddyDesignation.caddyName}
+                </span>
+              )}
               <span className={`text-[10px] px-2 py-0.5 rounded-full ${needCart ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
                 {needCart ? '需要球车' : '无需球车'}
               </span>
@@ -580,7 +585,7 @@ interface CashierDialogProps {
 }
 
 const CHARGE_TYPE_LABELS: Record<string, string> = {
-  green_fee: '果岭费', caddy_fee: '球童费', cart_fee: '球车费',
+  green_fee: '果岭费', caddy_fee: '球童费', caddy_request_fee: '点号费', cart_fee: '球车费',
   insurance: '保险费', locker_daily: '更衣柜', room: '客房费',
   dining: '餐饮', proshop: '球具店', minibar: '迷你吧', other: '其他',
 }

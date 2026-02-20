@@ -67,7 +67,15 @@ function createSettingsRouter(getDb) {
       cartFee: 150,
       lockerFee: 0,
       insuranceFee: 10
-    }
+    },
+    // 点号费（指定球童）配置
+    caddyRequestFee: {
+      enabled: true,
+      defaultAmount: 100,
+      byLevel: { gold: 150, silver: 120, trainee: 80 },
+      byIdentity: { walkin: 120, guest: 100, member_1: 80, member_2: 80, member_3: 80, member_4: 80 },
+      clubShareRatio: 0.6,
+    },
   };
 
   // ─── 工具函数 ───────────────────────────────────────────────────────────────

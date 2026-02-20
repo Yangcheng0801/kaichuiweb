@@ -248,6 +248,46 @@ function getReducedFee(rateSheet, identityCode, holesPlayed, holesBooked) {
   }
 }
 
+// ─── 点号费计算 ──────────────────────────────────────────────────────────────
+/**
+ * 点号费 = Max(身份费率, 球童等级费率, 球童个人加价)
+ * 取三者中最高值；未配置时用 defaultAmount 兜底
+ *
+ * @param {object} db
+ * @param {string} clubId
+ * @param {object} opts - { identityCode, caddyLevel, designationFeeOverride }
+ * @returns {Promise<number>}
+ */
+async function calculateCaddyDesignationFee(db, clubId, opts = {}) {
+  const { identityCode = 'walkin', caddyLevel = 'trainee', designationFeeOverride } = opts;
+
+  try {
+    const res = await db.collection('pricing_rules')
+      .where({ clubId })
+      .limit(1)
+      .get();
+    const config = (res.data && res.data[0]) ? res.data[0] : null;
+    const caddyRequest = config?.caddyRequestFee || {};
+    if (!caddyRequest.enabled) return 0;
+
+    const defaultAmount = Number(caddyRequest.defaultAmount) || 100;
+    const byLevel = caddyRequest.byLevel || {};
+    const byIdentity = caddyRequest.byIdentity || {};
+
+    const identityFee = Number(byIdentity[identityCode]) ?? Number(byIdentity.walkin) ?? defaultAmount;
+    const levelFee = Number(byLevel[caddyLevel]) ?? Number(byLevel.trainee) ?? defaultAmount;
+    const overrideFee = designationFeeOverride !== undefined && designationFeeOverride !== null
+      ? Number(designationFeeOverride)
+      : 0;
+
+    const fee = Math.max(defaultAmount, identityFee, levelFee, overrideFee);
+    return Math.round(fee * 100) / 100;
+  } catch (e) {
+    console.warn('[PricingEngine] 查询点号费配置失败:', e.message);
+    return 100; // 兜底默认
+  }
+}
+
 // ─── 团队折扣 ────────────────────────────────────────────────────────────────
 async function getTeamDiscount(db, clubId, totalPlayers) {
   const noDiscount = { discountRate: 1, label: '', floorPriceRate: 0.6 };
@@ -557,6 +597,17 @@ async function calculateBookingPrice(db, input) {
   // 加打时保险费通常不再重复收取
   const insuranceFee = isAddOn ? 0 : (Number(rateSheet ? rateSheet.insuranceFee || 0 : 0) * players.length);
 
+  // 6.1 点号费（caddyDesignation）：Max(身份费率, 球童等级费率, 球童个人加价)
+  let caddyDesignationFee = 0;
+  const caddyDesignation = input.caddyDesignation || {};
+  if (caddyDesignation.type === 'designated' && caddyDesignation.caddyId && needCaddy) {
+    caddyDesignationFee = await calculateCaddyDesignationFee(db, clubId, {
+      identityCode: resolveIdentityCode(players[0]),
+      caddyLevel: caddyDesignation.caddyLevel || 'trainee',
+      designationFeeOverride: caddyDesignation.designationFeeOverride,
+    });
+  }
+
   // 7. 团队折扣
   let discount = 0;
   let teamDiscountInfo = null;
@@ -580,8 +631,8 @@ async function calculateBookingPrice(db, input) {
     }
   }
 
-  // 8. 合计
-  const totalFee = Math.round((totalGreenFee + caddyFee + cartFee + insuranceFee - discount) * 100) / 100;
+  // 8. 合计（含点号费）
+  const totalFee = Math.round((totalGreenFee + caddyFee + cartFee + insuranceFee + caddyDesignationFee - discount) * 100) / 100;
 
   // 9. 加打/减打汇总信息
   const addOnSummary = isAddOn ? {
@@ -613,6 +664,7 @@ async function calculateBookingPrice(db, input) {
     // 明细
     greenFee: totalGreenFee,
     caddyFee,
+    caddyDesignationFee,
     cartFee,
     insuranceFee,
     roomFee: 0,
@@ -671,6 +723,7 @@ module.exports = {
   getGreenFee,
   getAddOnFee,
   getReducedFee,
+  calculateCaddyDesignationFee,
   getTeamDiscount,
   calculatePackagePrice,
   calculateBookingPrice,

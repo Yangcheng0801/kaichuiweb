@@ -212,6 +212,19 @@ function createStarterRouter(getDb) {
 
       await updateBookingStatus(db, req.params.id, booking.status, 'dispatched', { dispatch }, operatorName);
 
+      // 点号预订：记录球童实际分配时间（用于分析预订→现场确认时差）
+      const des = booking.caddyDesignation || {};
+      if (des.type === 'designated' && dispatch.caddyId) {
+        try {
+          await db.collection('bookings').doc(req.params.id).update({
+            data: {
+              caddyDesignation: { ...des, assignedAt: now() },
+              updateTime: new Date(),
+            },
+          });
+        } catch (e) { console.warn('[Starter] 更新 assignedAt 失败:', e.message); }
+      }
+
       // 占用球童
       if (dispatch.caddyId) {
         try {

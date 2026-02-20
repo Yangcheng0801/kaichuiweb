@@ -201,13 +201,16 @@ function QueuePanel({ date, refreshKey, onRefresh }: { date: string; refreshKey:
   const [dispatchForm, setDispatchForm] = useState<any>(null)
 
   const openDispatch = (b: any) => {
+    const des = b.caddyDesignation
+    const isDesignated = des?.type === 'designated' && des?.caddyId
     setDispatchForm({
       bookingId: b._id,
-      caddyId: b.caddyId || '',
-      caddyName: b.caddyName || '',
+      caddyId: isDesignated ? des.caddyId : (b.caddyId || ''),
+      caddyName: isDesignated ? `${des.caddyNo || ''}号 ${des.caddyName || ''}` : (b.caddyName || ''),
       cartId: b.cartId || '',
       cartNo: b.cartNo || '',
       startHole: 1,
+      isDesignated,
     })
   }
 
@@ -249,6 +252,9 @@ function QueuePanel({ date, refreshKey, onRefresh }: { date: string; refreshKey:
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
+                {b.caddyDesignation?.type === 'designated' && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">点</span>
+                )}
                 {b.orderNo && <span className="text-[11px] font-mono text-gray-400">{b.orderNo}</span>}
                 <button onClick={e => { e.stopPropagation(); openDispatch(b) }}
                   className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-1">
@@ -287,12 +293,18 @@ function QueuePanel({ date, refreshKey, onRefresh }: { date: string; refreshKey:
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setDispatchForm(null)}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-gray-800 mb-4">出发调度</h3>
+            {dispatchForm.isDesignated && (
+              <div className="mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                <span className="font-medium">点号订单</span>：指定球童已预填，更换将取消点号费
+              </div>
+            )}
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">球童姓名</label>
+                  <label className="text-xs text-gray-500 mb-1 block">球童</label>
                   <input value={dispatchForm.caddyName} onChange={e => setDispatchForm((f: any) => ({ ...f, caddyName: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-emerald-400" placeholder="选填" />
+                    className={`w-full px-3 py-2 text-sm border rounded-lg outline-none focus:border-emerald-400 ${dispatchForm.isDesignated ? 'border-amber-200 bg-amber-50/50' : 'border-gray-200'}`}
+                    placeholder={dispatchForm.isDesignated ? '点号球童' : '选填'} />
                 </div>
                 <div>
                   <label className="text-xs text-gray-500 mb-1 block">球车号</label>
