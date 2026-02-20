@@ -183,7 +183,7 @@ function CaddieSelectDialog({ open, onClose, onSelect, date, teeTime }: CaddieSe
         </div>
         <div className="p-3 border-b">
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="工号 / 姓名"
+            placeholder="球童号 / 姓名"
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
         </div>
         <div className="flex-1 overflow-y-auto p-3 space-y-1">

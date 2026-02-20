@@ -801,7 +801,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
           className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white">
           {brandList.map(b => <option key={b} value={b === '全部' ? 'all' : b}>{b}</option>)}
         </select>
-        {/* 搜索框：支持车号 / 球童工号 / 球童姓名 */}
+        {/* 搜索框：支持车号 / 球童号 / 球童姓名 */}
         <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
           <Search size={13} className="ml-2.5 text-gray-400 flex-shrink-0" />
           <input
@@ -809,7 +809,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
             onKeyDown={handleSearchKeyDown}
-            placeholder="车号 / 球童工号 / 姓名"
+            placeholder="车号 / 球童号 / 姓名"
             className="px-2 py-1.5 text-sm outline-none w-40"
           />
           {searchInput && (

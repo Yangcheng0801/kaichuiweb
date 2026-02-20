@@ -312,7 +312,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
   });
 
   // GET /api/carts/usage - 使用记录列表（需在 PUT /:id 之前定义）
-  // searchText 支持：车号、球童工号（caddieNumber）、球童姓名（name/nickName）
+  // searchText 支持：车号、球童号（caddieNumber/caddyNo）、球童姓名（name/nickName）
   router.get('/usage', async (req, res) => {
     try {
       const db = getDb();
@@ -327,7 +327,7 @@ function createCartsRouter(getDb, requireAuthWithClubId) {
 
       const s = String(searchText || '').trim();
 
-      // 如果有搜索词，先尝试通过 users 集合查匹配的 openid（支持球童工号/姓名）
+      // 如果有搜索词，先尝试通过 users 集合查匹配的 openid（支持球童号/姓名）
       let matchedOpenids = null; // null = 未限制；[] = 无匹配（直接返回空）
       if (s) {
         try {

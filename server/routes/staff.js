@@ -79,19 +79,7 @@ module.exports = function (getDb) {
   // ══════════════════════════════════════════════════════════════════════
   //                         员 工 档 案
   // ══════════════════════════════════════════════════════════════════════
-
-  async function generateEmpNo(db, clubId) {
-    const now = new Date();
-    const prefix = `EMP${String(now.getFullYear()).slice(-2)}`;
-    const existing = await db.collection('employees').where({ clubId }).orderBy('createdAt', 'desc').limit(1).get();
-    let seq = 1;
-    if (existing.data?.length > 0) {
-      const last = existing.data[0].empNo || '';
-      const m = last.match(/-(\d+)$/);
-      if (m) seq = parseInt(m[1], 10) + 1;
-    }
-    return `${prefix}-${String(seq).padStart(4, '0')}`;
-  }
+  // 已废除工号（empNo），统一采用球童号（caddyNo）作为主标识
 
   router.get('/employees', async (req, res) => {
     try {
@@ -113,7 +101,7 @@ module.exports = function (getDb) {
         const kw = keyword.toLowerCase();
         list = list.filter(e =>
           (e.name || '').toLowerCase().includes(kw) ||
-          (e.empNo || '').toLowerCase().includes(kw) ||
+          (e.caddyNo || '').toString().toLowerCase().includes(kw) ||
           (e.phone || '').includes(kw)
         );
       }
@@ -136,17 +124,17 @@ module.exports = function (getDb) {
       const db = getDb();
       const clubId = getClubId(req);
       const {
-        name, phone, gender, idCard, avatar,
+        name, phone, gender, idCard, avatar, caddyNo,
         departmentId, departmentName, position, skills,
         contractType, hireDate, hourlyRate, baseSalary, outingFee,
         emergencyContact, emergencyPhone, address, notes,
       } = req.body;
       if (!name) return res.status(400).json({ success: false, message: '姓名必填' });
 
-      const empNo = await generateEmpNo(db, clubId);
       const now = new Date().toISOString();
       const doc = {
-        clubId, empNo, name,
+        clubId, name,
+        caddyNo: (caddyNo || '').toString().trim() || null,
         phone: phone || '', gender: gender || '',
         idCard: idCard || '', avatar: avatar || '',
         departmentId: departmentId || null,
@@ -186,7 +174,7 @@ module.exports = function (getDb) {
         } catch (_) {}
       }
 
-      console.log(`[Staff] 员工创建: ${empNo} ${name}`);
+      console.log(`[Staff] 员工创建: ${name}${doc.caddyNo ? ` (${doc.caddyNo}号)` : ''}`);
       res.json({ success: true, data: { _id: r._id || r.id, ...doc } });
     } catch (err) { res.status(500).json({ success: false, message: err.message }); }
   });
@@ -194,8 +182,9 @@ module.exports = function (getDb) {
   router.put('/employees/:id', async (req, res) => {
     try {
       const db = getDb();
-      const { _id, empNo, createdAt, totalWorkHours, totalOutings, lateCount, absentCount, ...fields } = req.body;
+      const { _id, createdAt, totalWorkHours, totalOutings, lateCount, absentCount, ...fields } = req.body;
       fields.updatedAt = new Date().toISOString();
+      if (fields.caddyNo !== undefined) fields.caddyNo = (fields.caddyNo || '').toString().trim() || null;
       if (fields.hourlyRate !== undefined) fields.hourlyRate = Number(fields.hourlyRate);
       if (fields.baseSalary !== undefined) fields.baseSalary = Number(fields.baseSalary);
       if (fields.outingFee !== undefined) fields.outingFee = Number(fields.outingFee);
@@ -940,7 +929,7 @@ module.exports = function (getDb) {
         const totalOvertime = empAtt.reduce((s, a) => s + (a.overtime || 0), 0);
 
         return {
-          employeeId: emp._id, empNo: emp.empNo, name: emp.name,
+          employeeId: emp._id, caddyNo: emp.caddyNo, name: emp.name,
           department: emp.departmentName, position: emp.position,
           scheduledDays: empSched.length,
           normalDays, lateDays, earlyDays, absentDays, leaveDays,

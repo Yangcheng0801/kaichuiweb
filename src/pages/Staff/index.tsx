@@ -80,7 +80,7 @@ function EmployeesTab() {
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [form, setForm] = useState({
-    name: '', phone: '', gender: '', departmentId: '', departmentName: '',
+    name: '', caddyNo: '', phone: '', gender: '', departmentId: '', departmentName: '',
     position: '', contractType: 'fulltime', hireDate: '',
     hourlyRate: '', baseSalary: '', outingFee: '', skills: '',
     emergencyContact: '', emergencyPhone: '', address: '', notes: '',
@@ -116,12 +116,12 @@ function EmployeesTab() {
     } catch { toast.error('操作失败'); }
   };
 
-  const resetForm = () => setForm({ name: '', phone: '', gender: '', departmentId: '', departmentName: '', position: '', contractType: 'fulltime', hireDate: '', hourlyRate: '', baseSalary: '', outingFee: '', skills: '', emergencyContact: '', emergencyPhone: '', address: '', notes: '' });
+  const resetForm = () => setForm({ name: '', caddyNo: '', phone: '', gender: '', departmentId: '', departmentName: '', position: '', contractType: 'fulltime', hireDate: '', hourlyRate: '', baseSalary: '', outingFee: '', skills: '', emergencyContact: '', emergencyPhone: '', address: '', notes: '' });
 
   const handleEdit = (e: any) => {
     setEditItem(e);
     setForm({
-      name: e.name || '', phone: e.phone || '', gender: e.gender || '',
+      name: e.name || '', caddyNo: (e.caddyNo || '').toString(), phone: e.phone || '', gender: e.gender || '',
       departmentId: e.departmentId || '', departmentName: e.departmentName || '',
       position: e.position || '', contractType: e.contractType || 'fulltime',
       hireDate: e.hireDate || '', hourlyRate: String(e.hourlyRate || ''),
@@ -147,7 +147,7 @@ function EmployeesTab() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="搜索姓名/工号/电话..."
+            <input value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="搜索姓名/球童号/电话..."
               className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm" />
           </div>
           <select value={filterDept} onChange={e => setFilterDept(e.target.value)} className="text-sm border rounded-lg px-3 py-2">
@@ -168,9 +168,11 @@ function EmployeesTab() {
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm border p-6">
           <h3 className="font-bold text-gray-800 mb-4">{editItem ? '编辑员工' : '新增员工'}</h3>
-          <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-4">
             <div><label className="block text-xs text-gray-500 mb-1">姓名 *</label>
               <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
+            <div><label className="block text-xs text-gray-500 mb-1">球童号</label>
+              <input value={form.caddyNo} onChange={e => setForm(f => ({ ...f, caddyNo: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="如: 18" /></div>
             <div><label className="block text-xs text-gray-500 mb-1">电话</label>
               <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
             <div><label className="block text-xs text-gray-500 mb-1">性别</label>
@@ -218,7 +220,7 @@ function EmployeesTab() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">工号</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">球童号</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">姓名</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">部门</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">岗位</th>
@@ -233,7 +235,7 @@ function EmployeesTab() {
             <tbody className="divide-y divide-gray-50">
               {employees.map(e => (
                 <tr key={e._id} className="hover:bg-gray-50/50">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{e.empNo}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{e.caddyNo || '-'}</td>
                   <td className="px-4 py-3 font-medium">{e.name}</td>
                   <td className="px-4 py-3 text-gray-500">{e.departmentName || '-'}</td>
                   <td className="px-4 py-3 text-gray-500">{e.position || '-'}</td>
@@ -680,7 +682,7 @@ function LeavesTab() {
           <div className="grid grid-cols-3 gap-4">
             <div><label className="block text-xs text-gray-500 mb-1">员工 *</label>
               <select value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm">
-                <option value="">选择员工</option>{employees.map(e => <option key={e._id} value={e._id}>{e.name} ({e.empNo})</option>)}
+                <option value="">选择员工</option>{employees.map(e => <option key={e._id} value={e._id}>{e.name}{e.caddyNo ? ` (${e.caddyNo}号)` : ''}</option>)}
               </select></div>
             <div><label className="block text-xs text-gray-500 mb-1">假期类型</label>
               <select value={form.leaveType} onChange={e => setForm(f => ({ ...f, leaveType: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm">
@@ -804,7 +806,7 @@ function StatsTab() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left px-4 py-2.5 font-medium text-gray-500">工号</th>
+              <th className="text-left px-4 py-2.5 font-medium text-gray-500">球童号</th>
               <th className="text-left px-4 py-2.5 font-medium text-gray-500">姓名</th>
               <th className="text-left px-4 py-2.5 font-medium text-gray-500">部门</th>
               <th className="text-right px-4 py-2.5 font-medium text-gray-500">排班天</th>
@@ -821,7 +823,7 @@ function StatsTab() {
           <tbody className="divide-y divide-gray-50">
             {(stats.employeeStats || []).map((e: any) => (
               <tr key={e.employeeId} className="hover:bg-gray-50/50">
-                <td className="px-4 py-2 font-mono text-xs text-gray-500">{e.empNo}</td>
+                <td className="px-4 py-2 font-mono text-xs text-gray-500">{e.caddyNo || '-'}</td>
                 <td className="px-4 py-2 font-medium">{e.name}</td>
                 <td className="px-4 py-2 text-gray-500 text-xs">{e.department || '-'}</td>
                 <td className="px-4 py-2 text-right">{e.scheduledDays}</td>

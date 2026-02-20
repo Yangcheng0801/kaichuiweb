@@ -5,6 +5,7 @@ import { api } from '@/utils/api'
 
 interface Caddie {
   _id?: string
+  caddyNo?: string
   name: string
   gender: 'male' | 'female'
   phone: string
@@ -16,7 +17,7 @@ interface Caddie {
 }
 
 const DEFAULTS: Omit<Caddie, '_id'> = {
-  name: '', gender: 'female', phone: '', experience: 1,
+  caddyNo: '', name: '', gender: 'female', phone: '', experience: 1,
   level: 'junior', status: 'available', note: '', clubId: 'default'
 }
 
@@ -52,8 +53,8 @@ export default function Caddies() {
   const openAdd = () => { setEditing(null); setForm(DEFAULTS); setModalOpen(true) }
   const openEdit = (item: Caddie) => {
     setEditing(item)
-    const { _id, ...rest } = item
-    setForm(rest)
+    const { _id, no, ...rest } = item as Caddie & { no?: string }
+    setForm({ ...rest, caddyNo: (rest.caddyNo || no || '').toString() })
     setModalOpen(true)
   }
   const set = (key: keyof Omit<Caddie, '_id'>, value: unknown) =>
@@ -105,6 +106,9 @@ export default function Caddies() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-medium text-gray-900 text-sm">
+                    {((item as Caddie).caddyNo || (item as { no?: string }).no) && (
+                      <span className="inline-block mr-2 font-mono text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded">{((item as Caddie).caddyNo || (item as { no?: string }).no)}号</span>
+                    )}
                     {item.name}
                     <span className="ml-2 text-xs text-gray-400">{item.gender === 'female' ? '女' : '男'} · {LEVEL_MAP[item.level]}</span>
                   </div>
@@ -136,6 +140,11 @@ export default function Caddies() {
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">球童号</label>
+                  <input type="text" value={form.caddyNo || ''} onChange={e => set('caddyNo', e.target.value)} placeholder="如: 18"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">姓名 <span className="text-red-500">*</span></label>
                   <input type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="请输入姓名"
