@@ -1,0 +1,55 @@
+[33m6ef9fc6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m 修改
+[33mf36d160[m Update .env
+[33me89f2e6[m 修改
+[33mcb7aff3[m 新建预订流程
+[33m0039957[m 修改
+[33mc3a5787[m 球童点号功能已实现
+[33mc51cd27[m 修复
+[33md365548[m 重构登录页
+[33m26d1d5f[m 改动汇总
+[33m5cf4151[m 改动 Login.tsx
+[33m204d108[m 变更总结和两条登录路径的运行逻辑
+[33m274cca7[m 修复
+[33me53f8f2[m 更新修复
+[33m874a924[m 出发台模块实现
+[33m6bfc95a[m 修复
+[33mbcdcada[m 5 项升级
+[33m19cab2e[m 修复
+[33m8c6e039[m 库存管理 / Pro Shop 模块
+[33m81c9e59[m 通知系统实施总结
+[33m660a077[m 赛事与活动管理模块
+[33mb407b6c[m 会籍权益深度集成
+[33maa19c08[m 会籍计划与权益系统 — 实施完成
+[33m9b96df3[m 修复
+[33me5c76c4[m 更新
+[33m773f49d[m 新增/修改
+[33m9aafa4b[m 重大更新
+[33mc0c7426[m 重大更新
+[33m2064f58[m 首页仪表盘升级的改动汇总
+[33md69aa8a[m 签到模块全面重构
+[33mf41a193[m 本次实现的完整总结
+[33m12bf496[m 修复
+[33m2d90190[m 修复
+[33m0a916ab[m Update README.md
+[33m13eeac8[m 加入player设计
+[33m35d3372[m 修复
+[33m49fe2da[m 整重写为 Web 深度适配版本
+[33m3dd1450[m 修复
+[33mb4ff241[m 修改说明 问题：球车管理列表接口 GET /api/carts 可能因 orderBy('createdAt', 'desc') 在 HTTP DB 模式下失败（例如缺少索引），导致返回空列表。 处理：在 server/routes/carts.js 中增加三层兜底： 优先使用 orderBy('createdAt', 'desc') 若失败，改用 orderBy('_id', 'desc')（_id 必定存在） 若仍失败，则去掉 orderBy，只使用 where().skip().limit().get() 这样在 HTTP DB 或索引异常时，列表仍能返回数据。
+[33mbfbfc23[m 修改如下
+[33m7c6d8ad[m Update README.md
+[33mbeabc3e[m 扩展 HTTP 适配器
+[33m35c4d74[m 球车管理相关功能实现
+[33m79d40f8[m 修复完成。  改动说明
+[33m5fedf7a[m 完成内容
+[33m75f2011[m 汇总一下所有改动
+[33m5b43330[m[33m ([m[1;31morigin/双视图新版[m[33m, [m[1;32m双视图新版[m[33m)[m 功能新特性
+[33m4899597[m 修复汇总
+[33mc547035[m 本次修改说明
+[33mfe06886[m 改动说明
+[33m6592c2d[m 改动说明
+[33mbcbc3b9[m 修改均已成功应用
+[33md7b1239[m[33m ([m[1;31morigin/ceshibanben[m[33m, [m[1;32mceshibanben[m[33m)[m 修复
+[33mc3880e0[m 修复内容
+[33mdb7c2f9[m 架构更改
+[33m137132c[m 初始版本
