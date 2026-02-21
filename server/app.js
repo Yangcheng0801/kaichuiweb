@@ -183,6 +183,13 @@ const { requireAuthWithClubId } = require('./middleware/auth-cart');
 app.use('/api/carts', require('./routes/carts')(getDb, requireAuthWithClubId));
 app.use('/api/maintenance', require('./routes/maintenance')(getDb, requireAuthWithClubId));
 
+// ===== 球员端小程序 API (miniapp) =====
+app.use('/api/miniapp/auth', require('./routes/miniapp-auth')(getDb));
+app.use('/api/miniapp/bookings', require('./routes/miniapp-bookings')(getDb));
+app.use('/api/miniapp/profile', require('./routes/miniapp-profile')(getDb));
+app.use('/api/miniapp/folios', require('./routes/miniapp-folios')(getDb));
+app.use('/api/miniapp/tournaments', require('./routes/miniapp-tournaments')(getDb));
+
 // 3. 健康检查接口
 app.get('/health', (req, res) => {
   res.json({
