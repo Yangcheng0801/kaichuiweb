@@ -4,20 +4,47 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 158 64% 40%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    /* Pure Black Background System */
+    --background: 0 0% 0%;
+    --background-elevated: 0 0% 4%;
+    --background-card: 0 0% 6%;
+    --background-hover: 0 0% 10%;
+    
+    /* Foreground Colors */
+    --foreground: 0 0% 100%;
+    --foreground-muted: 0 0% 71%;
+    --foreground-subtle: 0 0% 52%;
+    
+    /* Emerald Green Primary (Golf Theme) */
+    --primary: 158 64% 52%;
+    --primary-foreground: 0 0% 0%;
+    --primary-hover: 158 64% 45%;
+    
+    /* Amber Accent */
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 0%;
+    
+    /* Semantic Colors */
+    --success: 142 76% 36%;
+    --warning: 38 92% 50%;
+    --error: 0 72% 51%;
+    --info: 217 91% 60%;
+    
+    /* Borders & Inputs */
+    --border: 0 0% 15%;
+    --border-subtle: 0 0% 10%;
+    --input: 0 0% 15%;
     --ring: 158 64% 52%;
+    
+    /* Radius */
+    --radius: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
   }
 
   * {
@@ -27,5 +54,27 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background-elevated));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground-subtle));
   }
 }

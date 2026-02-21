@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Building2, CalendarClock, BadgeDollarSign, Grid3X3, Calendar, Users, UserCheck, Shield } from 'lucide-react'
+import { Building2, CalendarClock, BadgeDollarSign, Grid3X3, Calendar, Users, UserCheck, Shield } from 'lucide-react'
+import Layout from '@/components/Layout'
 import ClubInfo from './ClubInfo'
 import BookingRules from './BookingRules'
 import PricingRules from './PricingRules'
@@ -9,6 +9,7 @@ import SpecialDates from './SpecialDates'
 import TeamPricing from './TeamPricing'
 import IdentityTypes from './IdentityTypes'
 import RolesManager from './RolesManager'
+import { cn } from '@/lib/utils'
 
 type TabKey = 'club' | 'booking' | 'pricing' | 'identity-types' | 'rate-sheets' | 'special-dates' | 'team-pricing' | 'roles'
 
@@ -24,7 +25,6 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 ]
 
 export default function Settings() {
-  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabKey>('club')
 
   const renderContent = () => {
@@ -42,32 +42,26 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] flex flex-col">
-      {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
-        <button
-          onClick={() => navigate('/home')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          返回
-        </button>
-        <div className="h-4 w-px bg-gray-200" />
-        <h1 className="text-base font-semibold text-gray-900">系统设置</h1>
-      </header>
+    <Layout title="系统设置">
+      <div className="p-4 sm:p-6 flex flex-col gap-6 min-h-full">
+        {/* 标题 */}
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">系统设置</h1>
+          <p className="text-sm text-foreground-muted mt-1">管理球场配置和系统参数</p>
+        </div>
 
-      <div className="flex-1 flex flex-col px-6 py-6 gap-4">
         {/* Tabs */}
-        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit">
+        <div className="flex gap-1 bg-background-elevated rounded-xl p-1 border border-border overflow-x-auto">
           {TABS.map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
                 activeTab === tab.key
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground hover:bg-background-hover'
+              )}
             >
               {tab.icon}
               {tab.label}
@@ -75,11 +69,11 @@ export default function Settings() {
           ))}
         </div>
 
-        {/* 内容区：撐满剩余高度 */}
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+        {/* 内容区 */}
+        <div className="flex-1 bg-background-card rounded-xl border border-border p-6 sm:p-8">
           {renderContent()}
         </div>
       </div>
-    </div>
+    </Layout>
   )
 }

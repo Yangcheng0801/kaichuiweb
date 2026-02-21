@@ -130,45 +130,51 @@ export default function Login() {
     : qrLoadFailed ? '加载失败？点击重试' : '二维码过期？点击重新生成'
 
   return (
-    <div className="font-sans min-h-screen flex items-center justify-center p-5 relative overflow-hidden bg-gradient-to-br from-green-50 via-slate-50 to-slate-200">
+    <div className="font-sans min-h-screen flex items-center justify-center p-5 relative overflow-hidden bg-background">
       {/* 跳转链接（无障碍） */}
       <a
         href="#login-main"
-        className="absolute -top-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-primary-deep text-white text-sm rounded-lg z-[100] transition-[top] duration-200 focus:top-4 focus:outline-2 focus:outline-primary focus:outline-offset-2"
+        className="absolute -top-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-primary text-black text-sm rounded-lg z-[100] transition-[top] duration-200 focus:top-4 focus:outline-2 focus:outline-primary focus:outline-offset-2"
       >
         跳到主内容
       </a>
 
-      {/* 粒子背景 */}
-      <canvas ref={canvasRef} className="fixed inset-0 w-full h-full z-[1] pointer-events-none" aria-hidden="true" />
+      {/* 网格背景 */}
+      <div className="absolute inset-0 z-0" aria-hidden="true">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+      </div>
+
+      {/* 装饰光效 */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl z-0" aria-hidden="true" />
 
       {/* 登录卡片 */}
-      <div id="login-main" className="w-full max-w-[360px] relative z-10">
+      <div id="login-main" className="w-full max-w-[420px] relative z-10">
         <div
           className={cn(
             'flex flex-col items-center overflow-hidden',
-            'bg-white/95 backdrop-blur-sm rounded-[20px] px-0.5 pt-0.5 pb-2',
-            'border border-white/80',
-            'shadow-[0_20px_60px_rgba(0,0,0,0.08),0_40px_80px_rgba(0,0,0,0.06),inset_0_0_0_1px_rgba(0,0,0,0.05)]',
+            'bg-background-card backdrop-blur-xl rounded-2xl p-8 max-sm:p-6',
+            'border border-border',
+            'shadow-lg',
             'transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200',
             cardEntered ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-[30px] scale-[0.96]',
           )}
         >
           {/* ── 品牌区 ── */}
-          <div className="text-center mb-2 relative z-[1]">
-            <div className="w-11 h-11 mx-auto mb-2 text-primary-deep" role="img" aria-label="开锤品牌标识">
+          <div className="text-center mb-8 relative z-[1] w-full">
+            <div className="w-14 h-14 mx-auto mb-4 text-primary" role="img" aria-label="开锤品牌标识">
               <svg viewBox="0 0 48 48" fill="none" className="w-full h-full">
                 <path d="M12 8v32M12 24l12-16M12 24l12 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h1 className="text-[26px] max-sm:text-[22px] font-bold tracking-wide m-0 mb-1 text-primary-deep">
-              开锤后台管理系统
+            <h1 className="text-3xl max-sm:text-2xl font-bold tracking-tight mb-2 text-foreground">
+              开锤后台管理
             </h1>
-            <p className="text-sm font-medium tracking-wide m-0 text-gray-500">微信扫码，安全快捷</p>
+            <p className="text-sm font-medium text-foreground-muted">微信扫码登录，安全高效</p>
           </div>
 
           {/* ── 二维码区 ── */}
-          <div className="text-center relative z-[1] mt-2 flex flex-col items-center">
+          <div className="text-center relative z-[1] flex flex-col items-center w-full">
             <div
               ref={wxContainerRef}
               id="wx_login_container"
@@ -182,17 +188,18 @@ export default function Login() {
                 : '请使用微信扫一扫扫描二维码'
               }
               className={cn(
-                'mx-auto mb-2 rounded-xl border flex items-center justify-center relative overflow-hidden',
+                'mx-auto mb-6 rounded-xl border flex items-center justify-center relative overflow-hidden',
                 'transition-all duration-300',
-                'bg-gray-50 border-gray-200 hover:border-primary hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:bg-white',
-                scanned && 'animate-scanned-pulse motion-reduce:animate-none',
+                'bg-background-elevated border-border',
+                'hover:border-primary/50 hover:shadow-[0_0_24px_rgba(16,185,129,0.15)]',
+                scanned && 'animate-scanned-pulse motion-reduce:animate-none border-primary',
                 qrLoadFailed
                   ? 'w-[120px] min-w-[120px] h-[120px] min-h-[120px]'
                   : 'w-[280px] h-[264px] min-h-[264px] max-sm:w-[240px] max-sm:h-[228px] max-sm:min-h-[228px]',
               )}
             >
               {loading && (
-                <div className="flex flex-col items-center gap-3 text-sm text-gray-500 animate-in fade-in duration-400" role="status">
+                <div className="flex flex-col items-center gap-3 text-sm text-foreground-muted animate-fade-in" role="status">
                   <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
                   <p>正在生成二维码...</p>
                 </div>
@@ -200,20 +207,27 @@ export default function Login() {
             </div>
 
             {/* 状态文字 */}
-            <p className={cn('inline-flex items-center justify-center gap-1.5 text-base mb-2', scanned ? 'font-semibold text-primary' : 'font-medium text-gray-800')}>
+            <p className={cn(
+              'inline-flex items-center justify-center gap-2 text-base mb-4',
+              scanned ? 'font-semibold text-primary' : 'font-medium text-foreground'
+            )}>
               {scanned && (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-[18px] h-[18px] text-primary" aria-hidden="true">
-                  <path d="M20 6L9 17l-5-5" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-primary" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}
-              {loginDone ? '登录成功' : scanned ? '扫码成功' : '请使用微信扫一扫扫描二维码'}
+              {loginDone ? '登录成功' : scanned ? '扫码成功' : '请使用微信扫码登录'}
             </p>
 
             {scanned && !loginDone && (
-              <p className="text-[13px] -mt-1 mb-2 font-normal text-gray-500">请在手机上点击「确认登录」完成登录</p>
+              <p className="text-sm -mt-2 mb-4 font-normal text-foreground-muted animate-fade-in">
+                请在手机上确认登录
+              </p>
             )}
             {loginDone && (
-              <p className="text-[13px] -mt-1 mb-2 font-normal text-primary">正在跳转到首页...</p>
+              <p className="text-sm -mt-2 mb-4 font-normal text-primary animate-fade-in">
+                正在跳转到首页...
+              </p>
             )}
 
             {/* 刷新按钮 */}
@@ -224,18 +238,18 @@ export default function Login() {
                 aria-busy={refreshLoading}
                 onClick={() => genQRCode(true)}
                 className={cn(
-                  'relative px-5 py-2.5 bg-primary-deep text-white rounded-lg',
-                  'text-[13px] font-semibold cursor-pointer overflow-hidden',
-                  'transition-all duration-300',
-                  'hover:bg-primary-dark hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(5,44,34,0.3)]',
+                  'relative px-6 py-3 bg-primary text-primary-foreground rounded-lg w-full',
+                  'text-sm font-semibold cursor-pointer overflow-hidden',
+                  'transition-all duration-200',
+                  'hover:bg-primary-hover hover:shadow-lg',
                   'active:scale-[0.98]',
-                  'disabled:cursor-not-allowed disabled:opacity-85',
+                  'disabled:cursor-not-allowed disabled:opacity-50',
                   'focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2',
-                  refreshLoading && 'pl-9',
+                  refreshLoading && 'pl-10',
                 )}
               >
                 {refreshLoading && (
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" aria-hidden="true" />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" aria-hidden="true" />
                 )}
                 {refreshBtnText}
               </button>
@@ -243,20 +257,24 @@ export default function Login() {
           </div>
 
           {/* ── 底部 ── */}
-          <div className="text-center mt-auto pt-4 text-sm relative z-[1] text-gray-500">
+          <div className="text-center mt-6 pt-6 border-t border-border w-full relative z-[1]">
             <a
               href="#"
-              className="text-primary no-underline transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(16,185,129,0.2)] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+              className="text-sm text-primary no-underline transition-colors hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
               aria-label="联系管理员获取帮助"
               onClick={e => { e.preventDefault(); toast.info('请联系管理员') }}
             >
-              联系管理员
+              需要帮助？联系管理员
             </a>
-            <div className="w-20 h-px mx-auto mt-3 bg-gray-400/30" aria-hidden="true" />
-            <p className="text-xs mt-3 opacity-90">采用微信官方安全登录</p>
-            <p className="mt-2 text-xs">
+            <p className="text-xs mt-4 text-foreground-subtle">采用微信官方安全登录</p>
+            <p className="mt-2 text-xs text-foreground-subtle">
               网站备案号：
-              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener" className="text-primary no-underline">
+              <a 
+                href="https://beian.miit.gov.cn/" 
+                target="_blank" 
+                rel="noopener" 
+                className="text-primary no-underline hover:text-primary-hover transition-colors"
+              >
                 粤ICP备2025505541号-2
               </a>
             </p>
