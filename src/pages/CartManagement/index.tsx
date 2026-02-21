@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Car, BarChart2, Wrench, History, Plus, Pencil, Trash2, X,
+  Car, BarChart2, Wrench, History, Plus, Pencil, Trash2, X,
   ChevronLeft, ChevronRight, Search, RefreshCw, CheckSquare, Square,
   AlertTriangle, CheckCircle2, Clock, Ban, ArrowUpDown
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/utils/api'
+import Layout from '@/components/Layout'
+import { cn } from '@/lib/utils'
 
 // ─── 类型 ────────────────────────────────────────────────────────────────────
 
@@ -240,7 +241,7 @@ function OverviewTab({
             <h3 className="text-sm font-semibold text-gray-700 mb-3">操作指引</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: '点击卡片', desc: '跳转到对应状态的球车列表' },
+                { label: '点击卡片', desc: '跳转到对应状态的球车���表' },
                 { label: '球车管理', desc: '新增、编辑、批量状态操作' },
                 { label: '维修管理', desc: '看板式跟踪维修进度与成本' },
                 { label: '使用记录', desc: '时间轴甘特图查看出入库流水' },

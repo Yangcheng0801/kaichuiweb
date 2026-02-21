@@ -8,14 +8,15 @@
  *   - 账户充值弹窗：金额 + 支付方式
  */
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  ArrowLeft, Search, Plus, X, ChevronRight,
+  Search, Plus, X, ChevronRight,
   User, Phone, CreditCard, Car, RefreshCw, Wallet, QrCode,
   Crown, Star, Gift, Clock, Award
 } from 'lucide-react'
 import { api as _api } from '@/utils/api'
+import Layout from '@/components/Layout'
+import { cn } from '@/lib/utils'
 
 const api: any = _api
 
