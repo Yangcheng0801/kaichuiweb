@@ -67,7 +67,7 @@ module.exports = function (getDb) {
     }
   });
 
-  // 批量价格预览（实时试算）
+  // 批量价格预览（实时试算）—— 复用定价引擎
   router.post('/price-preview', async (req, res) => {
     const { date, identityType } = req.body;
     if (!date || !DATE_RE.test(date)) {
@@ -76,52 +76,97 @@ module.exports = function (getDb) {
 
     try {
       const db = getDb();
-      const identity = identityType || 'guest';
+      const { determineDayType, determineTimeSlot, matchRateSheet, getGreenFee } = require('../utils/pricing-engine');
 
-      const rateRes = await db.collection('rate_sheets').where({
-        clubId: req.clubId, identityType: identity
-      }).limit(1).get();
+      const identity = identityType || 'guest';
+      const dayInfo = await determineDayType(db, req.clubId, date);
+
+      if (dayInfo.isClosed) {
+        return res.json({ success: true, data: { prices: {}, date, closed: true, closedReason: dayInfo.dateName } });
+      }
 
       const prices = {};
-      if (rateRes.data && rateRes.data.length > 0) {
-        const rateSheet = rateRes.data[0];
-        const dayOfWeek = new Date(date).getDay();
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        const dayType = isWeekend ? 'weekend' : 'weekday';
+      const slotCache = {};
 
-        for (let h = 7; h <= 16; h++) {
-          for (let m = 0; m < 60; m += 12) {
-            const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            let price = rateSheet.basePrice || 680;
+      for (let h = 7; h <= 16; h++) {
+        for (let m = 0; m < 60; m += 12) {
+          const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+          const timeSlot = determineTimeSlot(time);
 
-            if (rateSheet.timeSlots) {
-              for (const slot of rateSheet.timeSlots) {
-                if (time >= (slot.start || '00:00') && time < (slot.end || '24:00')) {
-                  price = (slot.prices && slot.prices[dayType]) || slot.price || price;
-                  break;
-                }
-              }
-            }
-
-            if (isWeekend && rateSheet.weekendMultiplier) {
-              price = Math.round(price * rateSheet.weekendMultiplier);
-            }
-
-            prices[time] = price;
+          if (!slotCache[timeSlot]) {
+            slotCache[timeSlot] = await matchRateSheet(db, req.clubId, null, dayInfo.dayType, timeSlot, 18, date);
           }
+
+          const rateSheet = slotCache[timeSlot];
+          const fee = getGreenFee(rateSheet, identity);
+          if (fee > 0) prices[time] = fee;
         }
       }
 
-      res.json({ success: true, data: { prices, date } });
+      res.json({ success: true, data: { prices, date, dayType: dayInfo.dayType } });
     } catch (err) {
       console.error('[MiniappBookings] price-preview:', err);
       res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
+  // 单次价格计算（确认页使用）—— 复用定价引擎
+  router.post('/calculate', async (req, res) => {
+    const { date, teeTime, identityType, playerCount, courseId } = req.body;
+
+    if (!date || !DATE_RE.test(date)) {
+      return res.status(400).json({ success: false, message: '日期格式错误' });
+    }
+    if (!teeTime || !TIME_RE.test(teeTime)) {
+      return res.status(400).json({ success: false, message: '时段格式错误' });
+    }
+
+    try {
+      const db = getDb();
+      const { calculateBookingPrice } = require('../utils/pricing-engine');
+
+      const identity = identityType || 'guest';
+      const count = Math.max(1, Math.min(4, Number(playerCount) || 1));
+
+      const players = [];
+      for (let i = 0; i < count; i++) {
+        players.push({ identityCode: identity, name: i === 0 ? '预订人' : `球员${i + 1}` });
+      }
+
+      const result = await calculateBookingPrice(db, {
+        clubId: req.clubId,
+        date,
+        teeTime,
+        courseId: courseId || null,
+        holes: 18,
+        players
+      });
+
+      const perPlayer = result.greenFee > 0 ? Math.round(result.greenFee / count) : 0;
+
+      res.json({
+        success: true,
+        data: {
+          price: perPlayer,
+          totalPrice: result.greenFee,
+          playerCount: count,
+          dayType: result.dayType,
+          dayTypeName: result.dayTypeName,
+          timeSlot: result.timeSlot,
+          timeSlotName: result.timeSlotName,
+          hasRateSheet: result.hasRateSheet,
+          playerBreakdown: result.playerBreakdown
+        }
+      });
+    } catch (err) {
+      console.error('[MiniappBookings] calculate:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
+    }
+  });
+
   // 创建预订 — 含防超卖校验 + 乐观锁
   router.post('/', async (req, res) => {
-    const { date, teeTime, courseId, caddieId, cartId, companions } = req.body;
+    const { date, teeTime, courseId, caddieId, playerCount: reqPlayerCount } = req.body;
 
     if (!date || !DATE_RE.test(date)) {
       return res.status(400).json({ success: false, message: '日期格式错误' });
@@ -141,8 +186,7 @@ module.exports = function (getDb) {
       return res.status(400).json({ success: false, message: '不能预订过去的日期' });
     }
 
-    const companionList = Array.isArray(companions) ? companions.slice(0, 3) : [];
-    const playerCount = 1 + companionList.length;
+    const playerCount = Math.max(1, Math.min(4, Number(reqPlayerCount) || 1));
 
     try {
       const db = getDb();
@@ -175,10 +219,8 @@ module.exports = function (getDb) {
         courseId: courseId || null,
         playerId: req.playerId,
         clubId: req.clubId,
-        caddieId: caddieId || null,
-        cartId: cartId || null,
-        companions: companionList,
         playerCount,
+        caddieId: caddieId || null,
         status: 'pending',
         source: 'miniprogram',
         totalAmount: 0,
