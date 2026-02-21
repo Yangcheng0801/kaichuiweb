@@ -8,23 +8,58 @@ module.exports = function (getDb) {
 
   router.use(requirePlayerAuth);
 
+  function safeErrorMessage(err) {
+    if (process.env.NODE_ENV === 'production') return '服务器内部错误';
+    return err.message || '未知错误';
+  }
+
   // 赛事列表
   router.get('/', async (req, res) => {
     const { status } = req.query;
     try {
       const db = getDb();
-      let query = db.collection('tournaments').where({ clubId: req.clubId });
-      const result = await query.orderBy('startDate', 'desc').limit(50).get();
+      const _ = db.command;
+      const where = { clubId: req.clubId };
 
-      let list = result.data || [];
-      if (status && status !== 'all') {
+      if (status && status !== 'all' && _) {
         const mapped = status === 'open' ? ['registration', 'open'] : [status];
-        list = list.filter(t => mapped.includes(t.status));
+        where.status = _.in(mapped);
       }
 
-      res.json({ success: true, data: list });
+      const result = await db.collection('tournaments').where(where)
+        .orderBy('startDate', 'desc').limit(50).get();
+
+      res.json({ success: true, data: result.data || [] });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappTournaments] list:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
+    }
+  });
+
+  // 我的报名（必须在 /:id 之前）
+  router.get('/my-registrations', async (req, res) => {
+    try {
+      const db = getDb();
+      const regs = await db.collection('tournament_registrations').where({
+        playerId: req.playerId
+      }).get();
+
+      const tournamentIds = (regs.data || []).map(r => r.tournamentId);
+      if (tournamentIds.length === 0) return res.json({ success: true, data: [] });
+
+      const tournaments = [];
+      for (const tid of tournamentIds) {
+        try {
+          const tRes = await db.collection('tournaments').doc(tid).get();
+          const t = Array.isArray(tRes.data) ? tRes.data[0] : tRes.data;
+          if (t) tournaments.push(t);
+        } catch (e) { /* ignore deleted tournaments */ }
+      }
+
+      res.json({ success: true, data: tournaments });
+    } catch (err) {
+      console.error('[MiniappTournaments] my-registrations:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
@@ -36,7 +71,6 @@ module.exports = function (getDb) {
       const tournament = Array.isArray(result.data) ? result.data[0] : result.data;
       if (!tournament) return res.status(404).json({ success: false, message: '赛事不存在' });
 
-      // 检查是否已报名
       const regRes = await db.collection('tournament_registrations').where({
         tournamentId: req.params.id, playerId: req.playerId
       }).limit(1).get();
@@ -54,20 +88,49 @@ module.exports = function (getDb) {
         }
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappTournaments] detail:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
-  // 报名
+  // 报名 — 增加赛事状态校验 + 名额校验
   router.post('/:id/register', async (req, res) => {
     try {
       const db = getDb();
+
+      // 查询赛事信息，校验报名状态
+      const tResult = await db.collection('tournaments').doc(req.params.id).get();
+      const tournament = Array.isArray(tResult.data) ? tResult.data[0] : tResult.data;
+      if (!tournament) {
+        return res.status(404).json({ success: false, message: '赛事不存在' });
+      }
+
+      const allowedStatuses = ['registration', 'open'];
+      if (!allowedStatuses.includes(tournament.status)) {
+        return res.status(400).json({ success: false, message: '该赛事当前不接受报名' });
+      }
+
+      // 检查报名截止时间
+      if (tournament.registrationDeadline && new Date() > new Date(tournament.registrationDeadline)) {
+        return res.status(400).json({ success: false, message: '报名已截止' });
+      }
+
+      // 检查名额
+      if (tournament.maxPlayers) {
+        const regCount = await db.collection('tournament_registrations').where({
+          tournamentId: req.params.id
+        }).count();
+        if ((regCount.total || 0) >= tournament.maxPlayers) {
+          return res.status(400).json({ success: false, message: '报名名额已满' });
+        }
+      }
+
       // 检查是否已报名
       const existing = await db.collection('tournament_registrations').where({
         tournamentId: req.params.id, playerId: req.playerId
       }).limit(1).get();
       if (existing.data && existing.data.length > 0) {
-        return res.status(400).json({ success: false, message: '已报名' });
+        return res.status(400).json({ success: false, message: '已报名，请勿重复提交' });
       }
 
       await db.collection('tournament_registrations').add({
@@ -75,7 +138,7 @@ module.exports = function (getDb) {
           tournamentId: req.params.id,
           playerId: req.playerId,
           clubId: req.clubId,
-          remark: req.body.remark || '',
+          remark: (req.body.remark || '').substring(0, 200),
           status: 'registered',
           createdAt: new Date()
         }
@@ -83,34 +146,8 @@ module.exports = function (getDb) {
 
       res.json({ success: true, message: '报名成功' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
-    }
-  });
-
-  // 我的报名
-  router.get('/my-registrations', async (req, res) => {
-    try {
-      const db = getDb();
-      const regs = await db.collection('tournament_registrations').where({
-        playerId: req.playerId
-      }).get();
-
-      const tournamentIds = (regs.data || []).map(r => r.tournamentId);
-      if (tournamentIds.length === 0) return res.json({ success: true, data: [] });
-
-      // 逐个查询赛事信息
-      const tournaments = [];
-      for (const tid of tournamentIds) {
-        try {
-          const tRes = await db.collection('tournaments').doc(tid).get();
-          const t = Array.isArray(tRes.data) ? tRes.data[0] : tRes.data;
-          if (t) tournaments.push(t);
-        } catch (e) { /* ignore */ }
-      }
-
-      res.json({ success: true, data: tournaments });
-    } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappTournaments] register:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
@@ -124,7 +161,8 @@ module.exports = function (getDb) {
 
       res.json({ success: true, data: scores.data || [] });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappTournaments] leaderboard:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 

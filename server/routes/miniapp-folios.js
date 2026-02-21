@@ -8,21 +8,37 @@ module.exports = function (getDb) {
 
   router.use(requirePlayerAuth);
 
-  // 我的账单列表
+  function safeErrorMessage(err) {
+    if (process.env.NODE_ENV === 'production') return '服务器内部错误';
+    return err.message || '未知错误';
+  }
+
+  // 我的账单列表 — status 过滤移到数据库层
   router.get('/mine', async (req, res) => {
     const { status, page = 1, limit = 20 } = req.query;
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(50, Math.max(1, Number(limit) || 20));
+
     try {
       const db = getDb();
-      let query = db.collection('folios').where({ playerId: req.playerId, clubId: req.clubId });
-      const result = await query.orderBy('createdAt', 'desc')
-        .skip((Number(page) - 1) * Number(limit)).limit(Number(limit)).get();
+      const _ = db.command;
+      const where = { playerId: req.playerId, clubId: req.clubId };
 
-      let folios = result.data || [];
-      if (status) folios = folios.filter(f => f.status === status);
+      if (status && _) {
+        const validStatuses = ['open', 'settled', 'void'];
+        if (validStatuses.includes(status)) {
+          where.status = status;
+        }
+      }
 
-      res.json({ success: true, data: folios });
+      const result = await db.collection('folios').where(where)
+        .orderBy('createdAt', 'desc')
+        .skip((pageNum - 1) * limitNum).limit(limitNum).get();
+
+      res.json({ success: true, data: result.data || [] });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappFolios] mine:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
@@ -45,7 +61,8 @@ module.exports = function (getDb) {
         data: { folio, charges: chargesRes.data || [] }
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappFolios] detail:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
@@ -68,7 +85,8 @@ module.exports = function (getDb) {
         data: { folio, charges: chargesRes.data || [] }
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappFolios] live:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 

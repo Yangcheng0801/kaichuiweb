@@ -7,12 +7,24 @@
  */
 
 const axios = require('axios');
+const https = require('https');
 const { generateToken, verifyToken } = require('../utils/jwt-helper');
+
+// 腾讯云托管出口经代理/自签名证书，与 app.js 主文件保持一致
+const wxHttpsAgent = new https.Agent({ rejectUnauthorized: false });
+
+const PHONE_RE = /^1[3-9]\d{9}$/;
+const NAME_RE = /^[\u4e00-\u9fa5a-zA-Z\s·]{1,30}$/;
 
 function getJwtSecret() {
   const s = process.env.JWT_SECRET;
   if (process.env.NODE_ENV === 'production') return s || null;
   return s || 'kaichui-golf-secret-2026';
+}
+
+function safeErrorMessage(err) {
+  if (process.env.NODE_ENV === 'production') return '服务器内部错误';
+  return err.message || '未知错误';
 }
 
 const DEFAULT_CLUB_ID = '80a8bd4f680c3bb901e1269130e92a37';
@@ -23,7 +35,9 @@ module.exports = function (getDb) {
   // 小程序登录：code → openid/unionid → 查找球员 → 签发 JWT
   router.post('/login', async (req, res) => {
     const { code } = req.body;
-    if (!code) return res.status(400).json({ success: false, message: '缺少 code' });
+    if (!code || typeof code !== 'string' || code.length > 128) {
+      return res.status(400).json({ success: false, message: '缺少有效 code' });
+    }
 
     try {
       const appId = process.env.WX_MINIAPP_APPID || process.env.WX_APPID;
@@ -33,10 +47,10 @@ module.exports = function (getDb) {
         return res.status(500).json({ success: false, message: '未配置小程序 AppID/Secret' });
       }
 
-      // code2Session
       const wxRes = await axios.get('https://api.weixin.qq.com/sns/jscode2session', {
         params: { appid: appId, secret: appSecret, js_code: code, grant_type: 'authorization_code' },
-        timeout: 10000
+        timeout: 10000,
+        httpsAgent: wxHttpsAgent
       });
 
       if (wxRes.data.errcode) {
@@ -46,7 +60,6 @@ module.exports = function (getDb) {
       const { openid, unionid, session_key } = wxRes.data;
       const db = getDb();
 
-      // 通过 unionid 查找球员
       let playerRes;
       if (unionid) {
         playerRes = await db.collection('players').where({ unionid }).limit(1).get();
@@ -56,7 +69,6 @@ module.exports = function (getDb) {
       }
 
       if (!playerRes || !playerRes.data || playerRes.data.length === 0) {
-        // 新用户，返回 isNew
         return res.json({
           success: true,
           data: { isNew: true, openid, unionid }
@@ -65,14 +77,12 @@ module.exports = function (getDb) {
 
       const player = playerRes.data[0];
 
-      // 更新 miniapp_openid
       if (openid && player.miniapp_openid !== openid) {
         await db.collection('players').doc(player._id).update({
           data: { miniapp_openid: openid, lastLoginAt: new Date() }
         }).catch(() => {});
       }
 
-      // 查询球场档案
       let clubProfile = null;
       const cpRes = await db.collection('player_club_profiles').where({
         playerId: player._id, clubId: DEFAULT_CLUB_ID
@@ -87,7 +97,7 @@ module.exports = function (getDb) {
         unionid: unionid || player.unionid,
         phone: player.phone,
         clubId: DEFAULT_CLUB_ID
-      }, jwtSecret, 30 * 24 * 60 * 60); // 30 天
+      }, jwtSecret, 30 * 24 * 60 * 60);
 
       res.json({
         success: true,
@@ -107,32 +117,46 @@ module.exports = function (getDb) {
       });
     } catch (err) {
       console.error('[MiniappAuth] login error:', err);
-      res.status(500).json({ success: false, message: '登录失败: ' + err.message });
+      res.status(500).json({ success: false, message: '登录失败: ' + safeErrorMessage(err) });
     }
   });
 
-  // 球员注册
+  // 球员注册 — 编号使用时间戳+随机数防并发冲突
   router.post('/register', async (req, res) => {
     const { name, gender, phone, openid, unionid, clubId } = req.body;
-    if (!name || !phone) return res.status(400).json({ success: false, message: '姓名和手机号必填' });
+
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ success: false, message: '姓名不能为空' });
+    }
+    const trimmedName = name.trim().substring(0, 30);
+    if (!NAME_RE.test(trimmedName)) {
+      return res.status(400).json({ success: false, message: '姓名包含非法字符' });
+    }
+    if (!phone || !PHONE_RE.test(phone)) {
+      return res.status(400).json({ success: false, message: '手机号格式错误' });
+    }
 
     try {
       const db = getDb();
       const targetClub = clubId || DEFAULT_CLUB_ID;
 
-      // 检查手机号是否已注册
       const existRes = await db.collection('players').where({ phone }).limit(1).get();
       if (existRes.data && existRes.data.length > 0) {
         return res.status(400).json({ success: false, message: '该手机号已注册' });
       }
 
-      // 生成六位球员编号
-      const countRes = await db.collection('players').count();
-      const playerNo = String((countRes.total || 0) + 1).padStart(6, '0');
+      // 生成球员编号：日期前缀 + 随机数，避免 count()+1 的并发冲突
+      const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+      const randomPart = String(Math.floor(Math.random() * 9000) + 1000);
+      const playerNo = datePart + randomPart;
 
-      // 创建平台级球员记录
+      const validGender = [1, 2].includes(Number(gender)) ? Number(gender) : 1;
+
       const playerData = {
-        name, gender: gender || 1, phone, playerNo,
+        name: trimmedName,
+        gender: validGender,
+        phone,
+        playerNo,
         unionid: unionid || null,
         miniapp_openid: openid || null,
         avatarUrl: '',
@@ -143,7 +167,6 @@ module.exports = function (getDb) {
       const addRes = await db.collection('players').add({ data: playerData });
       const playerId = addRes._id;
 
-      // 创建球场级档案
       await db.collection('player_club_profiles').add({
         data: {
           playerId, clubId: targetClub,
@@ -163,38 +186,39 @@ module.exports = function (getDb) {
         success: true,
         data: {
           token, playerId, clubId: targetClub,
-          userInfo: { name, phone, playerNo, gender, avatarUrl: '' }
+          userInfo: { name: trimmedName, phone, playerNo, gender: validGender, avatarUrl: '' }
         }
       });
     } catch (err) {
       console.error('[MiniappAuth] register error:', err);
-      res.status(500).json({ success: false, message: '注册失败: ' + err.message });
+      res.status(500).json({ success: false, message: '注册失败: ' + safeErrorMessage(err) });
     }
   });
 
   // 获取手机号
   router.post('/phone', async (req, res) => {
     const { code } = req.body;
-    if (!code) return res.status(400).json({ success: false, message: '缺少 code' });
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({ success: false, message: '缺少 code' });
+    }
 
     try {
       const appId = process.env.WX_MINIAPP_APPID || process.env.WX_APPID;
       const appSecret = process.env.WX_MINIAPP_SECRET || process.env.WX_APP_SECRET;
 
-      // 获取 access_token
       const tokenRes = await axios.get('https://api.weixin.qq.com/cgi-bin/token', {
         params: { grant_type: 'client_credential', appid: appId, secret: appSecret },
-        timeout: 10000
+        timeout: 10000,
+        httpsAgent: wxHttpsAgent
       });
 
       const accessToken = tokenRes.data.access_token;
       if (!accessToken) return res.status(500).json({ success: false, message: '获取 access_token 失败' });
 
-      // 获取手机号
       const phoneRes = await axios.post(
         `https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=${accessToken}`,
         { code },
-        { timeout: 10000 }
+        { timeout: 10000, httpsAgent: wxHttpsAgent }
       );
 
       if (phoneRes.data.errcode !== 0) {
@@ -211,7 +235,7 @@ module.exports = function (getDb) {
       });
     } catch (err) {
       console.error('[MiniappAuth] phone error:', err);
-      res.status(500).json({ success: false, message: '获取手机号失败: ' + err.message });
+      res.status(500).json({ success: false, message: '获取手机号失败: ' + safeErrorMessage(err) });
     }
   });
 

@@ -8,7 +8,12 @@ module.exports = function (getDb) {
 
   router.use(requirePlayerAuth);
 
-  const DEFAULT_CLUB_ID = '80a8bd4f680c3bb901e1269130e92a37';
+  const NAME_RE = /^[\u4e00-\u9fa5a-zA-Z\s·]{1,30}$/;
+
+  function safeErrorMessage(err) {
+    if (process.env.NODE_ENV === 'production') return '服务器内部错误';
+    return err.message || '未知错误';
+  }
 
   // 获取个人资料 + 球场档案
   router.get('/', async (req, res) => {
@@ -25,24 +30,50 @@ module.exports = function (getDb) {
 
       res.json({ success: true, data: { player, clubProfile } });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappProfile] get:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
-  // 更新个人资料
+  // 更新个人资料 — 增加输入校验
   router.put('/', async (req, res) => {
     const { name, gender, avatarUrl } = req.body;
     try {
       const db = getDb();
       const update = { updatedAt: new Date() };
-      if (name) update.name = name;
-      if (gender) update.gender = gender;
-      if (avatarUrl) update.avatarUrl = avatarUrl;
+
+      if (name !== undefined) {
+        const trimmed = (name || '').trim();
+        if (!trimmed || !NAME_RE.test(trimmed)) {
+          return res.status(400).json({ success: false, message: '姓名格式不正确（1-30字，支持中英文）' });
+        }
+        update.name = trimmed;
+      }
+
+      if (gender !== undefined) {
+        const g = Number(gender);
+        if (![1, 2].includes(g)) {
+          return res.status(400).json({ success: false, message: '性别参数错误' });
+        }
+        update.gender = g;
+      }
+
+      if (avatarUrl !== undefined) {
+        if (typeof avatarUrl !== 'string' || avatarUrl.length > 500) {
+          return res.status(400).json({ success: false, message: '头像地址无效' });
+        }
+        update.avatarUrl = avatarUrl;
+      }
+
+      if (Object.keys(update).length <= 1) {
+        return res.status(400).json({ success: false, message: '未提供需要更新的字段' });
+      }
 
       await db.collection('players').doc(req.playerId).update({ data: update });
       res.json({ success: true, message: '更新成功' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappProfile] update:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
@@ -55,7 +86,8 @@ module.exports = function (getDb) {
       }).limit(1).get();
       res.json({ success: true, data: cpRes.data && cpRes.data.length > 0 ? cpRes.data[0] : null });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappProfile] club:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
@@ -86,20 +118,28 @@ module.exports = function (getDb) {
         }
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappProfile] stats:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
   // 充值/消费流水
   router.get('/transactions', async (req, res) => {
+    const { page = 1, limit = 50 } = req.query;
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 50));
+
     try {
       const db = getDb();
       const result = await db.collection('transactions').where({
         playerId: req.playerId
-      }).orderBy('createdAt', 'desc').limit(50).get();
+      }).orderBy('createdAt', 'desc')
+        .skip((pageNum - 1) * limitNum).limit(limitNum).get();
+
       res.json({ success: true, data: result.data || [] });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      console.error('[MiniappProfile] transactions:', err);
+      res.status(500).json({ success: false, message: safeErrorMessage(err) });
     }
   });
 
