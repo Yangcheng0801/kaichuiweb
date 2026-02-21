@@ -185,10 +185,18 @@ app.use('/api/maintenance', require('./routes/maintenance')(getDb, requireAuthWi
 
 // ===== 球员端小程序 API (miniapp) =====
 app.use('/api/miniapp/auth', require('./routes/miniapp-auth')(getDb));
+app.use('/api/miniapp/home', require('./routes/miniapp-home')(getDb));
 app.use('/api/miniapp/bookings', require('./routes/miniapp-bookings')(getDb));
 app.use('/api/miniapp/profile', require('./routes/miniapp-profile')(getDb));
 app.use('/api/miniapp/folios', require('./routes/miniapp-folios')(getDb));
+app.use('/api/miniapp/pay', require('./routes/miniapp-pay')(getDb));
 app.use('/api/miniapp/tournaments', require('./routes/miniapp-tournaments')(getDb));
+app.use('/api/miniapp/bag-storage', require('./routes/miniapp-bag-storage')(getDb));
+app.use('/api/miniapp/caddies', require('./routes/miniapp-caddie-rating')(getDb));
+app.use('/api/miniapp/notifications', require('./routes/miniapp-notifications')(getDb));
+app.use('/api/miniapp/memberships', require('./routes/miniapp-memberships')(getDb));
+app.use('/api/miniapp/points', require('./routes/miniapp-points')(getDb));
+app.use('/api/miniapp/feedback', require('./routes/miniapp-feedback')(getDb));
 
 // 3. 健康检查接口
 app.get('/health', (req, res) => {

@@ -145,10 +145,19 @@ module.exports = function (getDb) {
         return res.status(400).json({ success: false, message: '该手机号已注册' });
       }
 
-      // 生成球员编号：日期前缀 + 随机数，避免 count()+1 的并发冲突
-      const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-      const randomPart = String(Math.floor(Math.random() * 9000) + 1000);
-      const playerNo = datePart + randomPart;
+      // 生成6位球员编号，冲突自动重试（最多5次）
+      let playerNo = '';
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const candidate = String(Math.floor(Math.random() * 900000) + 100000);
+        const dup = await db.collection('players').where({ playerNo: candidate }).limit(1).get();
+        if (!dup.data || dup.data.length === 0) {
+          playerNo = candidate;
+          break;
+        }
+      }
+      if (!playerNo) {
+        return res.status(500).json({ success: false, message: '编号生成失败，请重试' });
+      }
 
       const validGender = [1, 2].includes(Number(gender)) ? Number(gender) : 1;
 
