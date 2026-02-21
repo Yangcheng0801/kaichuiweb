@@ -67,7 +67,7 @@ module.exports = function (getDb) {
     }
   });
 
-  // 批量价格预览（实时试算）—— 复用定价引擎
+  // 批量价格预览（实时试算）
   router.post('/price-preview', async (req, res) => {
     const { date, identityType } = req.body;
     if (!date || !DATE_RE.test(date)) {
@@ -87,14 +87,16 @@ module.exports = function (getDb) {
 
       const prices = {};
       const slotCache = {};
+      let hasAnyRateSheet = false;
 
       for (let h = 7; h <= 16; h++) {
         for (let m = 0; m < 60; m += 12) {
           const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
           const timeSlot = determineTimeSlot(time);
 
-          if (!slotCache[timeSlot]) {
+          if (slotCache[timeSlot] === undefined) {
             slotCache[timeSlot] = await matchRateSheet(db, req.clubId, null, dayInfo.dayType, timeSlot, 18, date);
+            if (slotCache[timeSlot]) hasAnyRateSheet = true;
           }
 
           const rateSheet = slotCache[timeSlot];
@@ -103,7 +105,20 @@ module.exports = function (getDb) {
         }
       }
 
-      res.json({ success: true, data: { prices, date, dayType: dayInfo.dayType } });
+      // 数据库无定价规则时，使用兜底参考价
+      if (!hasAnyRateSheet) {
+        const dayOfWeek = new Date(date + 'T12:00:00').getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const fallback = isWeekend ? 880 : 680;
+        for (let h = 7; h <= 16; h++) {
+          for (let m = 0; m < 60; m += 12) {
+            const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            prices[time] = fallback;
+          }
+        }
+      }
+
+      res.json({ success: true, data: { prices, date, dayType: dayInfo.dayType, fallback: !hasAnyRateSheet } });
     } catch (err) {
       console.error('[MiniappBookings] price-preview:', err);
       res.status(500).json({ success: false, message: safeErrorMessage(err) });
@@ -142,19 +157,29 @@ module.exports = function (getDb) {
         players
       });
 
-      const perPlayer = result.greenFee > 0 ? Math.round(result.greenFee / count) : 0;
+      let perPlayer = result.greenFee > 0 ? Math.round(result.greenFee / count) : 0;
+      let totalPrice = result.greenFee || 0;
+
+      // 数据库无定价规则时使用兜底参考价
+      if (!result.hasRateSheet || totalPrice === 0) {
+        const dayOfWeek = new Date(date + 'T12:00:00').getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        perPlayer = isWeekend ? 880 : 680;
+        totalPrice = perPlayer * count;
+      }
 
       res.json({
         success: true,
         data: {
           price: perPlayer,
-          totalPrice: result.greenFee,
+          totalPrice,
           playerCount: count,
           dayType: result.dayType,
           dayTypeName: result.dayTypeName,
           timeSlot: result.timeSlot,
           timeSlotName: result.timeSlotName,
           hasRateSheet: result.hasRateSheet,
+          fallback: !result.hasRateSheet || result.greenFee === 0,
           playerBreakdown: result.playerBreakdown
         }
       });
@@ -332,28 +357,37 @@ module.exports = function (getDb) {
       }
 
       const currentVersion = booking.version || 1;
-      const updateWhere = {
-        _id: req.params.id,
-        playerId: req.playerId,
-        status: _ ? _.in(['pending', 'confirmed']) : booking.status
-      };
+      const reason = (req.body && typeof req.body.reason === 'string') ? req.body.reason.substring(0, 200) : '球员取消';
 
-      if (_) {
-        updateWhere.version = currentVersion;
-      }
+      if (_ && typeof _.in === 'function') {
+        const updateRes = await db.collection('bookings').where({
+          _id: req.params.id,
+          playerId: req.playerId,
+          status: _.in(['pending', 'confirmed']),
+          version: currentVersion
+        }).update({
+          data: {
+            status: 'cancelled',
+            cancelledAt: new Date(),
+            cancelReason: reason,
+            updatedAt: new Date(),
+            version: _.inc(1)
+          }
+        });
 
-      const updateRes = await db.collection('bookings').where(updateWhere).update({
-        data: {
-          status: 'cancelled',
-          cancelledAt: new Date(),
-          cancelReason: (req.body.reason || '球员取消').substring(0, 200),
-          updatedAt: new Date(),
-          version: _ ? _.inc(1) : currentVersion + 1
+        if (!updateRes.stats || updateRes.stats.updated === 0) {
+          return res.status(409).json({ success: false, message: '预订状态已变更，请刷新后重试' });
         }
-      });
-
-      if (!updateRes.stats || updateRes.stats.updated === 0) {
-        return res.status(409).json({ success: false, message: '预订状态已变更，请刷新后重试' });
+      } else {
+        await db.collection('bookings').doc(req.params.id).update({
+          data: {
+            status: 'cancelled',
+            cancelledAt: new Date(),
+            cancelReason: reason,
+            updatedAt: new Date(),
+            version: currentVersion + 1
+          }
+        });
       }
 
       res.json({ success: true, message: '已取消' });
