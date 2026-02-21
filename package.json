@@ -1,7 +1,6 @@
 {
   "name": "kaichui-erp",
   "version": "1.0.0",
-  "type": "module",
   "description": "开锤后台管理系统 - 前后端一体化",
   "scripts": {
     "dev": "vite",
