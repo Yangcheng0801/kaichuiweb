@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import {
   CalendarDays, Layers, Car, UserRound, Settings,
   UserCircle, ChevronDown, Menu, X, BarChart3,
-  Receipt, UtensilsCrossed, Crown, Trophy, 
+  Receipt, UtensilsCrossed, Crown, Trophy, Moon,
   Bell, Store, ClipboardCheck, Heart, Flag, LogOut, User
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
