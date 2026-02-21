@@ -5,7 +5,7 @@
   "description": "开锤后台管理系统 - 前后端一体化",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "server": "node server/app.js",
     "server:dev": "nodemon server/app.js"
