@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { loginSuccess, generateQRCode as generateQRCodeThunk, checkLoginStatusByQRCode } from '@/store/authSlice'
 import type { AppDispatch } from '@/store'
 import { useParticleSystem } from '@/hooks/useParticleSystem'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 declare global {
   interface Window {
@@ -131,10 +132,15 @@ export default function Login() {
 
   return (
     <div className="font-sans min-h-screen flex items-center justify-center p-5 relative overflow-hidden bg-background">
+      {/* 主题切换按钮 */}
+      <div className="absolute top-4 right-4 z-[100]">
+        <ThemeToggle />
+      </div>
+      
       {/* 跳转链接（无障碍） */}
       <a
         href="#login-main"
-        className="absolute -top-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-primary text-black text-sm rounded-lg z-[100] transition-[top] duration-200 focus:top-4 focus:outline-2 focus:outline-primary focus:outline-offset-2"
+        className="absolute -top-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-primary text-primary-foreground text-sm rounded-lg z-[100] transition-[top] duration-200 focus:top-4 focus:outline-2 focus:outline-primary focus:outline-offset-2"
       >
         跳到主内容
       </a>
@@ -256,7 +262,7 @@ export default function Login() {
             )}
           </div>
 
-          {/* ── 底部 ── */}
+          {/* ── 底�� ── */}
           <div className="text-center mt-6 pt-6 border-t border-border w-full relative z-[1]">
             <a
               href="#"

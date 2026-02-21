@@ -5,9 +5,10 @@ import { toast } from 'sonner'
 import {
   CalendarDays, Layers, Car, UserRound, Settings,
   UserCircle, ChevronDown, Menu, X, BarChart3,
-  Receipt, UtensilsCrossed, Moon, Crown, Trophy, 
+  Receipt, UtensilsCrossed, Crown, Trophy, 
   Bell, Store, ClipboardCheck, Heart, Flag, LogOut, User
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator
@@ -236,6 +237,7 @@ export default function Layout({ children, title = '开锤后台管理' }: Layou
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
             <NotificationCenter recipientRole="admin" pollInterval={30000} />
             
             <DropdownMenu>
