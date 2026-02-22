@@ -94,7 +94,7 @@ export default function Courses() {
         <p className="text-sm text-muted-foreground">共 {list.length} 个球场</p>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 transition-colors"
         >
           <Plus size={15} /> 新增球场
         </button>
@@ -197,7 +197,7 @@ export default function Courses() {
               <button onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">取消</button>
               <button
                 onClick={handleSave} disabled={saving}
-                className="px-5 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors"
+                className="px-5 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors"
               >
                 {saving ? '保存中...' : '确认保存'}
               </button>
@@ -217,7 +217,7 @@ export default function Courses() {
             <p className="text-sm text-muted-foreground mb-6">删除后无法恢复，请谨慎操作。</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-border text-sm text-muted-foreground rounded-lg hover:bg-secondary/50 transition-colors">取消</button>
-              <button onClick={() => handleDelete(deleteId)} className="flex-1 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">确认删除</button>
+              <button onClick={() => handleDelete(deleteId)} className="flex-1 px-4 py-2 bg-destructive text-primary-foreground text-sm rounded-lg hover:bg-red-600 transition-colors">确认删除</button>
             </div>
           </div>
         </div>

@@ -258,7 +258,7 @@ export default function Notifications() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-primary-foreground">
                 <Bell className="w-5 h-5" />
               </div>
               <div>
@@ -548,7 +548,7 @@ export default function Notifications() {
                 </button>
                 <button
                   onClick={sendAnnouncement}
-                  className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-sm transition-all"
+                  className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-primary-foreground text-sm font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-sm transition-all"
                 >
                   <Send className="w-4 h-4" />
                   发送公告

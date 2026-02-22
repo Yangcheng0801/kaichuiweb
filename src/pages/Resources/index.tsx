@@ -56,7 +56,7 @@ export default function Resources() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab.key
-                  ? 'bg-success text-white shadow-sm'
+                  ? 'bg-success text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             >

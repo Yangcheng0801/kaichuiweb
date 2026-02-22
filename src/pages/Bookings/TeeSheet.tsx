@@ -480,7 +480,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                           <button key={l._id} onClick={() => toggleLocker(l._id)}
                             className={`w-14 h-10 rounded-lg border-2 text-[11px] font-bold transition-all flex flex-col items-center justify-center ${
                               selected
-                                ? 'bg-blue-500 border-blue-600 text-white shadow-md scale-105'
+                                ? 'bg-blue-500 border-blue-600 text-primary-foreground shadow-md scale-105'
                                 : 'bg-success/10 border-success/30 text-success hover:border-blue-400 hover:bg-blue-50'
                             }`}>
                             {l.lockerNo}
@@ -566,7 +566,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             取消
           </button>
           <button onClick={handleConfirm} disabled={saving}
-            className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-semibold">
+            className="flex-1 px-4 py-2.5 bg-info text-primary-foreground text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-semibold">
             {saving ? '处理中...' : '确认签到'}
           </button>
         </div>
@@ -823,7 +823,7 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
             仅收款
           </button>
           <button onClick={handleConfirm} disabled={saving}
-            className="flex-1 px-4 py-2.5 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors font-semibold">
+            className="flex-1 px-4 py-2.5 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors font-semibold">
             {saving ? '处理中...' : `收款并完赛`}
           </button>
         </div>
@@ -882,7 +882,7 @@ function CancelDialog({ booking, onClose, onSuccess }: CancelDialogProps) {
             不取消
           </button>
           <button onClick={handleConfirm} disabled={saving}
-            className="flex-1 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors font-medium">
+            className="flex-1 px-4 py-2 bg-destructive text-primary-foreground text-sm rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors font-medium">
             {saving ? '处理中...' : '确认取消'}
           </button>
         </div>
@@ -969,7 +969,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
 
         {/* 新增按钮 */}
         <button onClick={() => onNewBooking(date)}
-          className="ml-auto flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 transition-colors">
+          className="ml-auto flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 transition-colors">
           <Plus size={15} /> 新增预订
         </button>
       </div>
@@ -988,7 +988,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
           <div className="text-4xl mb-3">⛳</div>
           <p className="text-sm">当天暂无预订</p>
           <button onClick={() => onNewBooking(date)}
-            className="mt-4 px-5 py-2 bg-success text-white text-sm rounded-full hover:bg-success/90 transition-colors">
+            className="mt-4 px-5 py-2 bg-success text-primary-foreground text-sm rounded-full hover:bg-success/90 transition-colors">
             新增预订
           </button>
         </div>
@@ -1084,7 +1084,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                               handleSuccess()
                             } catch { /* 拦截器处理 */ }
                           }}
-                          className="px-2.5 py-1 text-xs bg-success/100 text-white rounded-lg hover:bg-success transition-colors">
+                          className="px-2.5 py-1 text-xs bg-success/100 text-primary-foreground rounded-lg hover:bg-success transition-colors">
                           确认
                         </button>
                       )}
@@ -1092,7 +1092,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                       {/* 已确认 → 签到（打开弹窗） */}
                       {b.status === 'confirmed' && (
                         <button onClick={() => setCheckInTarget(b)}
-                          className="px-2.5 py-1 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                          className="px-2.5 py-1 text-xs bg-info text-primary-foreground rounded-lg hover:bg-blue-600 transition-colors">
                           签到
                         </button>
                       )}
@@ -1100,7 +1100,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                       {/* 已签到 → 完赛（打开收银台） */}
                       {b.status === 'checked_in' && (
                         <button onClick={() => setCashierTarget(b)}
-                          className="px-2.5 py-1 text-xs bg-success/100 text-white rounded-lg hover:bg-success transition-colors">
+                          className="px-2.5 py-1 text-xs bg-success/100 text-primary-foreground rounded-lg hover:bg-success transition-colors">
                           完赛结账
                         </button>
                       )}

@@ -102,7 +102,7 @@ export default function Tournaments() {
           return (
             <button key={t.key} onClick={() => setActiveTab(t.key)}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                active ? 'bg-success text-white shadow' : 'text-muted-foreground hover:bg-secondary'}`}>
+                active ? 'bg-success text-primary-foreground shadow' : 'text-muted-foreground hover:bg-secondary'}`}>
               <Icon size={15} />
               {t.label}
             </button>
@@ -177,7 +177,7 @@ function TournamentList({ tournaments, loading, onSelect, onChangeStatus, onDele
       {/* 筛选栏 */}
       <div className="flex items-center gap-2 flex-wrap">
         <button onClick={() => setFilter('')}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium ${!filter ? 'bg-success text-white' : 'bg-card text-muted-foreground border'}`}>
+          className={`px-3 py-1.5 rounded-full text-xs font-medium ${!filter ? 'bg-success text-primary-foreground' : 'bg-card text-muted-foreground border'}`}>
           全部 ({tournaments.length})
         </button>
         {Object.entries(STATUSES).map(([k, v]) => {
@@ -185,7 +185,7 @@ function TournamentList({ tournaments, loading, onSelect, onChangeStatus, onDele
           if (cnt === 0) return null
           return (
             <button key={k} onClick={() => setFilter(k)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium ${filter === k ? 'bg-success text-white' : `${v.color} border`}`}>
+              className={`px-3 py-1.5 rounded-full text-xs font-medium ${filter === k ? 'bg-success text-primary-foreground' : `${v.color} border`}`}>
               {v.label} ({cnt})
             </button>
           )
@@ -426,7 +426,7 @@ function CreateTournament({ onCreated }: { onCreated: (t: any) => void }) {
         </div>
 
         <button onClick={handleSubmit} disabled={submitting}
-          className="w-full py-3 bg-success text-white rounded-xl font-medium hover:bg-success/90 disabled:opacity-50">
+          className="w-full py-3 bg-success text-primary-foreground rounded-xl font-medium hover:bg-success/90 disabled:opacity-50">
           {submitting ? '创建中...' : '创建赛事'}
         </button>
       </div>
@@ -493,7 +493,7 @@ function RegistrationTab({ tournaments, selectedId, onSelectId, selectedTourname
               </span>
             </h3>
             <button onClick={() => setShowAdd(true)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-success text-white rounded-lg text-sm hover:bg-success/90">
+              className="flex items-center gap-1 px-3 py-1.5 bg-success text-primary-foreground rounded-lg text-sm hover:bg-success/90">
               <UserPlus size={14} />新增报名
             </button>
           </div>
@@ -573,7 +573,7 @@ function RegistrationTab({ tournaments, selectedId, onSelectId, selectedTourname
                 </div>
                 <div className="flex gap-2 mt-4">
                   <button onClick={() => setShowAdd(false)} className="flex-1 py-2 border rounded-lg text-sm text-muted-foreground">取消</button>
-                  <button onClick={handleRegister} className="flex-1 py-2 bg-success text-white rounded-lg text-sm hover:bg-success/90">确认报名</button>
+                  <button onClick={handleRegister} className="flex-1 py-2 bg-success text-primary-foreground rounded-lg text-sm hover:bg-success/90">确认报名</button>
                 </div>
               </div>
             </div>
@@ -621,11 +621,11 @@ function GroupingTab({ tournaments, selectedId, onSelectId }: any) {
             <h3 className="font-bold text-foreground">分组编排 <span className="text-sm font-normal text-muted-foreground">{groups.length} 组</span></h3>
             <div className="flex gap-2">
               <button onClick={() => handleAutoGroup('handicap')}
-                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700">
+                className="flex items-center gap-1 px-3 py-1.5 bg-info text-primary-foreground rounded-lg text-xs hover:bg-blue-700">
                 <ArrowUpDown size={12} />按差点分组
               </button>
               <button onClick={() => handleAutoGroup('random')}
-                className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 text-white rounded-lg text-xs hover:bg-purple-700">
+                className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 text-primary-foreground rounded-lg text-xs hover:bg-purple-700">
                 <Shuffle size={12} />随机分组
               </button>
             </div>
@@ -752,7 +752,7 @@ function ScoringTab({ tournaments, selectedId, onSelectId }: any) {
                   placeholder="如 82" />
               </div>
             </div>
-            <button onClick={handleSubmit} className="w-full py-2 bg-success text-white rounded-lg text-sm hover:bg-success/90">
+            <button onClick={handleSubmit} className="w-full py-2 bg-success text-primary-foreground rounded-lg text-sm hover:bg-success/90">
               提交成绩
             </button>
           </div>
@@ -839,7 +839,7 @@ function LeaderboardTab({ tournaments, selectedId, onSelectId, onFinalize }: any
               </select>
               {t?.status === 'scoring' && (
                 <button onClick={() => onFinalize(selectedId)}
-                  className="flex items-center gap-1 px-4 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-medium hover:bg-amber-600">
+                  className="flex items-center gap-1 px-4 py-1.5 bg-amber-500 text-primary-foreground rounded-lg text-xs font-medium hover:bg-amber-600">
                   <Award size={14} />确认成绩 & 颁奖
                 </button>
               )}
@@ -849,7 +849,7 @@ function LeaderboardTab({ tournaments, selectedId, onSelectId, onFinalize }: any
           {/* 排行榜 */}
           <div className="bg-card rounded-xl border overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gradient-to-r from-success to-success text-white">
+              <thead className="bg-gradient-to-r from-success to-success text-primary-foreground">
                 <tr>
                   <th className="px-4 py-3 text-center w-16">名次</th>
                   <th className="px-4 py-3 text-left">球员</th>
@@ -868,9 +868,9 @@ function LeaderboardTab({ tournaments, selectedId, onSelectId, onFinalize }: any
                 ) : lb.map((p: any, i: number) => (
                   <tr key={i} className={`border-t hover:bg-secondary/50 ${p.rank <= 3 ? 'bg-amber-50/50' : ''}`}>
                     <td className="px-4 py-3 text-center">
-                      {p.rank === 1 ? <span className="inline-flex items-center justify-center w-7 h-7 bg-amber-400 text-white rounded-full font-bold text-xs">1</span> :
-                       p.rank === 2 ? <span className="inline-flex items-center justify-center w-7 h-7 bg-secondary text-white rounded-full font-bold text-xs">2</span> :
-                       p.rank === 3 ? <span className="inline-flex items-center justify-center w-7 h-7 bg-amber-700 text-white rounded-full font-bold text-xs">3</span> :
+                      {p.rank === 1 ? <span className="inline-flex items-center justify-center w-7 h-7 bg-amber-400 text-primary-foreground rounded-full font-bold text-xs">1</span> :
+                       p.rank === 2 ? <span className="inline-flex items-center justify-center w-7 h-7 bg-secondary text-primary-foreground rounded-full font-bold text-xs">2</span> :
+                       p.rank === 3 ? <span className="inline-flex items-center justify-center w-7 h-7 bg-amber-700 text-primary-foreground rounded-full font-bold text-xs">3</span> :
                        <span className="text-muted-foreground font-medium">{p.rankDisplay}</span>}
                     </td>
                     <td className="px-4 py-3 font-medium text-foreground">{p.playerName}</td>

@@ -36,7 +36,7 @@ export default function Inventory() {
       <div className="bg-card border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center text-white">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center text-primary-foreground">
               <Store className="w-5 h-5" />
             </div>
             <div>
@@ -186,7 +186,7 @@ function ProductsTab() {
           </select>
           <div className="flex-1" />
           <button onClick={() => { setEditItem(null); setForm({ name: '', categoryId: '', categoryName: '', brand: '', description: '', barcode: '', price: '', costPrice: '', memberPrice: '', unit: '件', minStock: '5', maxStock: '999', location: '' }); setShowForm(true); }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
+            className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700 shadow-sm">
             <Plus className="w-4 h-4" /> 新增商品
           </button>
           <button onClick={fetchProducts} className="p-2 rounded-lg hover:bg-secondary">
@@ -263,7 +263,7 @@ function ProductsTab() {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-            <button onClick={handleSubmit} className="px-5 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
+            <button onClick={handleSubmit} className="px-5 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700 shadow-sm">
               {editItem ? '保存修改' : '创建商品'}
             </button>
           </div>
@@ -417,7 +417,7 @@ function StockTab() {
       {/* 操作 */}
       <div className="flex items-center gap-3">
         <button onClick={() => setShowMovForm(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
+          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700 shadow-sm">
           <Plus className="w-4 h-4" /> 库存变动
         </button>
         <button onClick={fetchData} className="p-2 rounded-lg hover:bg-secondary">
@@ -463,7 +463,7 @@ function StockTab() {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <button onClick={() => setShowMovForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-            <button onClick={handleMovement} className="px-5 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700">提交</button>
+            <button onClick={handleMovement} className="px-5 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700">提交</button>
           </div>
         </div>
       )}
@@ -612,7 +612,7 @@ function PurchaseTab() {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <button onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
+          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700 shadow-sm">
           <Plus className="w-4 h-4" /> 新建采购单
         </button>
         <button onClick={fetchOrders} className="p-2 rounded-lg hover:bg-secondary">
@@ -666,7 +666,7 @@ function PurchaseTab() {
             <span className="text-sm font-bold">合计: ¥{form.items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unitCost) || 0), 0).toFixed(2)}</span>
             <div className="flex gap-3">
               <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-              <button onClick={handleCreate} className="px-5 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700">创建采购单</button>
+              <button onClick={handleCreate} className="px-5 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700">创建采购单</button>
             </div>
           </div>
         </div>
@@ -765,7 +765,7 @@ function SuppliersTab() {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <button onClick={() => { setEditItem(null); setForm({ name: '', contactPerson: '', phone: '', email: '', address: '', paymentTerms: '', notes: '' }); setShowForm(true); }}
-          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
+          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700 shadow-sm">
           <Plus className="w-4 h-4" /> 新增供应商
         </button>
         <button onClick={fetchSuppliers} className="p-2 rounded-lg hover:bg-secondary">
@@ -792,7 +792,7 @@ function SuppliersTab() {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-            <button onClick={handleSubmit} className="px-5 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700">{editItem ? '保存' : '创建'}</button>
+            <button onClick={handleSubmit} className="px-5 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700">{editItem ? '保存' : '创建'}</button>
           </div>
         </div>
       )}
@@ -910,7 +910,7 @@ function SalesTab() {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <button onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
+          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-primary-foreground text-sm rounded-lg hover:bg-orange-700 shadow-sm">
           <ShoppingCart className="w-4 h-4" /> 新建销售单
         </button>
         <button onClick={fetchSales} className="p-2 rounded-lg hover:bg-secondary">
@@ -958,7 +958,7 @@ function SalesTab() {
             <div className="flex items-center gap-4">
               <span className="text-lg font-bold">合计: ¥{saleTotal.toFixed(2)}</span>
               <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-              <button onClick={handleSale} className="px-5 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 shadow-sm">
+              <button onClick={handleSale} className="px-5 py-2 bg-green-600 text-primary-foreground text-sm rounded-lg hover:bg-green-700 shadow-sm">
                 <CheckCircle className="w-4 h-4 inline mr-1" /> 完成销售
               </button>
             </div>
@@ -1097,7 +1097,7 @@ function StatsTab() {
                 <tr key={i} className="border-t border-border/50">
                   <td className="px-4 py-2">
                     <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      i === 0 ? 'bg-amber-400 text-white' : i === 1 ? 'bg-secondary text-white' : i === 2 ? 'bg-orange-300 text-white' : 'bg-secondary text-muted-foreground'
+                      i === 0 ? 'bg-amber-400 text-primary-foreground' : i === 1 ? 'bg-secondary text-primary-foreground' : i === 2 ? 'bg-orange-300 text-primary-foreground' : 'bg-secondary text-muted-foreground'
                     }`}>{i + 1}</span>
                   </td>
                   <td className="px-4 py-2 font-medium">{p.name}</td>

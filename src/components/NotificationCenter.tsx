@@ -206,7 +206,7 @@ export default function NotificationCenter({
       >
         <Bell className="w-5 h-5 text-muted-foreground" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-destructive text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -221,7 +221,7 @@ export default function NotificationCenter({
               <Bell className="w-4 h-4 text-muted-foreground" />
               <span className="font-semibold text-foreground">通知中心</span>
               {unreadCount > 0 && (
-                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                <span className="bg-destructive text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
                   {unreadCount}
                 </span>
               )}

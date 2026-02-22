@@ -970,7 +970,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
           <div className="flex gap-3">
             <button onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">取消</button>
             <button onClick={handleSave} disabled={saving}
-              className="px-6 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors font-medium">
+              className="px-6 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors font-medium">
               {saving ? '创建中...' : '确认预订'}
             </button>
           </div>

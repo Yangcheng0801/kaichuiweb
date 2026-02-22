@@ -134,7 +134,7 @@ export default function Login() {
       {/* 跳转链接（无障碍） */}
       <a
         href="#login-main"
-        className="absolute -top-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-primary-deep text-white text-sm rounded-lg z-[100] transition-[top] duration-200 focus:top-4 focus:outline-2 focus:outline-primary focus:outline-offset-2"
+        className="absolute -top-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-primary-deep text-primary-foreground text-sm rounded-lg z-[100] transition-[top] duration-200 focus:top-4 focus:outline-2 focus:outline-primary focus:outline-offset-2"
       >
         跳到主内容
       </a>
@@ -224,7 +224,7 @@ export default function Login() {
                 aria-busy={refreshLoading}
                 onClick={() => genQRCode(true)}
                 className={cn(
-                  'relative px-5 py-2.5 bg-primary-deep text-white rounded-lg',
+                  'relative px-5 py-2.5 bg-primary-deep text-primary-foreground rounded-lg',
                   'text-[13px] font-semibold cursor-pointer overflow-hidden',
                   'transition-all duration-300',
                   'hover:bg-primary-dark hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(5,44,34,0.3)]',

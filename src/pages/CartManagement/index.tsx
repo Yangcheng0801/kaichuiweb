@@ -194,7 +194,7 @@ function OverviewTab({
                   const pct = total > 0 ? (b.value / total) * 100 : 0
                   if (pct === 0) return null
                   return (
-                    <div key={i} className={`${b.color} flex items-center justify-center text-xs text-white font-medium transition-all`}
+                    <div key={i} className={`${b.color} flex items-center justify-center text-xs text-primary-foreground font-medium transition-all`}
                       style={{ width: `${pct}%` }} title={`${b.label}: ${b.value}辆`}>
                       {pct > 8 ? b.value : ''}
                     </div>
@@ -377,7 +377,7 @@ function CartsTab({
         {/* 工具栏 */}
         <div className="flex flex-wrap items-center gap-2 mb-3 flex-shrink-0">
           <button onClick={openCreate}
-            className="flex items-center gap-1.5 px-3 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90">
+            className="flex items-center gap-1.5 px-3 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90">
             <Plus size={15} /> 新增球车
           </button>
           <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)}
@@ -609,7 +609,7 @@ function CartsTab({
             <div className="flex justify-end gap-2 px-6 py-4 border-t">
               <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-border rounded-lg text-sm">取消</button>
               <button onClick={editCart ? handleSaveEdit : handleSubmit}
-                className="px-4 py-2 bg-success text-white rounded-lg text-sm hover:bg-success/90">
+                className="px-4 py-2 bg-success text-primary-foreground rounded-lg text-sm hover:bg-success/90">
                 {editCart ? '保存' : '提交'}
               </button>
             </div>
@@ -669,7 +669,7 @@ function MaintenanceTab() {
       </div>
       {r.status !== 'completed' && (
         <button onClick={() => handleComplete(r._id)}
-          className="mt-2.5 w-full py-1.5 bg-success text-white text-xs rounded-lg hover:bg-success/90">
+          className="mt-2.5 w-full py-1.5 bg-success text-primary-foreground text-xs rounded-lg hover:bg-success/90">
           完成维修
         </button>
       )}
@@ -818,7 +818,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
             </button>
           )}
           <button onClick={handleSearch}
-            className="px-2.5 py-1.5 bg-success text-white text-xs hover:bg-success/90 transition-colors">
+            className="px-2.5 py-1.5 bg-success text-primary-foreground text-xs hover:bg-success/90 transition-colors">
             搜索
           </button>
         </div>
@@ -833,7 +833,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
         <div className="flex rounded-lg border border-border overflow-hidden ml-auto">
           {(['gantt', 'list'] as const).map(m => (
             <button key={m} onClick={() => setViewMode(m)}
-              className={`px-3 py-1.5 text-sm transition-colors ${viewMode === m ? 'bg-success text-white' : 'bg-card text-muted-foreground hover:bg-secondary/50'}`}>
+              className={`px-3 py-1.5 text-sm transition-colors ${viewMode === m ? 'bg-success text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-secondary/50'}`}>
               {m === 'gantt' ? '时间轴' : '列表'}
             </button>
           ))}
@@ -881,7 +881,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
                         style={{ left: `${((h - GANTT_START) / GANTT_HOURS) * 100}%` }} />
                     ))}
                     {cp !== null && (
-                      <div className="absolute h-5 rounded-full flex items-center overflow-hidden px-2 text-[11px] text-white font-medium shadow-sm"
+                      <div className="absolute h-5 rounded-full flex items-center overflow-hidden px-2 text-[11px] text-primary-foreground font-medium shadow-sm"
                         style={{
                           left: `${cp}%`,
                           width: dp !== null ? `${Math.max(1, dp - cp)}%` : '4%',

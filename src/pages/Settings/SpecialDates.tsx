@@ -182,7 +182,7 @@ export default function SpecialDates() {
         <button
           onClick={handleImportHolidays}
           disabled={importLoading}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm bg-success text-white rounded-lg hover:bg-success/90 font-medium disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm bg-success text-primary-foreground rounded-lg hover:bg-success/90 font-medium disabled:opacity-50"
         >
           <Download size={14} />
           {importLoading ? '导入中...' : `导入${year}年法定假日`}
@@ -246,7 +246,7 @@ export default function SpecialDates() {
                       {day}
                     </span>
                     {typeInfo && (
-                      <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white ${typeInfo.dotClass}`}>
+                      <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-primary-foreground ${typeInfo.dotClass}`}>
                         {typeInfo.label}
                       </span>
                     )}
@@ -313,7 +313,7 @@ export default function SpecialDates() {
               ) : <span />}
               <div className="flex gap-3">
                 <button onClick={() => setEditDate(null)} className="px-4 py-2 text-sm text-muted-foreground">取消</button>
-                <button onClick={handleSave} disabled={saving} className="px-5 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
+                <button onClick={handleSave} disabled={saving} className="px-5 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
                   {saving ? '保存中...' : '保存'}
                 </button>
               </div>

@@ -115,7 +115,7 @@ export default function TeamPricing() {
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">配置团队预订的人数阶梯折扣</p>
         </div>
-        <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-5 py-2 text-sm bg-success text-white rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
+        <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-5 py-2 text-sm bg-success text-primary-foreground rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
           <Save size={14} />
           {saving ? '保存中...' : '保存'}
         </button>

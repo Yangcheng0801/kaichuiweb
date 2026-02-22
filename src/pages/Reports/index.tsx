@@ -158,7 +158,7 @@ export default function Reports() {
           </button>
           {(activeTab === 'revenue' || activeTab === 'bookings') && (
             <button onClick={() => handleExport(activeTab)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-primary-foreground rounded-lg text-xs hover:bg-green-700">
               <Download size={14} /> 导出 CSV
             </button>
           )}

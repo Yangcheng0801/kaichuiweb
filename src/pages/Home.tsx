@@ -331,17 +331,17 @@ export default function Home() {
                 ) : (
                   <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
                     {/* 今日预订 */}
-                    <div className="bg-gradient-to-br from-success to-success rounded-2xl p-5 text-white shadow-lg shadow-success/20">
+                    <div className="bg-gradient-to-br from-success to-success rounded-2xl p-5 text-primary-foreground shadow-lg shadow-success/20">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-3xl font-bold tracking-tight">{kpi?.todayBookings ?? 0}</div>
-                          <div className="text-white/70 text-sm mt-1">今日预订</div>
+                          <div className="text-primary-foreground/70 text-sm mt-1">今日预订</div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-card/20 flex items-center justify-center">
                           <CalendarDays size={24} />
                         </div>
                       </div>
-                      <div className="mt-3 text-xs text-white/60 flex items-center gap-3">
+                      <div className="mt-3 text-xs text-primary-foreground/60 flex items-center gap-3">
                         <span>{kpi?.todayPlayers ?? 0} 人</span>
                         <span>·</span>
                         <span>未到 {kpi?.notArrivedCount ?? 0}</span>

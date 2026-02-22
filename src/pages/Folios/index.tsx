@@ -338,7 +338,7 @@ export default function Folios() {
                   关闭
                 </button>
                 <button onClick={handleSettle}
-                  className="flex-1 px-4 py-2.5 bg-success text-white text-sm rounded-lg hover:bg-success/90 transition-colors font-semibold">
+                  className="flex-1 px-4 py-2.5 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 transition-colors font-semibold">
                   结算此账单
                 </button>
               </div>

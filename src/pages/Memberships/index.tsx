@@ -171,7 +171,7 @@ function PlansTab() {
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
           <button onClick={() => { setEditingPlan(null); setForm(getEmptyPlanForm()); setShowForm(true) }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm font-medium">
+            className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-primary-foreground rounded-lg hover:bg-amber-700 text-sm font-medium">
             <Plus className="w-4 h-4" /> 新增套餐
           </button>
           <button onClick={handleSeed}
@@ -359,7 +359,7 @@ function PlansTab() {
               <button onClick={() => { setShowForm(false); setEditingPlan(null) }}
                 className="px-4 py-2 border rounded-lg text-sm text-muted-foreground hover:bg-secondary/50">取消</button>
               <button onClick={handleSave}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700">保存</button>
+                className="px-4 py-2 bg-amber-600 text-primary-foreground rounded-lg text-sm hover:bg-amber-700">保存</button>
             </div>
           </div>
         </div>
@@ -504,7 +504,7 @@ function MembershipsTab() {
           {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
         <button onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm font-medium">
+          className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-primary-foreground rounded-lg hover:bg-amber-700 text-sm font-medium">
           <Plus className="w-4 h-4" /> 办理开卡
         </button>
         <button onClick={handleCheckExpiry}
@@ -669,7 +669,7 @@ function MembershipsTab() {
 
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowCreate(false)} className="px-4 py-2 border rounded-lg text-sm">取消</button>
-              <button onClick={handleCreate} className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700">确认开卡</button>
+              <button onClick={handleCreate} className="px-4 py-2 bg-amber-600 text-primary-foreground rounded-lg text-sm hover:bg-amber-700">确认开卡</button>
             </div>
           </div>
         </div>
@@ -697,7 +697,7 @@ function MembershipsTab() {
             </div>
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowRenew(false)} className="px-4 py-2 border rounded-lg text-sm">取消</button>
-              <button onClick={handleRenew} className="px-4 py-2 bg-success text-white rounded-lg text-sm hover:bg-success/90">确认续费</button>
+              <button onClick={handleRenew} className="px-4 py-2 bg-success text-primary-foreground rounded-lg text-sm hover:bg-success/90">确认续费</button>
             </div>
           </div>
         </div>
@@ -794,7 +794,7 @@ function PointsTab() {
           {Object.entries(POINT_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
         <button onClick={() => setShowAdjust(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700">
+          className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-primary-foreground rounded-lg text-sm hover:bg-amber-700">
           <Edit3 className="w-4 h-4" /> 手动调整
         </button>
         <button onClick={loadData} className="ml-auto p-2 text-muted-foreground hover:text-muted-foreground">
@@ -888,7 +888,7 @@ function PointsTab() {
 
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowAdjust(false)} className="px-4 py-2 border rounded-lg text-sm">取消</button>
-              <button onClick={handleAdjust} className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700">确认调整</button>
+              <button onClick={handleAdjust} className="px-4 py-2 bg-amber-600 text-primary-foreground rounded-lg text-sm hover:bg-amber-700">确认调整</button>
             </div>
           </div>
         </div>

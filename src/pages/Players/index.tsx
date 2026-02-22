@@ -181,7 +181,7 @@ function AddPlayerDialog({ onClose, onSuccess }: AddPlayerDialogProps) {
             取消
           </button>
           <button onClick={handleSubmit} disabled={saving}
-            className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
+            className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
             {saving ? '创建中...' : '创建球员'}
           </button>
         </div>
@@ -283,7 +283,7 @@ function RechargeDialog({ player, onClose, onSuccess }: RechargeDialogProps) {
             取消
           </button>
           <button onClick={handleConfirm} disabled={saving}
-            className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
+            className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
             {saving ? '充值中...' : `确认充值 ¥${amount || 0}`}
           </button>
         </div>
@@ -386,14 +386,14 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
               </div>
 
               {/* 账户余额 */}
-              <div className="bg-gradient-to-r from-success to-success rounded-2xl p-5 text-white">
-                <p className="text-sm text-white/70">会员卡余额</p>
+              <div className="bg-gradient-to-r from-success to-success rounded-2xl p-5 text-primary-foreground">
+                <p className="text-sm text-primary-foreground/70">会员卡余额</p>
                 <p className="text-3xl font-bold mt-1">¥ {balance.toFixed(2)}</p>
                 {profile?.consumeCardNo && (
-                  <p className="text-xs text-white/60 mt-2 font-mono">消费卡号：{profile.consumeCardNo}</p>
+                  <p className="text-xs text-primary-foreground/60 mt-2 font-mono">消费卡号：{profile.consumeCardNo}</p>
                 )}
                 <button onClick={() => setShowRecharge(true)}
-                  className="mt-3 px-4 py-1.5 bg-card/20 hover:bg-card/30 text-white text-sm rounded-lg transition-colors font-medium">
+                  className="mt-3 px-4 py-1.5 bg-card/20 hover:bg-card/30 text-primary-foreground text-sm rounded-lg transition-colors font-medium">
                   + 充值
                 </button>
               </div>
@@ -402,7 +402,7 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
               {membershipInfo ? (
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">当前会籍</p>
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-5 text-white">
+                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-5 text-primary-foreground">
                     <div className="flex items-center gap-2 mb-2">
                       <Crown size={18} className="text-amber-200" />
                       <span className="font-bold text-lg">{membershipInfo.planName}</span>
@@ -643,7 +643,7 @@ export default function Players() {
             />
           </div>
           <button onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-success text-white text-sm rounded-xl hover:bg-success/90 transition-colors shadow-sm font-medium flex-shrink-0">
+            className="flex items-center gap-2 px-4 py-2.5 bg-success text-primary-foreground text-sm rounded-xl hover:bg-success/90 transition-colors shadow-sm font-medium flex-shrink-0">
             <Plus size={15} /> 新增球员
           </button>
         </div>
@@ -660,7 +660,7 @@ export default function Players() {
               </p>
               {!searchText && (
                 <button onClick={() => setShowAdd(true)}
-                  className="mt-4 px-5 py-2 bg-success text-white text-sm rounded-full hover:bg-success/90 transition-colors">
+                  className="mt-4 px-5 py-2 bg-success text-primary-foreground text-sm rounded-full hover:bg-success/90 transition-colors">
                   新增第一位球员
                 </button>
               )}

@@ -281,7 +281,7 @@ export default function Lockers() {
               <span className="inline-block w-3 h-3 bg-amber-300 rounded-sm border border-amber-400 ml-2" /> 长租
             </div>
             <button onClick={() => setShowAdd(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 transition-colors">
+              className="flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 transition-colors">
               <Plus size={15} /> 新增
             </button>
           </div>
@@ -311,23 +311,23 @@ export default function Lockers() {
                         <div className="absolute -top-1 -right-1 hidden group-hover:flex gap-0.5 z-10">
                           {l.status === 'available' && (
                             <button onClick={e => { e.stopPropagation(); handleStatusChange(l, 'maintenance') }} title="维护"
-                              className="w-5 h-5 rounded-full bg-foreground text-white flex items-center justify-center text-[10px] hover:bg-foreground/90">
+                              className="w-5 h-5 rounded-full bg-foreground text-primary-foreground flex items-center justify-center text-[10px] hover:bg-foreground/90">
                               <Wrench size={10} />
                             </button>
                           )}
                           {(l.status === 'occupied' || l.status === 'maintenance') && (
                             <button onClick={e => { e.stopPropagation(); handleStatusChange(l, 'available') }} title="释放"
-                              className="w-5 h-5 rounded-full bg-success text-white flex items-center justify-center text-[10px] hover:bg-success/90">
+                              className="w-5 h-5 rounded-full bg-success text-primary-foreground flex items-center justify-center text-[10px] hover:bg-success/90">
                               <Unlock size={10} />
                             </button>
                           )}
                           <button onClick={e => { e.stopPropagation(); setSelectedLocker(l); setKeyAction('issue'); setShowKeyDialog(true) }} title="钥匙"
-                            className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] hover:bg-amber-600">
+                            className="w-5 h-5 rounded-full bg-amber-500 text-primary-foreground flex items-center justify-center text-[10px] hover:bg-amber-600">
                             <Key size={10} />
                           </button>
                           {l.status !== 'occupied' && (
                             <button onClick={e => { e.stopPropagation(); handleDelete(l) }} title="删除"
-                              className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] hover:bg-red-600">
+                              className="w-5 h-5 rounded-full bg-destructive text-primary-foreground flex items-center justify-center text-[10px] hover:bg-red-600">
                               <X size={10} />
                             </button>
                           )}
@@ -365,7 +365,7 @@ export default function Lockers() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground">租赁合同列表</h3>
             <button onClick={() => { setShowNewContract(true); setCfStartDate(new Date().toISOString().slice(0, 10)) }}
-              className="flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90">
+              className="flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90">
               <Plus size={15} /> 新建合同
             </button>
           </div>
@@ -524,7 +524,7 @@ export default function Lockers() {
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={handleCreate} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认创建</button>
+              <button onClick={handleCreate} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认创建</button>
             </div>
           </div>
         </div>
@@ -569,7 +569,7 @@ export default function Lockers() {
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => setShowNewContract(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={handleCreateContract} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认创建</button>
+              <button onClick={handleCreateContract} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认创建</button>
             </div>
           </div>
         </div>
@@ -609,7 +609,7 @@ export default function Lockers() {
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => setShowKeyDialog(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
               <button onClick={keyAction === 'issue' ? handleIssueKey : handleReturnKey}
-                className="flex-1 px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 font-medium">
+                className="flex-1 px-4 py-2 bg-amber-500 text-primary-foreground text-sm rounded-lg hover:bg-amber-600 font-medium">
                 {keyAction === 'issue' ? '确认发放' : '确认回收'}
               </button>
             </div>

@@ -87,7 +87,7 @@ export default function Caddies() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <p className="text-sm text-muted-foreground">共 {list.length} 名球童</p>
-        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 transition-colors">
+        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 transition-colors">
           <Plus size={15} /> 新增球童
         </button>
       </div>
@@ -194,7 +194,7 @@ export default function Caddies() {
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">取消</button>
               <button onClick={handleSave} disabled={saving}
-                className="px-5 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors">
+                className="px-5 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors">
                 {saving ? '保存中...' : '确认保存'}
               </button>
             </div>
@@ -211,7 +211,7 @@ export default function Caddies() {
             <p className="text-sm text-muted-foreground mb-6">删除后无法恢复。</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-border text-sm text-muted-foreground rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={() => handleDelete(deleteId)} className="flex-1 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600">确认删除</button>
+              <button onClick={() => handleDelete(deleteId)} className="flex-1 px-4 py-2 bg-destructive text-primary-foreground text-sm rounded-lg hover:bg-red-600">确认删除</button>
             </div>
           </div>
         </div>

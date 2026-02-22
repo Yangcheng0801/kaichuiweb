@@ -167,11 +167,11 @@ export default function RolesManager() {
         {activeTab === 'roles' && (
           <div className="flex gap-2">
             {roles.length === 0 && (
-              <button onClick={handleSeed} className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs hover:bg-indigo-700">
+              <button onClick={handleSeed} className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-primary-foreground rounded-lg text-xs hover:bg-indigo-700">
                 <Zap size={14} /> 一键初始化默认角色
               </button>
             )}
-            <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1.5 px-3 py-1.5 bg-success text-white rounded-lg text-xs hover:bg-success/90">
+            <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1.5 px-3 py-1.5 bg-success text-primary-foreground rounded-lg text-xs hover:bg-success/90">
               <Plus size={14} /> 新增角色
             </button>
           </div>
@@ -195,7 +195,7 @@ export default function RolesManager() {
                 <input value={newRole.description} onChange={e => setNewRole(p => ({ ...p, description: e.target.value }))}
                   placeholder="描述（可选）" className="w-full border rounded px-2 py-1 text-xs" />
                 <div className="flex gap-2">
-                  <button onClick={handleCreate} className="flex-1 bg-indigo-600 text-white rounded text-xs py-1 hover:bg-indigo-700">创建</button>
+                  <button onClick={handleCreate} className="flex-1 bg-indigo-600 text-primary-foreground rounded text-xs py-1 hover:bg-indigo-700">创建</button>
                   <button onClick={() => setShowCreate(false)} className="px-3 bg-secondary rounded text-xs py-1">取消</button>
                 </div>
               </div>
@@ -240,7 +240,7 @@ export default function RolesManager() {
                     <p className="text-xs text-muted-foreground">{editingRole.description}</p>
                   </div>
                   <button onClick={handleSavePermissions}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs hover:bg-indigo-700">
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-primary-foreground rounded-lg text-xs hover:bg-indigo-700">
                     <Check size={14} /> 保存权限
                   </button>
                 </div>

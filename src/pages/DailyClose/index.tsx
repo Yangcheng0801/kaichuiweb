@@ -211,7 +211,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
               <Ban size={16} className="text-orange-500" /> 自动 No-Show
             </h3>
             <button onClick={onAutoNoShow} disabled={noShowProcessing}
-              className="px-3 py-1.5 bg-orange-600 text-white rounded-lg text-xs hover:bg-orange-700 disabled:opacity-50">
+              className="px-3 py-1.5 bg-orange-600 text-primary-foreground rounded-lg text-xs hover:bg-orange-700 disabled:opacity-50">
               {noShowProcessing ? '处理中...' : `标记 ${data.noShowCandidates.length} 笔 No-Show`}
             </button>
           </div>
@@ -313,7 +313,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
       {/* 执行按钮 */}
       <div className="flex justify-center">
         <button onClick={onExecute} disabled={closing}
-          className="px-8 py-3 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2 shadow-lg">
+          className="px-8 py-3 bg-indigo-600 text-primary-foreground rounded-xl text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2 shadow-lg">
           {closing ? <RefreshCw size={16} className="animate-spin" /> : <CheckCircle size={16} />}
           {closing ? '正在日结...' : `确认完成 ${targetDate} 日结`}
         </button>
@@ -334,7 +334,7 @@ function ReportPanel({ data }: { data: any }) {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* 报告头 */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-primary-foreground">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm opacity-80">日结报告</div>

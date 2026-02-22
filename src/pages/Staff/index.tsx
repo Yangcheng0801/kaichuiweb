@@ -31,7 +31,7 @@ export default function Staff() {
       <div className="bg-card border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-white">
+            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-primary-foreground">
               <Users className="w-5 h-5" />
             </div>
             <div>
@@ -156,7 +156,7 @@ function EmployeesTab() {
           </select>
           <div className="flex-1" />
           <button onClick={() => { setEditItem(null); resetForm(); setShowForm(true); }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 shadow-sm">
+            className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700 shadow-sm">
             <UserPlus className="w-4 h-4" /> 新增员工
           </button>
           <button onClick={fetchData} className="p-2 rounded-lg hover:bg-secondary">
@@ -208,7 +208,7 @@ function EmployeesTab() {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-            <button onClick={handleSubmit} className="px-5 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700">{editItem ? '保存' : '创建'}</button>
+            <button onClick={handleSubmit} className="px-5 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700">{editItem ? '保存' : '创建'}</button>
           </div>
         </div>
       )}
@@ -288,7 +288,7 @@ function DepartmentsTab() {
   return (
     <div className="space-y-4">
       <button onClick={() => { setEditItem(null); setForm({ name: '', headName: '', headPhone: '', description: '' }); setShowForm(true); }}
-        className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 shadow-sm">
+        className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700 shadow-sm">
         <Plus className="w-4 h-4" /> 新增部门
       </button>
       {showForm && (
@@ -302,7 +302,7 @@ function DepartmentsTab() {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-            <button onClick={handleSubmit} className="px-5 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700">{editItem ? '保存' : '创建'}</button>
+            <button onClick={handleSubmit} className="px-5 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700">{editItem ? '保存' : '创建'}</button>
           </div>
         </div>
       )}
@@ -352,7 +352,7 @@ function ShiftsTab() {
   return (
     <div className="space-y-4">
       <button onClick={() => setShowForm(true)}
-        className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 shadow-sm">
+        className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700 shadow-sm">
         <Plus className="w-4 h-4" /> 新增班次
       </button>
       {showForm && (
@@ -370,7 +370,7 @@ function ShiftsTab() {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-            <button onClick={handleSubmit} className="px-5 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700">创建</button>
+            <button onClick={handleSubmit} className="px-5 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700">创建</button>
           </div>
         </div>
       )}
@@ -462,10 +462,10 @@ function ScheduleTab() {
         <span className="font-bold text-foreground">{weekStart} ~ {weekEnd}</span>
         <button onClick={nextWeek} className="p-2 rounded-lg hover:bg-secondary"><ChevronRight className="w-4 h-4" /></button>
         <div className="flex-1" />
-        <button onClick={autoSchedule} className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 shadow-sm">
+        <button onClick={autoSchedule} className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700 shadow-sm">
           <Zap className="w-4 h-4" /> 自动排班
         </button>
-        <button onClick={publishSchedules} className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 shadow-sm">
+        <button onClick={publishSchedules} className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-primary-foreground text-sm rounded-lg hover:bg-green-700 shadow-sm">
           <Check className="w-4 h-4" /> 发布
         </button>
         <button onClick={fetchData} className="p-2 rounded-lg hover:bg-secondary"><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /></button>
@@ -501,7 +501,7 @@ function ScheduleTab() {
                             {c.shiftName}
                             <div className="text-[9px] opacity-70">{c.startTime}-{c.endTime}</div>
                           </div>
-                          <button onClick={() => deleteSchedule(c._id)} className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] hidden group-hover:flex items-center justify-center">×</button>
+                          <button onClick={() => deleteSchedule(c._id)} className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-primary-foreground rounded-full text-[10px] hidden group-hover:flex items-center justify-center">×</button>
                         </div>
                       )) : (
                         <div className="text-muted-foreground text-xs">-</div>
@@ -673,7 +673,7 @@ function LeavesTab() {
   return (
     <div className="space-y-4">
       <button onClick={() => setShowForm(true)}
-        className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 shadow-sm">
+        className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700 shadow-sm">
         <Plus className="w-4 h-4" /> 提交请假
       </button>
       {showForm && (
@@ -699,7 +699,7 @@ function LeavesTab() {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-            <button onClick={handleSubmit} className="px-5 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700">提交</button>
+            <button onClick={handleSubmit} className="px-5 py-2 bg-violet-600 text-primary-foreground text-sm rounded-lg hover:bg-violet-700">提交</button>
           </div>
         </div>
       )}

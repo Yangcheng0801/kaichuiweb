@@ -51,7 +51,7 @@ export default function Bookings() {
               onClick={() => setActiveView(v.key)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeView === v.key
-                  ? 'bg-success text-white shadow-sm'
+                  ? 'bg-success text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             >
@@ -219,7 +219,7 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
 
         <div className="ml-auto">
           <button onClick={() => onNewBooking(date)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-success text-white text-sm font-medium rounded-xl hover:bg-success/90 transition-colors shadow-sm">
+            className="flex items-center gap-1.5 px-4 py-2 bg-success text-primary-foreground text-sm font-medium rounded-xl hover:bg-success/90 transition-colors shadow-sm">
             <Plus size={15} /> 新增预订
           </button>
         </div>
@@ -243,13 +243,13 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
             <button key={tab.value} onClick={() => setStatus(tab.value)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 active
-                  ? 'bg-success text-white border-success shadow-sm'
+                  ? 'bg-success text-primary-foreground border-success shadow-sm'
                   : 'bg-card text-muted-foreground border-border hover:border-border hover:bg-secondary/50'
               }`}>
               <tab.icon size={13} />
               {tab.label}
               <span className={`ml-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                active ? 'bg-card/20 text-white' : 'bg-secondary text-muted-foreground'
+                active ? 'bg-card/20 text-primary-foreground' : 'bg-secondary text-muted-foreground'
               }`}>{cnt}</span>
             </button>
           )
@@ -331,7 +331,7 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
                           <div className="flex gap-1 justify-end">
                             {b.status === 'pending' && (
                               <button onClick={e => { e.stopPropagation(); handleAction(b._id, 'confirm') }}
-                                className="text-[11px] px-2.5 py-1 bg-success text-white rounded-lg hover:bg-success/90 transition-colors font-medium">
+                                className="text-[11px] px-2.5 py-1 bg-success text-primary-foreground rounded-lg hover:bg-success/90 transition-colors font-medium">
                                 确认
                               </button>
                             )}

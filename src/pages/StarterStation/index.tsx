@@ -257,7 +257,7 @@ function QueuePanel({ date, refreshKey, onRefresh }: { date: string; refreshKey:
                 )}
                 {b.orderNo && <span className="text-[11px] font-mono text-muted-foreground">{b.orderNo}</span>}
                 <button onClick={e => { e.stopPropagation(); openDispatch(b) }}
-                  className="px-3 py-1.5 bg-success text-white text-xs font-medium rounded-lg hover:bg-success/90 transition-colors flex items-center gap-1">
+                  className="px-3 py-1.5 bg-success text-primary-foreground text-xs font-medium rounded-lg hover:bg-success/90 transition-colors flex items-center gap-1">
                   <Truck size={13} /> 调度
                 </button>
                 {isExpanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
@@ -324,7 +324,7 @@ function QueuePanel({ date, refreshKey, onRefresh }: { date: string; refreshKey:
             </div>
             <div className="flex gap-3 mt-5">
               <button onClick={() => setDispatchForm(null)} className="flex-1 px-4 py-2.5 text-sm font-medium border border-border rounded-xl hover:bg-secondary/50 transition-colors">取消</button>
-              <button onClick={submitDispatch} className="flex-1 px-4 py-2.5 text-sm font-medium bg-success text-white rounded-xl hover:bg-success/90 transition-colors">确认出发</button>
+              <button onClick={submitDispatch} className="flex-1 px-4 py-2.5 text-sm font-medium bg-success text-primary-foreground rounded-xl hover:bg-success/90 transition-colors">确认出发</button>
             </div>
           </div>
         </div>
@@ -362,13 +362,13 @@ function OnCoursePanel({ date, refreshKey, onRefresh }: { date: string; refreshK
 
   const nextActions = (status: string): { label: string; target: string; color: string }[] => {
     switch (status) {
-      case 'dispatched': return [{ label: '开始前9洞', target: 'front_9', color: 'bg-success hover:bg-success/90 text-white' }]
+      case 'dispatched': return [{ label: '开始前9洞', target: 'front_9', color: 'bg-success hover:bg-success/90 text-primary-foreground' }]
       case 'front_9':    return [
-        { label: '转场', target: 'turning', color: 'bg-amber-500 hover:bg-amber-600 text-white' },
-        { label: '回场(9洞)', target: 'returned', color: 'bg-secondary/500 hover:bg-foreground text-white' },
+        { label: '转场', target: 'turning', color: 'bg-amber-500 hover:bg-amber-600 text-primary-foreground' },
+        { label: '回场(9洞)', target: 'returned', color: 'bg-secondary/500 hover:bg-foreground text-primary-foreground' },
       ]
-      case 'turning':    return [{ label: '开始后9洞', target: 'back_9', color: 'bg-indigo-600 hover:bg-indigo-700 text-white' }]
-      case 'back_9':     return [{ label: '回场', target: 'returned', color: 'bg-foreground hover:bg-foreground/90 text-white' }]
+      case 'turning':    return [{ label: '开始后9洞', target: 'back_9', color: 'bg-indigo-600 hover:bg-indigo-700 text-primary-foreground' }]
+      case 'back_9':     return [{ label: '回场', target: 'returned', color: 'bg-foreground hover:bg-foreground/90 text-primary-foreground' }]
       default: return []
     }
   }
@@ -478,13 +478,13 @@ function ReturnedPanel({ date, refreshKey, onRefresh }: { date: string; refreshK
             <div className="flex gap-1.5 flex-shrink-0">
               {b.status === 'returned' && (
                 <button onClick={() => handleAction(b._id, 'complete')}
-                  className="px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  className="px-3 py-1.5 text-xs font-medium bg-info text-primary-foreground rounded-lg hover:bg-blue-700 transition-colors">
                   完赛确认
                 </button>
               )}
               {b.status === 'completed' && (
                 <button onClick={() => handleAction(b._id, 'settle')}
-                  className="px-3 py-1.5 text-xs font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                  className="px-3 py-1.5 text-xs font-medium bg-green-600 text-primary-foreground rounded-lg hover:bg-green-700 transition-colors">
                   结账
                 </button>
               )}
@@ -568,7 +568,7 @@ function BagsPanel({ refreshKey, onRefresh }: { refreshKey: number; onRefresh: (
             className="w-full pl-8 pr-3 py-1.5 text-sm bg-secondary/50 border border-border rounded-lg outline-none focus:border-success" />
         </div>
         <button onClick={() => setFormOpen(true)}
-          className="flex items-center gap-1 px-3 py-1.5 bg-success text-white text-xs font-medium rounded-lg hover:bg-success/90 transition-colors ml-auto">
+          className="flex items-center gap-1 px-3 py-1.5 bg-success text-primary-foreground text-xs font-medium rounded-lg hover:bg-success/90 transition-colors ml-auto">
           <Plus size={14} /> 球包入库
         </button>
       </div>
@@ -599,11 +599,11 @@ function BagsPanel({ refreshKey, onRefresh }: { refreshKey: number; onRefresh: (
                 <div className="flex gap-1.5 flex-shrink-0">
                   {b.status === 'stored' && (
                     <button onClick={() => handleStatusChange(b._id, 'out')}
-                      className="px-2.5 py-1 text-xs font-medium bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors">取出</button>
+                      className="px-2.5 py-1 text-xs font-medium bg-amber-500 text-primary-foreground rounded-lg hover:bg-amber-600 transition-colors">取出</button>
                   )}
                   {b.status === 'out' && (
                     <button onClick={() => handleStatusChange(b._id, 'stored')}
-                      className="px-2.5 py-1 text-xs font-medium bg-success text-white rounded-lg hover:bg-success/90 transition-colors">归还入库</button>
+                      className="px-2.5 py-1 text-xs font-medium bg-success text-primary-foreground rounded-lg hover:bg-success/90 transition-colors">归还入库</button>
                   )}
                 </div>
               </div>
@@ -650,7 +650,7 @@ function BagsPanel({ refreshKey, onRefresh }: { refreshKey: number; onRefresh: (
             </div>
             <div className="flex gap-3 mt-5">
               <button onClick={() => setFormOpen(false)} className="flex-1 px-4 py-2.5 text-sm font-medium border border-border rounded-xl hover:bg-secondary/50 transition-colors">取消</button>
-              <button onClick={handleCreate} className="flex-1 px-4 py-2.5 text-sm font-medium bg-success text-white rounded-xl hover:bg-success/90 transition-colors">确认入库</button>
+              <button onClick={handleCreate} className="flex-1 px-4 py-2.5 text-sm font-medium bg-success text-primary-foreground rounded-xl hover:bg-success/90 transition-colors">确认入库</button>
             </div>
           </div>
         </div>
@@ -711,11 +711,11 @@ function TimelinePanel({ date, refreshKey }: { date: string; refreshKey: number 
       {/* 视图切换 */}
       <div className="flex gap-2">
         <button onClick={() => setViewMode('caddy')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${viewMode === 'caddy' ? 'bg-success text-white border-success' : 'bg-card text-muted-foreground border-border hover:bg-secondary/50'}`}>
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${viewMode === 'caddy' ? 'bg-success text-primary-foreground border-success' : 'bg-card text-muted-foreground border-border hover:bg-secondary/50'}`}>
           球童视图
         </button>
         <button onClick={() => setViewMode('cart')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${viewMode === 'cart' ? 'bg-success text-white border-success' : 'bg-card text-muted-foreground border-border hover:bg-secondary/50'}`}>
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${viewMode === 'cart' ? 'bg-success text-primary-foreground border-success' : 'bg-card text-muted-foreground border-border hover:bg-secondary/50'}`}>
           球车视图
         </button>
       </div>
@@ -774,7 +774,7 @@ function TimelinePanel({ date, refreshKey }: { date: string; refreshKey: number 
                       className={`absolute top-1.5 h-7 rounded ${statusColor(slot.status)} opacity-85 hover:opacity-100 transition-opacity cursor-default group`}
                       style={{ left: `${startPct}%`, width: `${width}%`, minWidth: '20px' }}
                       title={`${slot.players} · ${slot.teeTime} · ${STATUS_LABELS[slot.status]?.label || slot.status}`}>
-                      <span className="text-[10px] text-white font-medium px-1 truncate block leading-7">
+                      <span className="text-[10px] text-primary-foreground font-medium px-1 truncate block leading-7">
                         {slot.players || slot.orderNo}
                       </span>
                     </div>

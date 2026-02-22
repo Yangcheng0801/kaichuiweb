@@ -250,7 +250,7 @@ export default function CRM() {
           <label className="block text-sm font-medium text-foreground">分类<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={tagForm.category} onChange={e => setTagForm(p => ({ ...p, category: e.target.value }))}>{['通用', '身份', '行为', '消费', '风险', '偏好', '来源'].map(c => <option key={c}>{c}</option>)}</select></label>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => setTagDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
-            <button onClick={saveTag} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button>
+            <button onClick={saveTag} className="px-4 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg">保存</button>
           </div>
           {!editingTag && tags.length > 0 && <div className="pt-3 border-t mt-3"><p className="text-xs text-muted-foreground mb-2">已有标签</p><div className="flex flex-wrap gap-2">{tags.map(t => <span key={t._id} className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{ backgroundColor: t.color + '20', color: t.color }}>{t.name}<button onClick={() => openTagDialog(t)} className="hover:opacity-70"><Edit2 className="w-3 h-3" /></button><button onClick={() => deleteTag(t._id)} className="hover:opacity-70"><Trash2 className="w-3 h-3" /></button></span>)}</div></div>}
         </div>
@@ -266,7 +266,7 @@ export default function CRM() {
           <label className="block text-sm font-medium text-foreground">内容<textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows={3} value={interactionForm.content} onChange={e => setInteractionForm(p => ({ ...p, content: e.target.value }))} /></label>
           <label className="block text-sm font-medium text-foreground">摘要<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.summary} onChange={e => setInteractionForm(p => ({ ...p, summary: e.target.value }))} /></label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={interactionForm.followUpRequired} onChange={e => setInteractionForm(p => ({ ...p, followUpRequired: e.target.checked }))} />需要跟进</label>
-          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setInteractionDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveInteraction} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button></div>
+          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setInteractionDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveInteraction} className="px-4 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg">保存</button></div>
         </div>
       </Dialog>}
 
@@ -280,7 +280,7 @@ export default function CRM() {
             <label className="block text-sm font-medium text-foreground">到期日<input type="date" className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.dueDate} onChange={e => setFollowupForm(p => ({ ...p, dueDate: e.target.value }))} /></label>
           </div>
           <label className="block text-sm font-medium text-foreground">负责人<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="员工姓名" value={followupForm.assigneeName} onChange={e => setFollowupForm(p => ({ ...p, assigneeName: e.target.value }))} /></label>
-          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setFollowupDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveFollowup} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button></div>
+          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setFollowupDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveFollowup} className="px-4 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg">保存</button></div>
         </div>
       </Dialog>}
 
@@ -297,7 +297,7 @@ export default function CRM() {
             </div>)}
             <button onClick={() => setSegmentForm(p => ({ ...p, rules: [...p.rules, { field: 'account.totalRounds', operator: 'gte', value: '' }] }))} className="text-sm text-success">+ 添加条件</button>
           </div>
-          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setSegmentDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveSegment} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button></div>
+          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setSegmentDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveSegment} className="px-4 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg">保存</button></div>
         </div>
       </Dialog>}
 
@@ -312,7 +312,7 @@ export default function CRM() {
           <label className="block text-sm font-medium text-foreground">目标分群<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.segmentId} onChange={e => setCampaignForm(p => ({ ...p, segmentId: e.target.value }))}><option value="">全部客户</option>{segments.map(s => <option key={s._id} value={s._id}>{s.name} ({s.playerCount}人)</option>)}</select></label>
           <label className="block text-sm font-medium text-foreground">活动内容<textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows={3} value={campaignForm.content} onChange={e => setCampaignForm(p => ({ ...p, content: e.target.value }))} /></label>
           <label className="block text-sm font-medium text-foreground">预算 (元)<input type="number" className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.budget} onChange={e => setCampaignForm(p => ({ ...p, budget: Number(e.target.value) }))} /></label>
-          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setCampaignDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveCampaign} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button></div>
+          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setCampaignDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveCampaign} className="px-4 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg">保存</button></div>
         </div>
       </Dialog>}
     </div>
@@ -364,7 +364,7 @@ function InteractionTab({ interactions, customers, onNew, onRefresh, onCreateFol
   return (<div className="space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-base font-semibold text-foreground">互动记录</h2>
-      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={() => onNew()} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新增互动</button></div>
+      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={() => onNew()} className="flex items-center gap-1 px-3 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新增互动</button></div>
     </div>
     {interactions.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无互动记录</div> : <div className="space-y-3">{interactions.map((item: Interaction) => {
       const typeInfo = INTERACTION_TYPES[item.type] || INTERACTION_TYPES.note
@@ -388,7 +388,7 @@ function FollowupTab({ followups, filter, setFilter, onNew, onRefresh, onUpdateS
   return (<div className="space-y-4">
     <div className="flex items-center justify-between flex-wrap gap-2">
       <div className="flex items-center gap-2"><h2 className="text-base font-semibold text-foreground">跟进任务</h2><div className="flex gap-1">{[{ value: '', label: '全部' }, ...Object.entries(STATUS_MAP).map(([k, v]) => ({ value: k, label: v.label }))].map(s => <button key={s.value} onClick={() => setFilter(s.value)} className={`px-2.5 py-1 text-xs rounded-full ${filter === s.value ? 'bg-success/10 text-success font-medium' : 'text-muted-foreground hover:bg-secondary'}`}>{s.label}</button>)}</div></div>
-      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={() => onNew()} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新增任务</button></div>
+      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={() => onNew()} className="flex items-center gap-1 px-3 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新增任务</button></div>
     </div>
     {followups.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无跟进任务</div> : <div className="space-y-3">{followups.map((item: Followup) => {
       const si = STATUS_MAP[item.status] || STATUS_MAP.pending; const pi = PRIORITY_MAP[item.priority] || PRIORITY_MAP.medium; const SI = si.icon
@@ -412,7 +412,7 @@ function FollowupTab({ followups, filter, setFilter, onNew, onRefresh, onUpdateS
  * ═══════════════════════════════════════════════════════════ */
 function SegmentTab({ segments, onNew, onRefresh, onDelete }: any) {
   return (<div className="space-y-4">
-    <div className="flex items-center justify-between"><h2 className="text-base font-semibold text-foreground">客户分群</h2><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新建分群</button></div>
+    <div className="flex items-center justify-between"><h2 className="text-base font-semibold text-foreground">客户分群</h2><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新建分群</button></div>
     {segments.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无分群</div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{segments.map((seg: Segment) => <div key={seg._id} className="bg-card rounded-xl border p-4">
       <div className="flex items-start justify-between"><div><h3 className="font-medium text-foreground">{seg.name}</h3><p className="text-xs text-muted-foreground mt-0.5">{seg.description || '无描述'}</p></div><span className={`px-2 py-0.5 rounded-full text-xs ${seg.type === 'auto' ? 'bg-info/10 text-info border border-info/20' : 'bg-secondary text-muted-foreground'}`}>{seg.type === 'auto' ? '自动' : '手动'}</span></div>
       <div className="mt-3"><span className="text-muted-foreground text-sm"><span className="font-semibold text-lg text-foreground">{seg.playerCount || 0}</span> 位客户</span></div>
@@ -429,7 +429,7 @@ function CampaignTab({ campaigns, segments, onNew, onLaunch, onDelete, onRefresh
   return (<div className="space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-base font-semibold text-foreground">营销活动</h2>
-      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新建活动</button></div>
+      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-primary-foreground bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新建活动</button></div>
     </div>
     {campaigns.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无营销活动</div> : <div className="space-y-4">{campaigns.map((c: Campaign) => {
       const si = CAMPAIGN_STATUS[c.status] || CAMPAIGN_STATUS.draft

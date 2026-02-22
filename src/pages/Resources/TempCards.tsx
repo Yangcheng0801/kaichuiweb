@@ -142,7 +142,7 @@ export default function TempCards() {
           <option value="virtual">虚拟卡</option>
         </select>
         <button onClick={() => setShowAdd(true)}
-          className="ml-auto flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 transition-colors">
+          className="ml-auto flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 transition-colors">
           <Plus size={15} /> 录入实体卡
         </button>
       </div>
@@ -201,7 +201,7 @@ export default function TempCards() {
                       <div className="flex items-center justify-end gap-1.5">
                         {c.status === 'in_use' && (
                           <button onClick={() => handleReturn(c)}
-                            className="px-2.5 py-1 text-xs bg-success/100 text-white rounded-lg hover:bg-success transition-colors flex items-center gap-1">
+                            className="px-2.5 py-1 text-xs bg-success/100 text-primary-foreground rounded-lg hover:bg-success transition-colors flex items-center gap-1">
                             <RotateCcw size={12} /> 回收
                           </button>
                         )}
@@ -280,7 +280,7 @@ export default function TempCards() {
               <button onClick={() => setShowAdd(false)}
                 className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
               <button onClick={handleCreate}
-                className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认录入</button>
+                className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认录入</button>
             </div>
           </div>
         </div>

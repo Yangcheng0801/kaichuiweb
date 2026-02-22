@@ -349,7 +349,7 @@ export default function Dining() {
                   <span className="text-xl font-bold text-foreground">¥{cartTotal}</span>
                 </div>
                 <button onClick={handlePlaceOrder} disabled={loading || cart.length === 0}
-                  className="w-full py-3 bg-success text-white text-sm rounded-xl hover:bg-success/90 disabled:opacity-50 font-semibold transition-colors">
+                  className="w-full py-3 bg-success text-primary-foreground text-sm rounded-xl hover:bg-success/90 disabled:opacity-50 font-semibold transition-colors">
                   {loading ? '提交中...' : '下单'}
                 </button>
               </div>
@@ -362,7 +362,7 @@ export default function Dining() {
           <>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-foreground">餐台总览</h3>
-              <button onClick={() => setShowAddTable(true)} className="flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90"><Plus size={15} /> 新增餐台</button>
+              <button onClick={() => setShowAddTable(true)} className="flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90"><Plus size={15} /> 新增餐台</button>
             </div>
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
               {tables.map(t => {
@@ -376,13 +376,13 @@ export default function Dining() {
                     </div>
                     {t.status !== 'occupied' && (
                       <button onClick={() => { api.tables.remove(t._id).then(() => { toast.success('已删除'); loadTables() }) }}
-                        className="absolute -top-1 -right-1 hidden group-hover:flex w-5 h-5 rounded-full bg-red-500 text-white items-center justify-center">
+                        className="absolute -top-1 -right-1 hidden group-hover:flex w-5 h-5 rounded-full bg-destructive text-primary-foreground items-center justify-center">
                         <X size={10} />
                       </button>
                     )}
                     {t.status === 'cleaning' && (
                       <button onClick={() => { api.tables.update(t._id, { status: 'available' }).then(() => { toast.success('已清台'); loadTables() }) }}
-                        className="absolute -top-1 -left-1 hidden group-hover:flex w-5 h-5 rounded-full bg-success/100 text-white items-center justify-center text-[10px]">
+                        className="absolute -top-1 -left-1 hidden group-hover:flex w-5 h-5 rounded-full bg-success/100 text-primary-foreground items-center justify-center text-[10px]">
                         ✓
                       </button>
                     )}
@@ -472,7 +472,7 @@ export default function Dining() {
                     <span className="text-sm font-bold text-foreground">¥{o.totalAmount}</span>
                     {o.status === 'open' && (
                       <button onClick={() => { setSettlingOrder(o); setSettlePayMethod('cash') }}
-                        className="text-xs px-3 py-1.5 bg-success text-white rounded-lg hover:bg-success/90">
+                        className="text-xs px-3 py-1.5 bg-success text-primary-foreground rounded-lg hover:bg-success/90">
                         结账
                       </button>
                     )}
@@ -562,7 +562,7 @@ export default function Dining() {
           <>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-foreground">消费点设置</h3>
-              <button onClick={() => setShowAddOutlet(true)} className="flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90"><Plus size={15} /> 新增</button>
+              <button onClick={() => setShowAddOutlet(true)} className="flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90"><Plus size={15} /> 新增</button>
             </div>
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
               {outlets.map(o => (
@@ -620,7 +620,7 @@ export default function Dining() {
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => setSettlingOrder(null)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={handleSettle} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-semibold">确认结账</button>
+              <button onClick={handleSettle} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-semibold">确认结账</button>
             </div>
           </div>
         </div>
@@ -635,7 +635,7 @@ export default function Dining() {
               <div><label className="block text-xs font-medium text-muted-foreground mb-1">名称</label><input value={fOutletName} onChange={e => setFOutletName(e.target.value)} placeholder="如：会所中餐厅" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
               <div><label className="block text-xs font-medium text-muted-foreground mb-1">类型</label><select value={fOutletType} onChange={e => setFOutletType(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card"><option value="restaurant">餐厅</option><option value="bar">吧台</option><option value="halfway">中途站</option></select></div>
             </div>
-            <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddOutlet(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddOutlet} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
+            <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddOutlet(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddOutlet} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
           </div>
         </div>
       )}
@@ -645,7 +645,7 @@ export default function Dining() {
           <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border"><h2 className="font-semibold text-foreground">新增分类</h2><button onClick={() => setShowAddCategory(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button></div>
             <div className="px-6 py-5"><div><label className="block text-xs font-medium text-muted-foreground mb-1">分类名称</label><input value={fCatName} onChange={e => setFCatName(e.target.value)} placeholder="如：热菜" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div></div>
-            <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddCategory(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddCategory} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
+            <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddCategory(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddCategory} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
           </div>
         </div>
       )}
@@ -662,7 +662,7 @@ export default function Dining() {
               </div>
               <div><label className="block text-xs font-medium text-muted-foreground mb-1">所属分类</label><select value={fItemCatId} onChange={e => setFItemCatId(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card"><option value="">不分类</option>{categories.map(c => <option key={c._id} value={c._id}>{c.categoryName}</option>)}</select></div>
             </div>
-            <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddItem(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddItem} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
+            <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddItem(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddItem} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
           </div>
         </div>
       )}
@@ -678,7 +678,7 @@ export default function Dining() {
                 <div><label className="block text-xs font-medium text-muted-foreground mb-1">座位数</label><input type="number" value={fTableCap} onChange={e => setFTableCap(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
               </div>
             </div>
-            <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddTable(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddTable} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
+            <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddTable(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddTable} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
           </div>
         </div>
       )}

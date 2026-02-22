@@ -494,7 +494,7 @@ export default function RateSheets() {
             ) : <span />}
             <div className="flex gap-3">
               <button onClick={closeEdit} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">取消</button>
-              <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
+              <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
                 {saving ? '保存中...' : '保存'}
               </button>
             </div>
@@ -516,7 +516,7 @@ export default function RateSheets() {
           <button onClick={loadData} className="flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-secondary/50">
             <RefreshCw size={14} /> 刷新
           </button>
-          <button onClick={() => setShowBatchForm(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-success text-white rounded-lg hover:bg-success/90 font-medium">
+          <button onClick={() => setShowBatchForm(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-success text-primary-foreground rounded-lg hover:bg-success/90 font-medium">
             <Zap size={14} /> 一键生成
           </button>
         </div>
@@ -584,7 +584,7 @@ export default function RateSheets() {
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => setShowBatchForm(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={handleBatch} disabled={batchLoading} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
+              <button onClick={handleBatch} disabled={batchLoading} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
                 {batchLoading ? '生成中...' : '确认生成'}
               </button>
             </div>

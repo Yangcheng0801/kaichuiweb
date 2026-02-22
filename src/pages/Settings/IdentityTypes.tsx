@@ -168,7 +168,7 @@ export default function IdentityTypes() {
       }`}
     >
       {/* 色彩标识 */}
-      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ backgroundColor: item.color }}>
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-primary-foreground text-xs font-bold flex-shrink-0" style={{ backgroundColor: item.color }}>
         {item.name[0]}
       </div>
 
@@ -298,7 +298,7 @@ export default function IdentityTypes() {
 
           <div className="flex gap-3 px-6 py-4 border-t border-border">
             <button onClick={closeForm} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-            <button onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
+            <button onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
               {saving ? '保存中...' : '保存'}
             </button>
           </div>
@@ -320,11 +320,11 @@ export default function IdentityTypes() {
             <RefreshCw size={14} /> 刷新
           </button>
           {identities.length === 0 && (
-            <button onClick={handleSeed} disabled={seeding} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50">
+            <button onClick={handleSeed} disabled={seeding} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-info text-primary-foreground rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50">
               <Zap size={14} /> {seeding ? '初始化中...' : '一键初始化'}
             </button>
           )}
-          <button onClick={openNew} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-success text-white rounded-lg hover:bg-success/90 font-medium">
+          <button onClick={openNew} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-success text-primary-foreground rounded-lg hover:bg-success/90 font-medium">
             <Plus size={14} /> 新增身份
           </button>
         </div>

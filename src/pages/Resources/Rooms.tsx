@@ -258,7 +258,7 @@ export default function Rooms() {
                 <span key={k} className="flex items-center gap-1"><span className={`w-3 h-3 rounded-sm ${v.bg}`} />{v.label}</span>
               ))}
             </div>
-            <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90">
+            <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90">
               <Plus size={15} /> 新增客房
             </button>
           </div>
@@ -292,19 +292,19 @@ export default function Rooms() {
                         <div className="absolute -top-1 -right-1 hidden group-hover:flex gap-0.5 z-10">
                           {r.status === 'occupied' && (
                             <button onClick={e => { e.stopPropagation(); setActionRoom(r); setActionType('checkout') }} title="退房"
-                              className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600">
+                              className="w-5 h-5 rounded-full bg-destructive text-primary-foreground flex items-center justify-center hover:bg-red-600">
                               <LogOut size={10} />
                             </button>
                           )}
                           {['available','vacant_clean','inspected'].includes(r.status) && (
                             <button onClick={e => { e.stopPropagation(); setActionRoom(r); setActionType('checkin') }} title="入住"
-                              className="w-5 h-5 rounded-full bg-success text-white flex items-center justify-center hover:bg-success/90">
+                              className="w-5 h-5 rounded-full bg-success text-primary-foreground flex items-center justify-center hover:bg-success/90">
                               <LogIn size={10} />
                             </button>
                           )}
                           {r.status !== 'occupied' && (
                             <button onClick={e => { e.stopPropagation(); handleDeleteRoom(r) }} title="删除"
-                              className="w-5 h-5 rounded-full bg-secondary/500 text-white flex items-center justify-center hover:bg-foreground">
+                              className="w-5 h-5 rounded-full bg-secondary/500 text-primary-foreground flex items-center justify-center hover:bg-foreground">
                               <X size={10} />
                             </button>
                           )}
@@ -366,7 +366,7 @@ export default function Rooms() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground">住宿套餐</h3>
             <button onClick={() => setShowPkgForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90">
+              className="flex items-center gap-2 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90">
               <Plus size={15} /> 新建套餐
             </button>
           </div>
@@ -421,7 +421,7 @@ export default function Rooms() {
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => { setActionRoom(null); setActionType(null) }} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={handleCheckIn} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认入住</button>
+              <button onClick={handleCheckIn} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认入住</button>
             </div>
           </div>
         </div>
@@ -441,7 +441,7 @@ export default function Rooms() {
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => { setActionRoom(null); setActionType(null) }} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={handleCheckOut} className="flex-1 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 font-medium">确认退房</button>
+              <button onClick={handleCheckOut} className="flex-1 px-4 py-2 bg-destructive text-primary-foreground text-sm rounded-lg hover:bg-red-600 font-medium">确认退房</button>
             </div>
           </div>
         </div>
@@ -465,7 +465,7 @@ export default function Rooms() {
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={handleCreateRoom} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认创建</button>
+              <button onClick={handleCreateRoom} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认创建</button>
             </div>
           </div>
         </div>
@@ -503,7 +503,7 @@ export default function Rooms() {
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">
               <button onClick={() => setShowPkgForm(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
-              <button onClick={handleCreatePackage} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认创建</button>
+              <button onClick={handleCreatePackage} className="flex-1 px-4 py-2 bg-success text-primary-foreground text-sm rounded-lg hover:bg-success/90 font-medium">确认创建</button>
             </div>
           </div>
         </div>
