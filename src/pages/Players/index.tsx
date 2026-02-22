@@ -52,7 +52,7 @@ const MEMBER_LEVELS = [
 const LEVEL_BADGE: Record<string, string> = {
   regular:  'bg-secondary text-muted-foreground',
   silver:   'bg-slate-100 text-slate-600',
-  gold:     'bg-yellow-100 text-yellow-700',
+  gold:     'bg-warning/10 text-warning border border-warning/20',
   platinum: 'bg-purple-100 text-purple-700',
   diamond:  'bg-sky-100 text-sky-700',
   vip:      'bg-rose-100 text-rose-700',
@@ -110,9 +110,9 @@ function AddPlayerDialog({ onClose, onSuccess }: AddPlayerDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
           <h2 className="font-semibold text-foreground">新增球员</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground">
             <X size={18} />
@@ -138,7 +138,7 @@ function AddPlayerDialog({ onClose, onSuccess }: AddPlayerDialogProps) {
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">性别</label>
               <select value={form.gender} onChange={e => set('gender', e.target.value)}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-white">
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-card">
                 <option value="male">男</option>
                 <option value="female">女</option>
                 <option value="other">其他</option>
@@ -147,7 +147,7 @@ function AddPlayerDialog({ onClose, onSuccess }: AddPlayerDialogProps) {
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">国籍</label>
               <select value={form.nationality} onChange={e => set('nationality', e.target.value)}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-white">
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-card">
                 <option value="CN">中国</option>
                 <option value="US">美国</option>
                 <option value="UK">英国</option>
@@ -163,7 +163,7 @@ function AddPlayerDialog({ onClose, onSuccess }: AddPlayerDialogProps) {
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">会员等级</label>
             <select value={form.memberLevel} onChange={e => set('memberLevel', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-white">
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-card">
               {MEMBER_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
             </select>
           </div>
@@ -225,7 +225,7 @@ function RechargeDialog({ player, onClose, onSuccess }: RechargeDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div>
             <h2 className="font-semibold text-foreground">账户充值</h2>
@@ -348,7 +348,7 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
       <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
       {/* 抽屉 */}
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-card shadow-2xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="font-semibold text-foreground">球员档案</h2>
@@ -393,7 +393,7 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
                   <p className="text-xs text-white/60 mt-2 font-mono">消费卡号：{profile.consumeCardNo}</p>
                 )}
                 <button onClick={() => setShowRecharge(true)}
-                  className="mt-3 px-4 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors font-medium">
+                  className="mt-3 px-4 py-1.5 bg-card/20 hover:bg-card/30 text-white text-sm rounded-lg transition-colors font-medium">
                   + 充值
                 </button>
               </div>
@@ -407,8 +407,8 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
                       <Crown size={18} className="text-amber-200" />
                       <span className="font-bold text-lg">{membershipInfo.planName}</span>
                       <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
-                        membershipInfo.status === 'active' ? 'bg-white/20' :
-                        membershipInfo.status === 'expiring' ? 'bg-red-400/30' : 'bg-white/10'
+                        membershipInfo.status === 'active' ? 'bg-card/20' :
+                        membershipInfo.status === 'expiring' ? 'bg-red-400/30' : 'bg-card/10'
                       }`}>
                         {membershipInfo.status === 'active' ? '生效中' :
                          membershipInfo.status === 'expiring' ? '即将到期' : membershipInfo.status}
@@ -423,8 +423,8 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
                           <span>免费轮次</span>
                           <span>{membershipInfo.usage?.roundsUsed || 0} / {membershipInfo.benefits.freeRounds}</span>
                         </div>
-                        <div className="bg-white/20 rounded-full h-2">
-                          <div className="bg-white h-2 rounded-full transition-all"
+                        <div className="bg-card/20 rounded-full h-2">
+                          <div className="bg-card h-2 rounded-full transition-all"
                             style={{ width: `${Math.min(100, ((membershipInfo.usage?.roundsUsed || 0) / membershipInfo.benefits.freeRounds) * 100)}%` }} />
                         </div>
                       </div>
@@ -435,18 +435,18 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
                           <span>带客名额</span>
                           <span>{membershipInfo.usage?.guestBrought || 0} / {membershipInfo.benefits.guestQuota}</span>
                         </div>
-                        <div className="bg-white/20 rounded-full h-2">
-                          <div className="bg-white h-2 rounded-full transition-all"
+                        <div className="bg-card/20 rounded-full h-2">
+                          <div className="bg-card h-2 rounded-full transition-all"
                             style={{ width: `${Math.min(100, ((membershipInfo.usage?.guestBrought || 0) / membershipInfo.benefits.guestQuota) * 100)}%` }} />
                         </div>
                       </div>
                     )}
 
                     <div className="flex flex-wrap gap-1.5 mt-3 text-xs">
-                      {membershipInfo.benefits?.discountRate < 1 && <span className="bg-white/15 px-2 py-0.5 rounded">{membershipInfo.benefits.discountRate * 10}折续打</span>}
-                      {membershipInfo.benefits?.priorityBooking && <span className="bg-white/15 px-2 py-0.5 rounded">优先预订</span>}
-                      {membershipInfo.benefits?.freeCart && <span className="bg-white/15 px-2 py-0.5 rounded">免球车</span>}
-                      {membershipInfo.benefits?.freeLocker && <span className="bg-white/15 px-2 py-0.5 rounded">免更衣柜</span>}
+                      {membershipInfo.benefits?.discountRate < 1 && <span className="bg-card/15 px-2 py-0.5 rounded">{membershipInfo.benefits.discountRate * 10}折续打</span>}
+                      {membershipInfo.benefits?.priorityBooking && <span className="bg-card/15 px-2 py-0.5 rounded">优先预订</span>}
+                      {membershipInfo.benefits?.freeCart && <span className="bg-card/15 px-2 py-0.5 rounded">免球车</span>}
+                      {membershipInfo.benefits?.freeLocker && <span className="bg-card/15 px-2 py-0.5 rounded">免更衣柜</span>}
                     </div>
 
                     <p className="text-xs text-amber-200 mt-3">
@@ -618,9 +618,9 @@ export default function Players() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] flex flex-col">
+    <div className="min-h-screen bg-page-bg flex flex-col">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-10 bg-white border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
+      <header className="sticky top-0 z-10 bg-card border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
         <button onClick={() => navigate('/home')}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft size={16} /> 返回
@@ -639,7 +639,7 @@ export default function Players() {
               value={searchInput}
               onChange={e => handleSearch(e.target.value)}
               placeholder="搜索姓名 / 手机号 / 球员号 / 消费卡号"
-              className="w-full pl-9 pr-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring shadow-sm"
+              className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring shadow-sm"
             />
           </div>
           <button onClick={() => setShowAdd(true)}
@@ -649,7 +649,7 @@ export default function Players() {
         </div>
 
         {/* 球员列表 */}
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+        <div className="flex-1 bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           {loading && players.length === 0 ? (
             <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">加载中...</div>
           ) : players.length === 0 ? (

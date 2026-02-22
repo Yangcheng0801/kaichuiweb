@@ -254,7 +254,7 @@ export default function Notifications() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/50 to-blue-50/30">
       {/* ── 顶部 ─────────────────────────────────────────────────────── */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-card border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -282,7 +282,7 @@ export default function Notifications() {
       </div>
 
       {/* ── Tab 栏 ────────────────────────────────────────────────────── */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex gap-1">
             {tabs.map(tab => (
@@ -308,7 +308,7 @@ export default function Notifications() {
         {activeTab === 'all' && (
           <div className="space-y-4">
             {/* 筛选栏 */}
-            <div className="bg-white rounded-xl shadow-sm border p-4">
+            <div className="bg-card rounded-xl shadow-sm border p-4">
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Filter className="w-4 h-4" />
@@ -317,7 +317,7 @@ export default function Notifications() {
                 <select
                   value={filterCategory}
                   onChange={e => { setFilterCategory(e.target.value); setPage(1); }}
-                  className="text-sm border rounded-lg px-3 py-1.5 bg-white"
+                  className="text-sm border rounded-lg px-3 py-1.5 bg-card"
                 >
                   <option value="">全部分类</option>
                   {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
@@ -327,7 +327,7 @@ export default function Notifications() {
                 <select
                   value={filterRead}
                   onChange={e => { setFilterRead(e.target.value as any); setPage(1); }}
-                  className="text-sm border rounded-lg px-3 py-1.5 bg-white"
+                  className="text-sm border rounded-lg px-3 py-1.5 bg-card"
                 >
                   <option value="">全部状态</option>
                   <option value="false">未读</option>
@@ -359,7 +359,7 @@ export default function Notifications() {
             </div>
 
             {/* 通知列表 */}
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
               {loading && notifications.length === 0 ? (
                 <div className="py-20 text-center text-muted-foreground">
                   <RefreshCw className="w-8 h-8 mx-auto mb-2 animate-spin" />
@@ -397,7 +397,7 @@ export default function Notifications() {
                             {n.title}
                           </span>
                           {n.priority === 'urgent' && (
-                            <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">紧急</span>
+                            <span className="text-[10px] bg-destructive/10 text-destructive border border-destructive/20 px-1.5 py-0.5 rounded font-medium">紧急</span>
                           )}
                           {n.priority === 'important' && (
                             <span className="text-[10px] bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded font-medium">重要</span>
@@ -482,7 +482,7 @@ export default function Notifications() {
         {/* ═══════════════ Tab: 发送公告 ═══════════════ */}
         {activeTab === 'send' && (
           <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-xl shadow-sm border p-6 space-y-5">
+            <div className="bg-card rounded-xl shadow-sm border p-6 space-y-5">
               <div className="flex items-center gap-2 mb-2">
                 <Megaphone className="w-5 h-5 text-indigo-600" />
                 <h2 className="text-lg font-bold text-foreground">发送系统公告</h2>
@@ -574,7 +574,7 @@ export default function Notifications() {
                   color: 'purple',
                 },
               ].map((card, i) => (
-                <div key={i} className="bg-white rounded-xl shadow-sm border p-5">
+                <div key={i} className="bg-card rounded-xl shadow-sm border p-5">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">{card.label}</p>
@@ -589,7 +589,7 @@ export default function Notifications() {
             </div>
 
             {/* 按分类统计 */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="bg-card rounded-xl shadow-sm border p-6">
               <h3 className="text-base font-bold text-foreground mb-4">按分类统计</h3>
               <div className="grid grid-cols-4 gap-4">
                 {Object.entries(CATEGORY_LABELS).map(([key, info]) => {
@@ -613,7 +613,7 @@ export default function Notifications() {
             </div>
 
             {/* 按优先级统计 */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="bg-card rounded-xl shadow-sm border p-6">
               <h3 className="text-base font-bold text-foreground mb-4">按优先级统计</h3>
               <div className="grid grid-cols-3 gap-4">
                 {[

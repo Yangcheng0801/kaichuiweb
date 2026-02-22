@@ -203,9 +203,9 @@ export default function Dining() {
 
   /* ========== 渲染 ========== */
   return (
-    <div className="min-h-screen bg-[#f4f7fb]">
+    <div className="min-h-screen bg-page-bg">
       {/* 头部 */}
-      <div className="bg-white border-b border-border px-4 sm:px-6 py-3 flex items-center gap-3 sticky top-0 z-20">
+      <div className="bg-card border-b border-border px-4 sm:px-6 py-3 flex items-center gap-3 sticky top-0 z-20">
         <button onClick={() => navigate('/home')} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"><ArrowLeft size={20} /></button>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-foreground">餐饮管理</h1>
@@ -213,7 +213,7 @@ export default function Dining() {
         </div>
         {/* 消费点选择 */}
         <select value={selectedOutlet} onChange={e => setSelectedOutlet(e.target.value)}
-          className="px-3 py-2 border border-border rounded-lg text-sm bg-white">
+          className="px-3 py-2 border border-border rounded-lg text-sm bg-card">
           {outlets.map(o => <option key={o._id} value={o._id}>{o.outletName}</option>)}
         </select>
         <button onClick={() => { loadTables(); loadMenu(); loadOrders() }} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground">
@@ -223,7 +223,7 @@ export default function Dining() {
 
       {/* Tab */}
       <div className="px-4 sm:px-6 pt-4">
-        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-border w-fit">
+        <div className="flex bg-card rounded-xl p-1 shadow-sm border border-border w-fit">
           {[
             { key: 'pos' as const, label: 'POS 点餐', icon: ShoppingCart },
             { key: 'tables' as const, label: '餐台管理', icon: LayoutGrid },
@@ -245,7 +245,7 @@ export default function Dining() {
         {tab === 'pos' && (
           <div className="flex gap-5 h-[calc(100vh-200px)]">
             {/* 左：菜单 */}
-            <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+            <div className="flex-1 flex flex-col bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
               {/* 分类栏 */}
               <div className="flex items-center gap-2 px-4 py-3 border-b border-border overflow-x-auto">
                 <button onClick={() => setSelectedCat('')}
@@ -277,7 +277,7 @@ export default function Dining() {
                     <div className="text-sm font-medium text-foreground truncate">{item.itemName}</div>
                     <div className="flex items-center justify-between mt-1.5">
                       <span className="text-sm font-bold text-orange-600">¥{item.price}</span>
-                      {item.soldOut && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded">估清</span>}
+                      {item.soldOut && <span className="text-[10px] bg-destructive/10 text-destructive border border-destructive/20 px-1.5 py-0.5 rounded">估清</span>}
                     </div>
                     {item.tags?.length > 0 && (
                       <div className="flex gap-1 mt-1">{item.tags.slice(0, 2).map(t => <span key={t} className="text-[10px] px-1 py-0.5 bg-blue-50 text-blue-600 rounded">{t}</span>)}</div>
@@ -288,7 +288,7 @@ export default function Dining() {
             </div>
 
             {/* 右：购物车 */}
-            <div className="w-80 lg:w-96 flex flex-col bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+            <div className="w-80 lg:w-96 flex flex-col bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
               <div className="px-4 py-3 border-b border-border flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-2"><ShoppingCart size={16} /> 当前订单</h3>
                 {cart.length > 0 && (
@@ -300,7 +300,7 @@ export default function Dining() {
               <div className="px-4 py-3 border-b border-border/50 space-y-2">
                 <div className="flex gap-2">
                   <select value={selectedTable?._id || ''} onChange={e => setSelectedTable(tables.find(t => t._id === e.target.value) || null)}
-                    className="flex-1 px-2 py-1.5 text-xs border border-border rounded-lg bg-white">
+                    className="flex-1 px-2 py-1.5 text-xs border border-border rounded-lg bg-card">
                     <option value="">选择餐台</option>
                     {tables.filter(t => t.status === 'available').map(t => <option key={t._id} value={t._id}>{t.tableNo} ({t.area || '-'})</option>)}
                   </select>
@@ -405,7 +405,7 @@ export default function Dining() {
             {/* 分类列表 */}
             <div className="mb-4 flex gap-2 flex-wrap">
               {categories.map(c => (
-                <div key={c._id} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-border rounded-lg text-sm group">
+                <div key={c._id} className="flex items-center gap-1 px-3 py-1.5 bg-card border border-border rounded-lg text-sm group">
                   <span>{c.categoryName}</span>
                   <button onClick={() => { api.menu.removeCategory(c._id).then(() => { toast.success('已删除'); loadMenu() }) }}
                     className="hidden group-hover:block text-red-400 hover:text-red-600 ml-1"><XCircle size={12} /></button>
@@ -413,7 +413,7 @@ export default function Dining() {
               ))}
             </div>
             {/* 菜品表格 */}
-            <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+            <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
               <div className="divide-y divide-border/50">
                 {menuItems.length === 0 ? (
                   <div className="p-12 text-center text-muted-foreground text-sm">暂无菜品</div>
@@ -422,7 +422,7 @@ export default function Dining() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-foreground">{item.itemName}</span>
-                        {item.soldOut && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded">估清</span>}
+                        {item.soldOut && <span className="text-[10px] bg-destructive/10 text-destructive border border-destructive/20 px-1.5 py-0.5 rounded">估清</span>}
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">
                         {categories.find(c => c._id === item.categoryId)?.categoryName || '未分类'} · {item.unit}
@@ -446,7 +446,7 @@ export default function Dining() {
 
         {/* ======== 订单列表 ======== */}
         {tab === 'orders' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
             <div className="px-5 py-3 border-b border-border flex items-center justify-between">
               <h3 className="text-sm font-semibold text-foreground">今日订单</h3>
               <button onClick={loadOrders} className="text-xs text-success">刷新</button>
@@ -460,7 +460,7 @@ export default function Dining() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-foreground">#{o.orderNo}</span>
-                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${o.status === 'open' ? 'bg-success/10 text-success' : o.status === 'settled' ? 'bg-secondary text-muted-foreground' : 'bg-blue-100 text-blue-700'}`}>
+                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${o.status === 'open' ? 'bg-success/10 text-success' : o.status === 'settled' ? 'bg-secondary text-muted-foreground' : 'bg-info/10 text-info border border-info/20'}`}>
                           {o.status === 'open' ? '用餐中' : o.status === 'settled' ? '已结账' : o.status}
                         </span>
                       </div>
@@ -489,22 +489,22 @@ export default function Dining() {
             <div className="flex items-center gap-3 mb-4">
               <h3 className="text-sm font-semibold text-foreground">餐饮日报</h3>
               <input type="date" value={reportDate} onChange={e => setReportDate(e.target.value)}
-                className="px-3 py-1.5 border border-border rounded-lg text-sm bg-white" />
+                className="px-3 py-1.5 border border-border rounded-lg text-sm bg-card" />
               <button onClick={loadReport} className="text-xs text-success hover:text-success">刷新</button>
             </div>
             {reportData ? (
               <div className="space-y-5">
                 {/* KPI */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="bg-white rounded-2xl shadow-sm border border-border p-5 text-center">
+                  <div className="bg-card rounded-2xl shadow-sm border border-border p-5 text-center">
                     <div className="text-xs text-muted-foreground mb-1">营业额</div>
                     <div className="text-2xl font-bold text-foreground">¥{reportData.totalRevenue}</div>
                   </div>
-                  <div className="bg-white rounded-2xl shadow-sm border border-border p-5 text-center">
+                  <div className="bg-card rounded-2xl shadow-sm border border-border p-5 text-center">
                     <div className="text-xs text-muted-foreground mb-1">订单数</div>
                     <div className="text-2xl font-bold text-foreground">{reportData.orderCount}</div>
                   </div>
-                  <div className="bg-white rounded-2xl shadow-sm border border-border p-5 text-center">
+                  <div className="bg-card rounded-2xl shadow-sm border border-border p-5 text-center">
                     <div className="text-xs text-muted-foreground mb-1">平均客单价</div>
                     <div className="text-2xl font-bold text-foreground">¥{reportData.avgPerOrder}</div>
                   </div>
@@ -512,7 +512,7 @@ export default function Dining() {
 
                 <div className="grid gap-5 grid-cols-1 xl:grid-cols-2">
                   {/* 消费点分布 */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-border p-5">
+                  <div className="bg-card rounded-2xl shadow-sm border border-border p-5">
                     <h4 className="text-sm font-semibold text-foreground mb-3">消费点分布</h4>
                     {Object.keys(reportData.byOutlet || {}).length === 0 ? (
                       <div className="text-sm text-muted-foreground text-center py-4">暂无数据</div>
@@ -532,7 +532,7 @@ export default function Dining() {
                   </div>
 
                   {/* 菜品销量 Top */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-border p-5">
+                  <div className="bg-card rounded-2xl shadow-sm border border-border p-5">
                     <h4 className="text-sm font-semibold text-foreground mb-3">菜品销量排行</h4>
                     {(reportData.topItems || []).length === 0 ? (
                       <div className="text-sm text-muted-foreground text-center py-4">暂无数据</div>
@@ -566,7 +566,7 @@ export default function Dining() {
             </div>
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
               {outlets.map(o => (
-                <div key={o._id} className="bg-white rounded-2xl shadow-sm border border-border p-5">
+                <div key={o._id} className="bg-card rounded-2xl shadow-sm border border-border p-5">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-semibold text-foreground">{o.outletName}</h4>
                     <span className={`text-[11px] px-2 py-0.5 rounded-full ${o.status === 'active' ? 'bg-success/10 text-success' : 'bg-secondary text-muted-foreground'}`}>
@@ -586,7 +586,7 @@ export default function Dining() {
       {/* ======== 结账弹窗 ======== */}
       {settlingOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">结账 #{settlingOrder.orderNo}</h2>
               <button onClick={() => setSettlingOrder(null)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>
@@ -629,11 +629,11 @@ export default function Dining() {
       {/* ======== 各种新增弹窗 ======== */}
       {showAddOutlet && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border"><h2 className="font-semibold text-foreground">新增消费点</h2><button onClick={() => setShowAddOutlet(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button></div>
             <div className="px-6 py-5 space-y-4">
               <div><label className="block text-xs font-medium text-muted-foreground mb-1">名称</label><input value={fOutletName} onChange={e => setFOutletName(e.target.value)} placeholder="如：会所中餐厅" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
-              <div><label className="block text-xs font-medium text-muted-foreground mb-1">类型</label><select value={fOutletType} onChange={e => setFOutletType(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white"><option value="restaurant">餐厅</option><option value="bar">吧台</option><option value="halfway">中途站</option></select></div>
+              <div><label className="block text-xs font-medium text-muted-foreground mb-1">类型</label><select value={fOutletType} onChange={e => setFOutletType(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card"><option value="restaurant">餐厅</option><option value="bar">吧台</option><option value="halfway">中途站</option></select></div>
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddOutlet(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddOutlet} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
           </div>
@@ -642,7 +642,7 @@ export default function Dining() {
 
       {showAddCategory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border"><h2 className="font-semibold text-foreground">新增分类</h2><button onClick={() => setShowAddCategory(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button></div>
             <div className="px-6 py-5"><div><label className="block text-xs font-medium text-muted-foreground mb-1">分类名称</label><input value={fCatName} onChange={e => setFCatName(e.target.value)} placeholder="如：热菜" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div></div>
             <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddCategory(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddCategory} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
@@ -652,7 +652,7 @@ export default function Dining() {
 
       {showAddItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border"><h2 className="font-semibold text-foreground">新增菜品</h2><button onClick={() => setShowAddItem(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button></div>
             <div className="px-6 py-5 space-y-4">
               <div><label className="block text-xs font-medium text-muted-foreground mb-1">菜品名称</label><input value={fItemName} onChange={e => setFItemName(e.target.value)} placeholder="如：清蒸鲈鱼" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
@@ -660,7 +660,7 @@ export default function Dining() {
                 <div><label className="block text-xs font-medium text-muted-foreground mb-1">价格</label><input type="number" value={fItemPrice} onChange={e => setFItemPrice(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
                 <div><label className="block text-xs font-medium text-muted-foreground mb-1">单位</label><input value={fItemUnit} onChange={e => setFItemUnit(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
               </div>
-              <div><label className="block text-xs font-medium text-muted-foreground mb-1">所属分类</label><select value={fItemCatId} onChange={e => setFItemCatId(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white"><option value="">不分类</option>{categories.map(c => <option key={c._id} value={c._id}>{c.categoryName}</option>)}</select></div>
+              <div><label className="block text-xs font-medium text-muted-foreground mb-1">所属分类</label><select value={fItemCatId} onChange={e => setFItemCatId(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card"><option value="">不分类</option>{categories.map(c => <option key={c._id} value={c._id}>{c.categoryName}</option>)}</select></div>
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border"><button onClick={() => setShowAddItem(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button><button onClick={handleAddItem} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium">确认</button></div>
           </div>
@@ -669,7 +669,7 @@ export default function Dining() {
 
       {showAddTable && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border"><h2 className="font-semibold text-foreground">新增餐台</h2><button onClick={() => setShowAddTable(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button></div>
             <div className="px-6 py-5 space-y-4">
               <div><label className="block text-xs font-medium text-muted-foreground mb-1">台号</label><input value={fTableNo} onChange={e => setFTableNo(e.target.value)} placeholder="如：A01" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>

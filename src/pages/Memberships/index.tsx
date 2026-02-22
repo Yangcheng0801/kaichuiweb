@@ -20,9 +20,9 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   active:    { label: '生效中', cls: 'bg-success/10 text-success' },
   expiring:  { label: '即将到期', cls: 'bg-amber-100 text-amber-700' },
   expired:   { label: '已过期', cls: 'bg-secondary text-muted-foreground' },
-  pending:   { label: '待激活', cls: 'bg-blue-100 text-blue-700' },
+  pending:   { label: '待激活', cls: 'bg-info/10 text-info border border-info/20' },
   suspended: { label: '已暂停', cls: 'bg-orange-100 text-orange-700' },
-  cancelled: { label: '已取消', cls: 'bg-red-100 text-red-600' },
+  cancelled: { label: '已取消', cls: 'bg-destructive/10 text-destructive border border-destructive/20' },
 }
 const PLAN_STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   active:   { label: '在售', cls: 'bg-success/10 text-success' },
@@ -47,7 +47,7 @@ export default function Memberships() {
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* 顶部标题 + Tab */}
-      <div className="flex-none border-b bg-white px-6 pt-5 pb-0">
+      <div className="flex-none border-b bg-card px-6 pt-5 pb-0">
         <h1 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
           <Crown className="w-6 h-6 text-amber-500" /> 会籍管理
         </h1>
@@ -187,7 +187,7 @@ function PlansTab() {
       {/* 套餐卡片列表 */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {plans.map(plan => (
-          <div key={plan._id} className="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md transition group">
+          <div key={plan._id} className="bg-card rounded-xl shadow-sm border p-5 hover:shadow-md transition group">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <h3 className="text-lg font-semibold text-foreground">{plan.name}</h3>
@@ -245,7 +245,7 @@ function PlansTab() {
       {/* 创建/编辑表单弹窗 */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForm(false)}>
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-auto p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-auto p-6" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-4">{editingPlan ? '编辑套餐' : '新增套餐'}</h2>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
@@ -493,12 +493,12 @@ function MembershipsTab() {
 
       {/* 工具栏 */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md bg-white border rounded-lg px-3">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md bg-card border rounded-lg px-3">
           <Search className="w-4 h-4 text-muted-foreground" />
           <input className="flex-1 py-2 text-sm outline-none" placeholder="搜索姓名/手机/会籍号"
             value={keyword} onChange={e => setKeyword(e.target.value)} />
         </div>
-        <select className="px-3 py-2 border rounded-lg text-sm bg-white" value={statusFilter}
+        <select className="px-3 py-2 border rounded-lg text-sm bg-card" value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}>
           <option value="">全部状态</option>
           {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
@@ -514,7 +514,7 @@ function MembershipsTab() {
       </div>
 
       {/* 列表 */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-secondary/50 text-muted-foreground text-xs">
             <tr>
@@ -598,7 +598,7 @@ function MembershipsTab() {
       {/* 开卡弹窗 */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><CreditCard className="w-5 h-5 text-amber-500" /> 办理开卡</h2>
 
             {/* 球员搜索 */}
@@ -678,7 +678,7 @@ function MembershipsTab() {
       {/* 续费弹窗 */}
       {showRenew && selectedMembership && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowRenew(false)}>
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-4">续费 - {selectedMembership.playerName}</h2>
             <p className="text-sm text-muted-foreground mb-4">
               当前套餐: {selectedMembership.planName} | 到期日: {selectedMembership.endDate?.slice(0, 10) || '未设置'}
@@ -788,7 +788,7 @@ function PointsTab() {
 
       {/* 工具栏 */}
       <div className="flex items-center gap-3">
-        <select className="px-3 py-2 border rounded-lg text-sm bg-white" value={typeFilter}
+        <select className="px-3 py-2 border rounded-lg text-sm bg-card" value={typeFilter}
           onChange={e => setTypeFilter(e.target.value)}>
           <option value="">全部类型</option>
           {Object.entries(POINT_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -803,7 +803,7 @@ function PointsTab() {
       </div>
 
       {/* 流水列表 */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-secondary/50 text-muted-foreground text-xs">
             <tr>
@@ -842,7 +842,7 @@ function PointsTab() {
       {/* 手动调整弹窗 */}
       {showAdjust && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowAdjust(false)}>
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-4">手动调整积分</h2>
 
             <div className="mb-4">
@@ -946,7 +946,7 @@ function ReportTab() {
 
       {/* 状态分布 */}
       {overview?.byStatus && (
-        <div className="bg-white rounded-xl shadow-sm border p-5">
+        <div className="bg-card rounded-xl shadow-sm border p-5">
           <h3 className="text-sm font-bold text-foreground mb-4">会籍状态分布</h3>
           <div className="space-y-2">
             {Object.entries(overview.byStatus).map(([status, count]: any) => {
@@ -969,7 +969,7 @@ function ReportTab() {
 
       {/* 套餐销售概况 */}
       {plansSummary && (
-        <div className="bg-white rounded-xl shadow-sm border p-5">
+        <div className="bg-card rounded-xl shadow-sm border p-5">
           <h3 className="text-sm font-bold text-foreground mb-4">套餐销售概况</h3>
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="bg-secondary/50 rounded-lg p-3 text-center">

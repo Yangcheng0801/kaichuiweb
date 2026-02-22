@@ -33,7 +33,7 @@ export default function Inventory() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/50 to-orange-50/30">
       {/* Header */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-card border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center text-white">
@@ -48,7 +48,7 @@ export default function Inventory() {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex gap-1 overflow-x-auto">
             {tabs.map(tab => (
@@ -169,7 +169,7 @@ function ProductsTab() {
   return (
     <div className="space-y-4">
       {/* 工具栏 */}
-      <div className="bg-white rounded-xl shadow-sm border p-4">
+      <div className="bg-card rounded-xl shadow-sm border p-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -197,7 +197,7 @@ function ProductsTab() {
 
       {/* 新增/编辑表单 */}
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-card rounded-xl shadow-sm border p-6">
           <h3 className="font-bold text-foreground mb-4">{editItem ? '编辑商品' : '新增商品'}</h3>
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-2">
@@ -271,7 +271,7 @@ function ProductsTab() {
       )}
 
       {/* 商品列表 */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         {loading && products.length === 0 ? (
           <div className="py-20 text-center text-muted-foreground"><RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin" />加载中...</div>
         ) : products.length === 0 ? (
@@ -401,7 +401,7 @@ function StockTab() {
           </div>
           <div className="grid grid-cols-4 gap-3">
             {lowStock.slice(0, 8).map(p => (
-              <div key={p._id} className="bg-white rounded-lg p-3 border border-red-100">
+              <div key={p._id} className="bg-card rounded-lg p-3 border border-red-100">
                 <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
                 <p className="text-xs text-muted-foreground">{p.sku}</p>
                 <div className="flex items-center justify-between mt-1">
@@ -427,7 +427,7 @@ function StockTab() {
 
       {/* 变动表单 */}
       {showMovForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-5">
+        <div className="bg-card rounded-xl shadow-sm border p-5">
           <h3 className="font-bold text-foreground mb-4">库存变动</h3>
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-2">
@@ -469,7 +469,7 @@ function StockTab() {
       )}
 
       {/* 流水 */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         <div className="px-5 py-3 border-b bg-secondary/50/50 font-semibold text-foreground">库存变动流水</div>
         {movements.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground">暂无记录</div>
@@ -622,7 +622,7 @@ function PurchaseTab() {
 
       {/* 新建表单 */}
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-card rounded-xl shadow-sm border p-6">
           <h3 className="font-bold text-foreground mb-4">新建采购单</h3>
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
@@ -673,7 +673,7 @@ function PurchaseTab() {
       )}
 
       {/* 采购单列表 */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         {orders.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground"><Truck className="w-10 h-10 text-muted-foreground mx-auto mb-2" />暂无采购单</div>
         ) : (
@@ -774,7 +774,7 @@ function SuppliersTab() {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-card rounded-xl shadow-sm border p-6">
           <h3 className="font-bold text-foreground mb-4">{editItem ? '编辑供应商' : '新增供应商'}</h3>
           <div className="grid grid-cols-3 gap-4">
             <div><label className="block text-xs text-muted-foreground mb-1">名称 *</label>
@@ -797,7 +797,7 @@ function SuppliersTab() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         {suppliers.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground"><Users2 className="w-10 h-10 text-muted-foreground mx-auto mb-2" />暂无供应商</div>
         ) : (
@@ -919,7 +919,7 @@ function SalesTab() {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-card rounded-xl shadow-sm border p-6">
           <h3 className="font-bold text-foreground mb-4">新建销售单 (POS)</h3>
           <div className="space-y-2 mb-4">
             {saleItems.map((item, idx) => (
@@ -966,7 +966,7 @@ function SalesTab() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         {sales.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground"><ShoppingCart className="w-10 h-10 text-muted-foreground mx-auto mb-2" />暂无销售记录</div>
         ) : (
@@ -1041,7 +1041,7 @@ function StatsTab() {
           { label: '低库存预警', value: stats.products?.lowStockCount || 0, icon: AlertTriangle, color: 'red' },
           { label: '库存零售值', value: `¥${(stats.products?.totalRetailValue || 0).toLocaleString()}`, icon: Tags, color: 'green' },
         ].map((c, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-sm border p-5">
+          <div key={i} className="bg-card rounded-xl shadow-sm border p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{c.label}</p>
@@ -1057,7 +1057,7 @@ function StatsTab() {
 
       {/* 销售统计 */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border p-5">
+        <div className="bg-card rounded-xl shadow-sm border p-5">
           <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><ShoppingCart className="w-4 h-4 text-orange-500" />销售概况</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-green-50 rounded-lg p-4"><p className="text-xs text-green-600">总销售额</p><p className="text-xl font-bold text-green-700 mt-1">¥{(stats.sales?.totalRevenue || 0).toLocaleString()}</p></div>
@@ -1067,7 +1067,7 @@ function StatsTab() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border p-5">
+        <div className="bg-card rounded-xl shadow-sm border p-5">
           <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><Truck className="w-4 h-4 text-orange-500" />采购概况</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-orange-50 rounded-lg p-4"><p className="text-xs text-orange-600">待处理采购单</p><p className="text-xl font-bold text-orange-700 mt-1">{stats.purchases?.pendingCount || 0}</p></div>
@@ -1077,7 +1077,7 @@ function StatsTab() {
       </div>
 
       {/* 畅销 TOP 10 */}
-      <div className="bg-white rounded-xl shadow-sm border p-5">
+      <div className="bg-card rounded-xl shadow-sm border p-5">
         <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-orange-500" />畅销商品 TOP 10</h3>
         {(stats.topSellers || []).length === 0 ? (
           <p className="text-muted-foreground text-sm py-4 text-center">暂无销售数据</p>
@@ -1112,7 +1112,7 @@ function StatsTab() {
       </div>
 
       {/* 分类统计 */}
-      <div className="bg-white rounded-xl shadow-sm border p-5">
+      <div className="bg-card rounded-xl shadow-sm border p-5">
         <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><Tags className="w-4 h-4 text-orange-500" />按分类统计</h3>
         <div className="grid grid-cols-4 gap-3">
           {Object.entries(stats.byCategory || {}).map(([cat, data]: [string, any]) => (

@@ -27,38 +27,38 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 
 /* ========== 侧边栏导航项 ========== */
 const navItems = [
-  { key: 'bookings',        label: '预订管理', path: '/bookings',        icon: CalendarDays, color: 'bg-success/10 text-success' },
-  { key: 'starter',         label: '出发台',   path: '/starter',         icon: Flag,         color: 'bg-teal-50 text-teal-600' },
-  { key: 'folios',          label: '账单管理', path: '/folios',          icon: Receipt,      color: 'bg-orange-50 text-orange-600' },
-  { key: 'resources',       label: '资源管理', path: '/resources',       icon: Layers,       color: 'bg-blue-50 text-blue-600' },
-  { key: 'dining',          label: '餐饮管理', path: '/dining',          icon: UtensilsCrossed, color: 'bg-rose-50 text-rose-600' },
-  { key: 'cart-management', label: '球车管理', path: '/cart-management', icon: Car,          color: 'bg-amber-50 text-amber-600' },
-  { key: 'players',         label: '球员管理', path: '/players',         icon: UserRound,    color: 'bg-purple-50 text-purple-600' },
-  { key: 'memberships',     label: '会籍管理', path: '/memberships',     icon: Crown,        color: 'bg-amber-50 text-amber-600' },
-  { key: 'tournaments',    label: '赛事管理', path: '/tournaments',    icon: Trophy,       color: 'bg-yellow-50 text-yellow-600' },
-  { key: 'notifications',  label: '通知中心', path: '/notifications',  icon: Bell,         color: 'bg-blue-50 text-blue-600' },
-  { key: 'inventory',      label: '库存/专卖店', path: '/inventory',      icon: Store,        color: 'bg-orange-50 text-orange-600' },
-  { key: 'crm',             label: '客户关系', path: '/crm',             icon: Heart,          color: 'bg-pink-50 text-pink-600' },
-  { key: 'staff',           label: '排班考勤', path: '/staff',           icon: ClipboardCheck, color: 'bg-violet-50 text-violet-600' },
-  { key: 'reports',         label: '报表分析', path: '/reports',         icon: BarChart3,    color: 'bg-cyan-50 text-cyan-600' },
-  { key: 'daily-close',     label: '日结/夜审', path: '/daily-close',     icon: Moon,         color: 'bg-indigo-50 text-indigo-600' },
+  { key: 'bookings',        label: '预订管理', path: '/bookings',        icon: CalendarDays, color: 'bg-secondary text-foreground' },
+  { key: 'starter',         label: '出发台',   path: '/starter',         icon: Flag,         color: 'bg-secondary text-foreground' },
+  { key: 'folios',          label: '账单管理', path: '/folios',          icon: Receipt,      color: 'bg-secondary text-foreground' },
+  { key: 'resources',       label: '资源管理', path: '/resources',       icon: Layers,       color: 'bg-secondary text-foreground' },
+  { key: 'dining',          label: '餐饮管理', path: '/dining',          icon: UtensilsCrossed, color: 'bg-secondary text-foreground' },
+  { key: 'cart-management', label: '球车管理', path: '/cart-management', icon: Car,          color: 'bg-secondary text-foreground' },
+  { key: 'players',         label: '球员管理', path: '/players',         icon: UserRound,    color: 'bg-secondary text-foreground' },
+  { key: 'memberships',     label: '会籍管理', path: '/memberships',     icon: Crown,        color: 'bg-secondary text-foreground' },
+  { key: 'tournaments',    label: '赛事管理', path: '/tournaments',    icon: Trophy,       color: 'bg-secondary text-foreground' },
+  { key: 'notifications',  label: '通知中心', path: '/notifications',  icon: Bell,         color: 'bg-secondary text-foreground' },
+  { key: 'inventory',      label: '库存/专卖店', path: '/inventory',      icon: Store,        color: 'bg-secondary text-foreground' },
+  { key: 'crm',             label: '客户关系', path: '/crm',             icon: Heart,          color: 'bg-secondary text-foreground' },
+  { key: 'staff',           label: '排班考勤', path: '/staff',           icon: ClipboardCheck, color: 'bg-secondary text-foreground' },
+  { key: 'reports',         label: '报表分析', path: '/reports',         icon: BarChart3,    color: 'bg-secondary text-foreground' },
+  { key: 'daily-close',     label: '日结/夜审', path: '/daily-close',     icon: Moon,         color: 'bg-secondary text-foreground' },
   { key: 'settings',        label: '系统设置', path: '/settings',        icon: Settings,     color: 'bg-secondary text-muted-foreground' },
 ]
 
 /* ========== 预订状态中文映射 ========== */
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  pending:    { label: '待确认', cls: 'bg-yellow-100 text-yellow-700' },
-  confirmed:  { label: '已确认', cls: 'bg-blue-100 text-blue-700' },
-  checked_in: { label: '已签到', cls: 'bg-success/10 text-success' },
-  dispatched: { label: '已出发', cls: 'bg-teal-100 text-teal-700' },
-  front_9:    { label: '前9洞',  cls: 'bg-green-100 text-green-700' },
-  turning:    { label: '转场中', cls: 'bg-amber-100 text-amber-700' },
-  back_9:     { label: '后9洞',  cls: 'bg-indigo-100 text-indigo-700' },
+  pending:    { label: '待确认', cls: 'bg-warning/10 text-warning border border-warning/20' },
+  confirmed:  { label: '已确认', cls: 'bg-info/10 text-info border border-info/20' },
+  checked_in: { label: '已签到', cls: 'bg-success/10 text-success border border-success/20' },
+  dispatched: { label: '已出发', cls: 'bg-info/10 text-info border border-info/20' },
+  front_9:    { label: '前9洞',  cls: 'bg-success/10 text-success border border-success/20' },
+  turning:    { label: '转场中', cls: 'bg-warning/10 text-warning border border-warning/20' },
+  back_9:     { label: '后9洞',  cls: 'bg-info/10 text-info border border-info/20' },
   returned:   { label: '已回场', cls: 'bg-secondary text-muted-foreground' },
   completed:  { label: '已完赛', cls: 'bg-secondary text-muted-foreground' },
-  settled:    { label: '已结账', cls: 'bg-green-100 text-green-600' },
-  cancelled:  { label: '已取消', cls: 'bg-red-100 text-red-600' },
-  no_show:    { label: '未到场', cls: 'bg-orange-100 text-orange-600' },
+  settled:    { label: '已结账', cls: 'bg-success/10 text-success border border-success/20' },
+  cancelled:  { label: '已取消', cls: 'bg-destructive/10 text-destructive border border-destructive/20' },
+  no_show:    { label: '未到场', cls: 'bg-warning/10 text-warning border border-warning/20' },
 }
 
 /* ========== 类型 ========== */
@@ -189,7 +189,7 @@ export default function Home() {
   }) => {
     const pct = total > 0 ? Math.round((used / total) * 100) : 0
     return (
-      <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
+      <div className="bg-card rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Icon size={18} className={color} />
@@ -220,7 +220,7 @@ export default function Home() {
 
   /* ========== 渲染 ========== */
   return (
-    <div className="min-h-screen bg-[#f4f7fb] flex">
+    <div className="min-h-screen bg-page-bg flex">
       {/* 桌面侧边栏 */}
       <div
         className="hidden lg:block fixed left-0 top-0 z-20 h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
@@ -228,7 +228,7 @@ export default function Home() {
         onMouseEnter={() => setSidebarOpen(true)}
         onMouseLeave={() => setSidebarOpen(false)}
       >
-        <div className="h-full w-[230px] flex flex-col bg-white rounded-r-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] border border-l-0 border-white/80">
+        <div className="h-full w-[230px] flex flex-col bg-card rounded-r-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] border border-l-0 border-white/80">
           {sidebarContent}
         </div>
       </div>
@@ -237,7 +237,7 @@ export default function Home() {
       {drawerOpen && (
         <>
           <div className="lg:hidden fixed inset-0 z-30 bg-black/40" onClick={closeDrawer} />
-          <aside className="lg:hidden fixed left-0 top-0 z-40 h-full w-[260px] max-w-[85vw] bg-white rounded-r-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] flex flex-col animate-slide-in-left">
+          <aside className="lg:hidden fixed left-0 top-0 z-40 h-full w-[260px] max-w-[85vw] bg-card rounded-r-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] flex flex-col animate-slide-in-left">
             <div className="h-[70px] flex items-center justify-between border-b border-border px-5">
               <h3 className="m-0 text-lg font-semibold text-foreground">开锤后台</h3>
               <button className="p-2 rounded-full hover:bg-secondary text-muted-foreground" onClick={closeDrawer}><X size={20} /></button>
@@ -264,7 +264,7 @@ export default function Home() {
       <div className={`flex-1 flex flex-col min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ml-0 ${sidebarOpen ? 'lg:ml-[230px]' : 'lg:ml-[8px]'}`}>
         <div className="min-h-screen pt-0 pb-6 px-4 sm:px-5 lg:px-5">
           <div className="flex flex-col gap-6">
-            <div className="flex-1 flex flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.12)] border border-white/80">
+            <div className="flex-1 flex flex-col overflow-hidden rounded-[32px] bg-card shadow-[0_25px_80px_rgba(15,23,42,0.12)] border border-white/80">
 
               {/* 顶部导航 */}
               <header className="border-b border-border flex items-center justify-between px-6 py-4 sm:px-8 sm:h-[70px]">
@@ -337,7 +337,7 @@ export default function Home() {
                           <div className="text-3xl font-bold tracking-tight">{kpi?.todayBookings ?? 0}</div>
                           <div className="text-white/70 text-sm mt-1">今日预订</div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-2xl bg-card/20 flex items-center justify-center">
                           <CalendarDays size={24} />
                         </div>
                       </div>
@@ -351,13 +351,13 @@ export default function Home() {
                     </div>
 
                     {/* 场上 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
+                    <div className="bg-card rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-3xl font-bold text-foreground tracking-tight">{kpi?.onCourseCount ?? 0}<span className="text-lg font-normal text-muted-foreground ml-1">组</span></div>
                           <div className="text-muted-foreground text-sm mt-1">场上进行中</div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500">
+                        <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-foreground">
                           <Flag size={24} />
                         </div>
                       </div>
@@ -369,7 +369,7 @@ export default function Home() {
                     </div>
 
                     {/* 今日营收 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
+                    <div className="bg-card rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-3xl font-bold text-foreground tracking-tight">
@@ -378,7 +378,7 @@ export default function Home() {
                           </div>
                           <div className="text-muted-foreground text-sm mt-1">今日营收</div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
+                        <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-foreground">
                           <DollarSign size={24} />
                         </div>
                       </div>
@@ -391,13 +391,13 @@ export default function Home() {
                     </div>
 
                     {/* 未结账单 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
+                    <div className="bg-card rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-3xl font-bold text-foreground tracking-tight">{data?.folios?.openCount ?? 0}</div>
                           <div className="text-muted-foreground text-sm mt-1">未结账单</div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
+                        <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-foreground">
                           <Receipt size={24} />
                         </div>
                       </div>
@@ -417,7 +417,7 @@ export default function Home() {
                 {/* ──── 第二行：预订漏斗 + 资源概况 ──── */}
                 <div className="grid gap-6 grid-cols-1 xl:grid-cols-5">
                   {/* 预订状态漏斗 */}
-                  <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border p-5">
+                  <div className="xl:col-span-2 bg-card rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border p-5">
                     <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                       <CalendarCheck size={16} className="text-muted-foreground" />
                       今日预订状态
@@ -425,13 +425,13 @@ export default function Home() {
                     {(() => {
                       const sc = kpi?.statusCounts || {}
                       const funnelItems = [
-                        { label: '待确认', count: sc.pending || 0, color: 'bg-amber-400' },
-                        { label: '已确认', count: sc.confirmed || 0, color: 'bg-blue-400' },
+                        { label: '待确认', count: sc.pending || 0, color: 'bg-warning' },
+                        { label: '已确认', count: sc.confirmed || 0, color: 'bg-info' },
                         { label: '已签到', count: sc.checked_in || 0, color: 'bg-success' },
-                        { label: '已出发', count: sc.dispatched || 0, color: 'bg-teal-400' },
-                        { label: '前9洞', count: sc.front_9 || 0, color: 'bg-green-500' },
-                        { label: '转场中', count: sc.turning || 0, color: 'bg-amber-500' },
-                        { label: '后9洞', count: sc.back_9 || 0, color: 'bg-indigo-500' },
+                        { label: '已出发', count: sc.dispatched || 0, color: 'bg-info' },
+                        { label: '前9洞', count: sc.front_9 || 0, color: 'bg-success' },
+                        { label: '转场中', count: sc.turning || 0, color: 'bg-warning' },
+                        { label: '后9洞', count: sc.back_9 || 0, color: 'bg-info' },
                         { label: '已回场', count: sc.returned || 0, color: 'bg-muted' },
                         { label: '已完赛', count: sc.completed || 0, color: 'bg-secondary' },
                         { label: '已结账', count: sc.settled || 0, color: 'bg-green-400' },
@@ -480,7 +480,7 @@ export default function Home() {
                 {/* ──── 第三行：近期预订 + 快捷入口 ──── */}
                 <div className="grid gap-6 grid-cols-1 xl:grid-cols-3">
                   {/* 近期预订列表 */}
-                  <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border overflow-hidden">
+                  <div className="xl:col-span-2 bg-card rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border overflow-hidden">
                     <div className="px-6 py-4 border-b border-border flex items-center justify-between">
                       <h4 className="text-sm font-semibold text-foreground">近期预订动态</h4>
                       <button onClick={() => navigate('/bookings')} className="text-xs text-success hover:text-success/80 font-medium flex items-center gap-1">
@@ -522,7 +522,7 @@ export default function Home() {
                   </div>
 
                   {/* 快捷入口 */}
-                  <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border p-6">
+                  <div className="bg-card rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border p-6">
                     <h4 className="text-sm font-semibold text-foreground mb-4">快捷操作</h4>
                     <div className="grid grid-cols-3 gap-2">
                       {navItems.slice(0, 9).map(item => (

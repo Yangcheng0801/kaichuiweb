@@ -147,7 +147,7 @@ export default function Login() {
         <div
           className={cn(
             'flex flex-col items-center overflow-hidden',
-            'bg-white/95 backdrop-blur-sm rounded-[20px] px-0.5 pt-0.5 pb-2',
+            'bg-card/95 backdrop-blur-sm rounded-[20px] px-0.5 pt-0.5 pb-2',
             'border border-white/80',
             'shadow-[0_20px_60px_rgba(0,0,0,0.08),0_40px_80px_rgba(0,0,0,0.06),inset_0_0_0_1px_rgba(0,0,0,0.05)]',
             'transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200',
@@ -184,7 +184,7 @@ export default function Login() {
               className={cn(
                 'mx-auto mb-2 rounded-xl border flex items-center justify-center relative overflow-hidden',
                 'transition-all duration-300',
-                'bg-secondary/50 border-border hover:border-primary hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:bg-white',
+                'bg-secondary/50 border-border hover:border-primary hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:bg-card',
                 scanned && 'animate-scanned-pulse motion-reduce:animate-none',
                 qrLoadFailed
                   ? 'w-[120px] min-w-[120px] h-[120px] min-h-[120px]'

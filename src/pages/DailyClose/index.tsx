@@ -117,7 +117,7 @@ export default function DailyClose() {
   return (
     <div className="min-h-screen bg-secondary/50 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b px-6 py-4 flex items-center justify-between shrink-0">
+      <header className="bg-card border-b px-6 py-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={() => window.history.back()} className="p-2 hover:bg-secondary rounded-lg">
             <ChevronLeft size={20} />
@@ -132,7 +132,7 @@ export default function DailyClose() {
       </header>
 
       {/* Tabs */}
-      <div className="bg-white border-b px-6">
+      <div className="bg-card border-b px-6">
         <div className="flex gap-0">
           {TABS.map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
@@ -179,7 +179,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* 日期选择 */}
-      <div className="bg-white rounded-xl p-5 shadow-sm">
+      <div className="bg-card rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">日结日期</h3>
           <input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)}
@@ -205,7 +205,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
 
       {/* No-Show 处理 */}
       {data.noShowCandidates?.length > 0 && (
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Ban size={16} className="text-orange-500" /> 自动 No-Show
@@ -229,7 +229,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
       )}
 
       {/* 收款汇总 */}
-      <div className="bg-white rounded-xl p-5 shadow-sm">
+      <div className="bg-card rounded-xl p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
           <DollarSign size={16} className="text-green-600" /> 当日收款汇总
         </h3>
@@ -248,7 +248,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
       </div>
 
       {/* 消费汇总 */}
-      <div className="bg-white rounded-xl p-5 shadow-sm">
+      <div className="bg-card rounded-xl p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
           <CreditCard size={16} className="text-blue-600" /> 当日消费汇总
         </h3>
@@ -267,7 +267,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
       </div>
 
       {/* 预订统计 */}
-      <div className="bg-white rounded-xl p-5 shadow-sm">
+      <div className="bg-card rounded-xl p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
           <Users size={16} className="text-purple-600" /> 预订统计
         </h3>
@@ -290,7 +290,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
       </div>
 
       {/* 交班信息 */}
-      <div className="bg-white rounded-xl p-5 shadow-sm space-y-4">
+      <div className="bg-card rounded-xl p-5 shadow-sm space-y-4">
         <h3 className="text-sm font-semibold text-foreground">交班信息</h3>
         <div>
           <label className="block text-xs text-muted-foreground mb-1">实点现金金额</label>
@@ -353,26 +353,26 @@ function ReportPanel({ data }: { data: any }) {
 
       {/* KPI 行 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm text-center">
+        <div className="bg-card rounded-xl p-4 shadow-sm text-center">
           <div className="text-xs text-muted-foreground">总预订</div>
           <div className="text-2xl font-bold text-foreground">{data.bookingStats?.total || 0}</div>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm text-center">
+        <div className="bg-card rounded-xl p-4 shadow-sm text-center">
           <div className="text-xs text-muted-foreground">完赛</div>
           <div className="text-2xl font-bold text-green-600">{data.bookingStats?.completed || 0}</div>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm text-center">
+        <div className="bg-card rounded-xl p-4 shadow-sm text-center">
           <div className="text-xs text-muted-foreground">交易笔数</div>
           <div className="text-2xl font-bold text-blue-600">{data.transactionCount || 0}</div>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm text-center">
+        <div className="bg-card rounded-xl p-4 shadow-sm text-center">
           <div className="text-xs text-muted-foreground">总消费额</div>
           <div className="text-2xl font-bold text-amber-600">¥{Number(data.totalCharged || 0).toLocaleString()}</div>
         </div>
       </div>
 
       {/* 收款明细 */}
-      <div className="bg-white rounded-xl p-5 shadow-sm">
+      <div className="bg-card rounded-xl p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-foreground mb-3">收款明细</h3>
         <table className="w-full text-sm">
           <thead><tr className="border-b text-muted-foreground text-left">
@@ -399,7 +399,7 @@ function ReportPanel({ data }: { data: any }) {
       </div>
 
       {/* 消费分类 */}
-      <div className="bg-white rounded-xl p-5 shadow-sm">
+      <div className="bg-card rounded-xl p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-foreground mb-3">消费分类</h3>
         <table className="w-full text-sm">
           <thead><tr className="border-b text-muted-foreground text-left">
@@ -429,7 +429,7 @@ function ReportPanel({ data }: { data: any }) {
       )}
 
       {data.notes && (
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-2">备注</h3>
           <p className="text-sm text-muted-foreground">{data.notes}</p>
         </div>
@@ -462,7 +462,7 @@ function HistoryPanel({ list, search, setSearch, onView }: any) {
 
       <div className="space-y-3">
         {filtered.map((report: any) => (
-          <div key={report._id || report.date} className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          <div key={report._id || report.date} className="bg-card rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             onClick={() => onView(report.date)}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

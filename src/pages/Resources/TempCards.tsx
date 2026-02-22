@@ -119,7 +119,7 @@ export default function TempCards() {
       {/* 统计 */}
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
         {statsArr.map(s => (
-          <div key={s.label} className="bg-white rounded-xl border border-border p-3 text-center">
+          <div key={s.label} className="bg-card rounded-xl border border-border p-3 text-center">
             <div className={`text-xl font-bold ${s.color}`}>{s.value}</div>
             <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
           </div>
@@ -129,14 +129,14 @@ export default function TempCards() {
       {/* 工具栏 */}
       <div className="flex items-center gap-3 flex-wrap">
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-          className="px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring">
+          className="px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">全部状态</option>
           <option value="available">可用</option>
           <option value="in_use">使用中</option>
           <option value="retired">已停用</option>
         </select>
         <select value={filterType} onChange={e => setFilterType(e.target.value)}
-          className="px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring">
+          className="px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">全部类型</option>
           <option value="physical">实体卡</option>
           <option value="virtual">虚拟卡</option>
@@ -207,7 +207,7 @@ export default function TempCards() {
                         )}
                         {c.status !== 'in_use' && (
                           <button onClick={() => handleDelete(c)}
-                            className="px-2.5 py-1 text-xs bg-white text-red-400 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                            className="px-2.5 py-1 text-xs bg-card text-red-400 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
                             删除
                           </button>
                         )}
@@ -224,7 +224,7 @@ export default function TempCards() {
       {/* 新增弹窗 */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">录入实体消费卡</h2>
               <button onClick={() => setShowAdd(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground">

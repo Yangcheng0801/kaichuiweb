@@ -217,7 +217,7 @@ export default function Rooms() {
             { label: '维护', value: stats.maintenance, color: 'text-muted-foreground' },
             { label: '停用', value: stats.retired, color: 'text-muted-foreground' },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-xl border border-border p-3 text-center">
+            <div key={s.label} className="bg-card rounded-xl border border-border p-3 text-center">
               <div className={`text-xl font-bold ${s.color}`}>{s.value}</div>
               <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
             </div>
@@ -227,7 +227,7 @@ export default function Rooms() {
 
       {/* Tab */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-border">
+        <div className="flex bg-card rounded-xl p-1 shadow-sm border border-border">
           {[
             { key: 'rack' as const, label: '房态总览', icon: BedDouble },
             { key: 'housekeeping' as const, label: '清洁看板', icon: ClipboardCheck },
@@ -239,7 +239,7 @@ export default function Rooms() {
             </button>
           ))}
         </div>
-        <button onClick={loadRooms} disabled={loading} className="ml-auto p-2 rounded-lg hover:bg-white text-muted-foreground transition-colors">
+        <button onClick={loadRooms} disabled={loading} className="ml-auto p-2 rounded-lg hover:bg-card text-muted-foreground transition-colors">
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
@@ -249,7 +249,7 @@ export default function Rooms() {
         <>
           <div className="flex items-center gap-3 flex-wrap">
             <select value={filterFloor} onChange={e => setFilterFloor(e.target.value)}
-              className="px-3 py-2 border border-border rounded-lg text-sm bg-white">
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-card">
               <option value="">全部楼层</option>
               {floors.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
@@ -328,7 +328,7 @@ export default function Rooms() {
             { title: '待查房', items: completedTasks, color: 'border-purple-300', actionLabel: '通过', action: 'inspect' as const },
             { title: '已完成', items: inspectedTasks, color: 'border-success/30', actionLabel: null, action: null },
           ].map(col => (
-            <div key={col.title} className={`bg-white rounded-2xl border-t-4 ${col.color} shadow-sm overflow-hidden`}>
+            <div key={col.title} className={`bg-card rounded-2xl border-t-4 ${col.color} shadow-sm overflow-hidden`}>
               <div className="px-4 py-3 border-b border-border">
                 <h4 className="text-sm font-semibold text-foreground">{col.title} <span className="text-muted-foreground">({col.items.length})</span></h4>
               </div>
@@ -347,7 +347,7 @@ export default function Rooms() {
                       {t.assignedName && <div className="text-xs text-muted-foreground mt-0.5">{t.assignedName}</div>}
                       {col.action && (
                         <button onClick={() => handleTaskAction(t, col.action!)}
-                          className="mt-2 w-full text-xs py-1.5 bg-white border border-border rounded-lg text-muted-foreground hover:bg-secondary/50 font-medium">
+                          className="mt-2 w-full text-xs py-1.5 bg-card border border-border rounded-lg text-muted-foreground hover:bg-secondary/50 font-medium">
                           {col.actionLabel}
                         </button>
                       )}
@@ -374,7 +374,7 @@ export default function Rooms() {
             {packages.length === 0 ? (
               <div className="col-span-full text-center py-12 text-muted-foreground text-sm">暂无套餐</div>
             ) : packages.map(pkg => (
-              <div key={pkg._id} className="bg-white rounded-2xl shadow-sm border border-border p-5">
+              <div key={pkg._id} className="bg-card rounded-2xl shadow-sm border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-foreground">{pkg.packageName}</h4>
                   <span className={`text-[11px] px-2 py-0.5 rounded-full ${pkg.status === 'active' ? 'bg-success/10 text-success' : 'bg-secondary text-muted-foreground'}`}>
@@ -407,7 +407,7 @@ export default function Rooms() {
       {/* ======== 入住弹窗 ======== */}
       {actionRoom && actionType === 'checkin' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">入住 {actionRoom.roomNo}</h2>
               <button onClick={() => { setActionRoom(null); setActionType(null) }} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>
@@ -430,7 +430,7 @@ export default function Rooms() {
       {/* ======== 退房确认 ======== */}
       {actionRoom && actionType === 'checkout' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">退房 {actionRoom.roomNo}</h2>
               <button onClick={() => { setActionRoom(null); setActionType(null) }} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>
@@ -450,7 +450,7 @@ export default function Rooms() {
       {/* ======== 新增客房弹窗 ======== */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">新增客房</h2>
               <button onClick={() => setShowAdd(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>
@@ -459,7 +459,7 @@ export default function Rooms() {
               <div><label className="block text-xs font-medium text-muted-foreground mb-1">房号</label><input value={formRoomNo} onChange={e => setFormRoomNo(e.target.value)} placeholder="如：301" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="block text-xs font-medium text-muted-foreground mb-1">楼层</label><input value={formFloor} onChange={e => setFormFloor(e.target.value)} placeholder="如：3F" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
-                <div><label className="block text-xs font-medium text-muted-foreground mb-1">房型</label><select value={formType} onChange={e => setFormType(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white">{Object.entries(ROOM_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
+                <div><label className="block text-xs font-medium text-muted-foreground mb-1">房型</label><select value={formType} onChange={e => setFormType(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card">{Object.entries(ROOM_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
               </div>
               <div><label className="block text-xs font-medium text-muted-foreground mb-1">每晚价格</label><input type="number" value={formPrice} onChange={e => setFormPrice(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
             </div>
@@ -474,7 +474,7 @@ export default function Rooms() {
       {/* ======== 新建套餐弹窗 ======== */}
       {showPkgForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">新建住宿套餐</h2>
               <button onClick={() => setShowPkgForm(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>

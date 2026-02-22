@@ -273,7 +273,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
@@ -389,7 +389,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                   <p className="text-xs text-muted-foreground py-2">暂无可用实体卡，请先在资源管理中录入</p>
                 ) : (
                   <select value={selectedCardId} onChange={e => setSelectedCardId(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-blue-400">
                     <option value="">选择实体消费卡...</option>
                     {availableCards.map(c => (
                       <option key={c._id} value={c._id}>{c.cardNo}</option>
@@ -413,10 +413,10 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                 <div className="grid grid-cols-2 gap-2">
                   <input value={courtesyHost} onChange={e => setCourtesyHost(e.target.value)}
                     placeholder="接待人（必填）" required
-                    className="px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white" />
+                    className="px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-card" />
                   <input value={courtesyReason} onChange={e => setCourtesyReason(e.target.value)}
                     placeholder="接待原因（如：商务洽谈）"
-                    className="px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white" />
+                    className="px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-card" />
                 </div>
               </div>
             )}
@@ -506,7 +506,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
               ) : (
                 <>
                   <select value={selectedRoomId} onChange={e => setSelectedRoomId(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring">
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
                     <option value="">选择客房...</option>
                     {availableRooms.map(r => (
                       <option key={r._id} value={r._id}>
@@ -678,9 +678,9 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
           <div>
             <h2 className="font-semibold text-foreground">结算工作台</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -813,7 +813,7 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 border-t border-border sticky bottom-0 bg-white">
+        <div className="flex gap-3 px-6 py-4 border-t border-border sticky bottom-0 bg-card">
           <button onClick={onClose}
             className="px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50 transition-colors">
             取消
@@ -860,7 +860,7 @@ function CancelDialog({ booking, onClose, onSuccess }: CancelDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
         <div className="px-6 py-5">
           <div className="text-center mb-4">
             <div className="text-3xl mb-2">⚠️</div>
@@ -943,11 +943,11 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
         {/* 日期导航 */}
         <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
           <button onClick={() => setDate(formatDate(addDays(new Date(date), -1)))}
-            className="p-1.5 rounded hover:bg-white transition-colors text-muted-foreground"><ChevronLeft size={16} /></button>
+            className="p-1.5 rounded hover:bg-card transition-colors text-muted-foreground"><ChevronLeft size={16} /></button>
           <input type="date" value={date} onChange={e => setDate(e.target.value)}
             className="px-2 py-1 bg-transparent text-sm font-medium text-foreground focus:outline-none" />
           <button onClick={() => setDate(formatDate(addDays(new Date(date), 1)))}
-            className="p-1.5 rounded hover:bg-white transition-colors text-muted-foreground"><ChevronRight size={16} /></button>
+            className="p-1.5 rounded hover:bg-card transition-colors text-muted-foreground"><ChevronRight size={16} /></button>
         </div>
 
         {/* 今日快捷 */}
@@ -961,7 +961,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
         {/* 球场选择 */}
         {courses.length > 1 && (
           <select value={courseId} onChange={e => setCourseId(e.target.value)}
-            className="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+            className="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
             <option value="">全部球场</option>
             {courses.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
@@ -1067,7 +1067,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                   {/* 右侧：状态 + 操作 */}
                   <div className="flex-shrink-0 flex flex-col items-end gap-2">
                     {/* 状态标签 */}
-                    <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-white/70 ${s.text}`}>
+                    <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-card/70 ${s.text}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
                       {s.label}
                     </span>
@@ -1108,7 +1108,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                       {/* 取消按钮（确认/待确认状态可取消） */}
                       {(b.status === 'confirmed' || b.status === 'pending') && (
                         <button onClick={() => setCancelTarget(b)}
-                          className="px-2.5 py-1 text-xs bg-white text-red-400 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                          className="px-2.5 py-1 text-xs bg-card text-red-400 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
                           取消
                         </button>
                       )}

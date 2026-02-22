@@ -129,7 +129,7 @@ function OverviewTab({
   onStatClick: (status: string) => void
 }) {
   const kpiCards = [
-    { key: 'totalCarts',       label: '球车总数',    icon: <Car size={18} />,           color: 'text-foreground',    bg: 'bg-white',        status: 'all' },
+    { key: 'totalCarts',       label: '球车总数',    icon: <Car size={18} />,           color: 'text-foreground',    bg: 'bg-card',        status: 'all' },
     { key: 'notCheckedOut',    label: '未出库',      icon: <CheckCircle2 size={18} />,  color: 'text-success', bg: 'bg-success/10',   status: 'notCheckedOut' },
     { key: 'checkedOut',       label: '已出库',      icon: <CheckCircle2 size={18} />,  color: 'text-blue-700',    bg: 'bg-blue-50',      status: 'checkedOut' },
     { key: 'inUseCarts',       label: '使用中',      icon: <Clock size={18} />,         color: 'text-violet-700',  bg: 'bg-violet-50',    status: 'inUse' },
@@ -184,7 +184,7 @@ function OverviewTab({
 
           {/* 状态分布 + 利用率 */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-border p-5">
+            <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-foreground">今日车辆状态分布</h3>
                 <span className="text-xs text-muted-foreground">共 {total} 辆</span>
@@ -213,13 +213,13 @@ function OverviewTab({
             </div>
 
             {/* 圆形利用率 */}
-            <div className="bg-white rounded-xl border border-border p-5 flex flex-col items-center justify-center">
+            <div className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center">
               <h3 className="text-sm font-semibold text-foreground mb-4 self-start">今日利用率</h3>
               <div className="relative w-32 h-32">
                 <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
                   <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="12" />
                   <circle cx="60" cy="60" r="50" fill="none"
-                    stroke={utilRate >= 70 ? '#10b981' : utilRate >= 40 ? '#8b5cf6' : '#f59e0b'}
+                    stroke={utilRate >= 70 ? 'hsl(var(--success))' : utilRate >= 40 ? 'hsl(var(--info))' : 'hsl(var(--warning))'}
                     strokeWidth="12" strokeLinecap="round"
                     strokeDasharray={`${2 * Math.PI * 50}`}
                     strokeDashoffset={`${2 * Math.PI * 50 * (1 - utilRate / 100)}`}
@@ -236,7 +236,7 @@ function OverviewTab({
           </div>
 
           {/* 操作指引 */}
-          <div className="bg-white rounded-xl border border-border p-5">
+          <div className="bg-card rounded-xl border border-border p-5">
             <h3 className="text-sm font-semibold text-foreground mb-3">操作指引</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
@@ -381,18 +381,18 @@ function CartsTab({
             <Plus size={15} /> 新增球车
           </button>
           <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)}
-            className="px-3 py-2 border border-border rounded-lg text-sm bg-white">
+            className="px-3 py-2 border border-border rounded-lg text-sm bg-card">
             {brandList.map(b => <option key={b} value={b === '全部' ? 'all' : b}>{b}</option>)}
           </select>
-          <div className="flex items-center border border-border rounded-lg bg-white px-2 gap-1">
+          <div className="flex items-center border border-border rounded-lg bg-card px-2 gap-1">
             <Search size={14} className="text-muted-foreground" />
             <input value={searchInput} onChange={e => setSearchInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && setSearch(searchInput)}
               placeholder="搜索车号/品牌" className="py-2 text-sm outline-none w-32" />
           </div>
           <button onClick={() => setSearch(searchInput)}
-            className="px-3 py-2 border border-border rounded-lg text-sm bg-white hover:bg-secondary/50">搜索</button>
-          <button onClick={load} className="p-2 border border-border rounded-lg bg-white hover:bg-secondary/50">
+            className="px-3 py-2 border border-border rounded-lg text-sm bg-card hover:bg-secondary/50">搜索</button>
+          <button onClick={load} className="p-2 border border-border rounded-lg bg-card hover:bg-secondary/50">
             <RefreshCw size={14} className={loading ? 'animate-spin text-muted-foreground' : 'text-muted-foreground'} />
           </button>
           {selected.length > 0 && (
@@ -412,7 +412,7 @@ function CartsTab({
         </div>
 
         {/* 表格 */}
-        <div className="flex-1 overflow-auto rounded-xl border border-border bg-white">
+        <div className="flex-1 overflow-auto rounded-xl border border-border bg-card">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-secondary/50 border-b border-border z-10">
               <tr>
@@ -488,7 +488,7 @@ function CartsTab({
 
       {/* 右：详情面板 */}
       {detail && (
-        <div className="w-64 xl:w-72 flex-shrink-0 bg-white rounded-xl border border-border flex flex-col overflow-hidden">
+        <div className="w-64 xl:w-72 flex-shrink-0 bg-card rounded-xl border border-border flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-secondary/50 flex-shrink-0">
             <h3 className="font-semibold text-foreground text-sm">球车详情</h3>
             <button onClick={() => setDetail(null)} className="text-muted-foreground hover:text-muted-foreground"><X size={16} /></button>
@@ -536,7 +536,7 @@ function CartsTab({
       {/* 新增/编辑弹窗 */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-auto">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-auto">
             <div className="flex justify-between px-6 py-4 border-b">
               <h2 className="font-semibold">{editCart ? '编辑球车' : '新增球车'}</h2>
               <button onClick={() => setShowModal(false)}><X size={18} /></button>
@@ -546,7 +546,7 @@ function CartsTab({
                 <div className="flex gap-1 p-1 bg-secondary rounded-lg">
                   {(['single', 'bulk'] as const).map(m => (
                     <button key={m} onClick={() => setCreateMode(m)}
-                      className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${createMode === m ? 'bg-white shadow text-foreground' : 'text-muted-foreground'}`}>
+                      className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${createMode === m ? 'bg-card shadow text-foreground' : 'text-muted-foreground'}`}>
                       {m === 'single' ? '单个' : '批量'}
                     </button>
                   ))}
@@ -597,7 +597,7 @@ function CartsTab({
                       <div className="text-xs text-muted-foreground mb-2">预览 {bulkNumbers.length} 条</div>
                       <div className="flex flex-wrap gap-1">
                         {bulkNumbers.slice(0, 24).map(n => (
-                          <span key={n} className="px-2 py-0.5 bg-white border border-border rounded text-xs">{n}</span>
+                          <span key={n} className="px-2 py-0.5 bg-card border border-border rounded text-xs">{n}</span>
                         ))}
                         {bulkNumbers.length > 24 && <span className="text-xs text-muted-foreground">+{bulkNumbers.length - 24}条</span>}
                       </div>
@@ -650,7 +650,7 @@ function MaintenanceTab() {
   const totalCost = completed.reduce((s, r) => s + (r.totalCost || 0), 0)
 
   const KanbanCard = ({ r }: { r: MaintenanceRecord }) => (
-    <div className="bg-white rounded-xl border border-border p-3 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-xl border border-border p-3 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-2">
         <div>
           <span className="font-semibold text-foreground text-sm">{r.cartNumber}</span>
@@ -705,7 +705,7 @@ function MaintenanceTab() {
           <div key={col.label} className="flex flex-col min-h-0 flex-1">
             <div className={`flex items-center justify-between px-3 py-2 rounded-t-xl border ${col.headerBg}`}>
               <span className={`text-sm font-semibold ${col.color}`}>{col.label}</span>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full bg-white ${col.color}`}>{col.data.length}</span>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full bg-card ${col.color}`}>{col.data.length}</span>
             </div>
             <div className="flex-1 overflow-auto bg-secondary/50/50 rounded-b-xl border border-t-0 border-border p-2 space-y-2 min-h-[120px]">
               {loading && col.data.length === 0 ? (
@@ -719,7 +719,7 @@ function MaintenanceTab() {
 
         {/* 故障分析侧栏 */}
         {faultAnalysis.length > 0 && (
-          <div className="w-52 flex-shrink-0 bg-white rounded-xl border border-border p-4 overflow-auto">
+          <div className="w-52 flex-shrink-0 bg-card rounded-xl border border-border p-4 overflow-auto">
             <h3 className="text-sm font-semibold text-foreground mb-3">故障类型分析</h3>
             <div className="space-y-3">
               {faultAnalysis.map((f, i) => (
@@ -798,11 +798,11 @@ function UsageTab({ brandList }: { brandList: string[] }) {
         <input type="date" value={date} onChange={e => setDate(e.target.value)}
           className="px-3 py-1.5 border border-border rounded-lg text-sm" />
         <select value={brand} onChange={e => setBrand(e.target.value)}
-          className="px-3 py-1.5 border border-border rounded-lg text-sm bg-white">
+          className="px-3 py-1.5 border border-border rounded-lg text-sm bg-card">
           {brandList.map(b => <option key={b} value={b === '全部' ? 'all' : b}>{b}</option>)}
         </select>
         {/* 搜索框：支持车号 / 球童号 / 球童姓名 */}
-        <div className="flex items-center border border-border rounded-lg overflow-hidden bg-white">
+        <div className="flex items-center border border-border rounded-lg overflow-hidden bg-card">
           <Search size={13} className="ml-2.5 text-muted-foreground flex-shrink-0" />
           <input
             type="text"
@@ -827,13 +827,13 @@ function UsageTab({ brandList }: { brandList: string[] }) {
             搜索: {searchText}
           </span>
         )}
-        <button onClick={load} className="p-1.5 border border-border rounded-lg bg-white hover:bg-secondary/50">
+        <button onClick={load} className="p-1.5 border border-border rounded-lg bg-card hover:bg-secondary/50">
           <RefreshCw size={14} className={loading ? 'animate-spin text-muted-foreground' : 'text-muted-foreground'} />
         </button>
         <div className="flex rounded-lg border border-border overflow-hidden ml-auto">
           {(['gantt', 'list'] as const).map(m => (
             <button key={m} onClick={() => setViewMode(m)}
-              className={`px-3 py-1.5 text-sm transition-colors ${viewMode === m ? 'bg-success text-white' : 'bg-white text-muted-foreground hover:bg-secondary/50'}`}>
+              className={`px-3 py-1.5 text-sm transition-colors ${viewMode === m ? 'bg-success text-white' : 'bg-card text-muted-foreground hover:bg-secondary/50'}`}>
               {m === 'gantt' ? '时间轴' : '列表'}
             </button>
           ))}
@@ -851,10 +851,10 @@ function UsageTab({ brandList }: { brandList: string[] }) {
         </div>
       ) : viewMode === 'gantt' ? (
         // 甘特视图
-        <div className="flex-1 overflow-auto bg-white rounded-xl border border-border">
+        <div className="flex-1 overflow-auto bg-card rounded-xl border border-border">
           <div className="min-w-[640px]">
             {/* 时间轴表头 */}
-            <div className="flex border-b border-border sticky top-0 bg-white z-10">
+            <div className="flex border-b border-border sticky top-0 bg-card z-10">
               <div className="w-24 flex-shrink-0 px-3 py-2 text-xs text-muted-foreground font-medium border-r border-border">车号</div>
               <div className="flex-1 relative h-9">
                 {hours.map(h => (
@@ -885,7 +885,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
                         style={{
                           left: `${cp}%`,
                           width: dp !== null ? `${Math.max(1, dp - cp)}%` : '4%',
-                          background: u.checkinTime ? 'linear-gradient(90deg,#10b981,#059669)' : 'linear-gradient(90deg,#8b5cf6,#7c3aed)',
+                          background: u.checkinTime ? 'linear-gradient(90deg, hsl(var(--success)), hsl(var(--success)))' : 'linear-gradient(90deg, hsl(var(--info)), hsl(var(--info)))',
                         }}
                         title={`${u.cartNumber} ${formatTime(u.checkoutTime)}–${formatTime(u.checkinTime)}`}>
                         {u.cartNumber}
@@ -913,7 +913,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
         </div>
       ) : (
         // 列表视图
-        <div className="flex-1 overflow-auto bg-white rounded-xl border border-border">
+        <div className="flex-1 overflow-auto bg-card rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-secondary/50 border-b border-border">
               <tr>
@@ -957,7 +957,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
       {(detailLoading || detail) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
           onClick={e => { if (e.target === e.currentTarget) { setDetail(null); setDetailLoading(false) } }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0">
               <div>
@@ -1107,7 +1107,7 @@ function UsageTab({ brandList }: { brandList: string[] }) {
                       <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">责任人摘要</div>
                       <div className="flex flex-wrap gap-1.5">
                         {[...people].map(p => (
-                          <span key={p} className="inline-flex items-center gap-1 bg-white border border-border px-2.5 py-1 rounded-full text-xs text-foreground">
+                          <span key={p} className="inline-flex items-center gap-1 bg-card border border-border px-2.5 py-1 rounded-full text-xs text-foreground">
                             <span className="w-1.5 h-1.5 rounded-full bg-success flex-shrink-0" />{p}
                           </span>
                         ))}
@@ -1158,9 +1158,9 @@ export default function CartManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] flex flex-col">
+    <div className="min-h-screen bg-page-bg flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-white border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
+      <header className="sticky top-0 z-20 bg-card border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
         <button onClick={() => navigate('/home')} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft size={16} /> 返回
         </button>
@@ -1169,7 +1169,7 @@ export default function CartManagement() {
         <div className="flex gap-0.5 ml-6 bg-secondary rounded-xl p-1">
           {TABS.map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
               {tab.icon}{tab.label}
             </button>
           ))}
@@ -1183,7 +1183,7 @@ export default function CartManagement() {
       <div className="flex flex-1 min-h-0 p-4 gap-4">
         {/* 左侧状态导航（仅球车管理 Tab） */}
         {activeTab === 'carts' && (
-          <div className="w-44 flex-shrink-0 bg-white rounded-xl border border-border shadow-sm p-3 self-start sticky top-[76px] space-y-0.5">
+          <div className="w-44 flex-shrink-0 bg-card rounded-xl border border-border shadow-sm p-3 self-start sticky top-[76px] space-y-0.5">
             <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide px-2 pb-1.5 border-b border-border mb-1">状态筛选</div>
             {STATUS_SIDEBAR.map(s => {
               const cfg = s.value !== 'all' ? STATUS_CONFIG[s.value] : null
@@ -1206,7 +1206,7 @@ export default function CartManagement() {
 
         {/* 右侧内容区 */}
         <div className="flex-1 min-w-0 flex flex-col min-h-0">
-          <div className={`flex-1 bg-white rounded-2xl shadow-sm border border-border min-h-0
+          <div className={`flex-1 bg-card rounded-2xl shadow-sm border border-border min-h-0
             ${activeTab === 'overview' ? 'overflow-auto p-6' : 'overflow-hidden p-6 flex flex-col'}`}>
             {activeTab === 'overview' && (
               <OverviewTab stats={stats} loading={statsLoading}

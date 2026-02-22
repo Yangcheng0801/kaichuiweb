@@ -26,10 +26,10 @@ const FORMATS: Record<string, string> = {
 }
 const STATUSES: Record<string, { label: string; color: string }> = {
   draft:        { label: '草稿',   color: 'bg-secondary text-muted-foreground' },
-  registration: { label: '报名中', color: 'bg-blue-100 text-blue-700' },
-  closed:       { label: '报名截止', color: 'bg-yellow-100 text-yellow-700' },
+  registration: { label: '报名中', color: 'bg-info/10 text-info border border-info/20' },
+  closed:       { label: '报名截止', color: 'bg-warning/10 text-warning border border-warning/20' },
   grouping:     { label: '分组中', color: 'bg-purple-100 text-purple-700' },
-  in_progress:  { label: '进行中', color: 'bg-green-100 text-green-700' },
+  in_progress:  { label: '进行中', color: 'bg-success/10 text-success border border-success/20' },
   scoring:      { label: '记分中', color: 'bg-success/10 text-success' },
   completed:    { label: '已完赛', color: 'bg-indigo-100 text-indigo-700' },
   archived:     { label: '已归档', color: 'bg-secondary text-muted-foreground' },
@@ -95,7 +95,7 @@ export default function Tournaments() {
   return (
     <div className="flex flex-col h-full bg-secondary/50">
       {/* 顶部 Tab 栏 */}
-      <div className="bg-white border-b px-4 py-2 flex items-center gap-1 overflow-x-auto shrink-0">
+      <div className="bg-card border-b px-4 py-2 flex items-center gap-1 overflow-x-auto shrink-0">
         {tabs.map(t => {
           const Icon = t.icon
           const active = activeTab === t.key
@@ -177,7 +177,7 @@ function TournamentList({ tournaments, loading, onSelect, onChangeStatus, onDele
       {/* 筛选栏 */}
       <div className="flex items-center gap-2 flex-wrap">
         <button onClick={() => setFilter('')}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium ${!filter ? 'bg-success text-white' : 'bg-white text-muted-foreground border'}`}>
+          className={`px-3 py-1.5 rounded-full text-xs font-medium ${!filter ? 'bg-success text-white' : 'bg-card text-muted-foreground border'}`}>
           全部 ({tournaments.length})
         </button>
         {Object.entries(STATUSES).map(([k, v]) => {
@@ -203,7 +203,7 @@ function TournamentList({ tournaments, loading, onSelect, onChangeStatus, onDele
             const st = STATUSES[t.status] || STATUSES.draft
             const actions = STATUS_ACTIONS[t.status] || []
             return (
-              <div key={t._id} className="bg-white rounded-xl border shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+              <div key={t._id} className="bg-card rounded-xl border shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                 {/* 头部 */}
                 <div className="p-4 border-b">
                   <div className="flex items-start justify-between mb-2">
@@ -325,7 +325,7 @@ function CreateTournament({ onCreated }: { onCreated: (t: any) => void }) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-xl border shadow-sm p-6 space-y-6">
+      <div className="bg-card rounded-xl border shadow-sm p-6 space-y-6">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><Trophy size={20} className="text-success" />创建新赛事</h2>
 
         {/* 基本信息 */}
@@ -499,7 +499,7 @@ function RegistrationTab({ tournaments, selectedId, onSelectId, selectedTourname
           </div>
 
           {/* 报名列表 */}
-          <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="bg-card rounded-xl border overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-secondary/50 text-muted-foreground">
                 <tr>
@@ -532,8 +532,8 @@ function RegistrationTab({ tournaments, selectedId, onSelectId, selectedTourname
                     <td className="px-4 py-2 text-center text-xs text-muted-foreground">{r.groupNo ? `第${r.groupNo}组` : '-'}</td>
                     <td className="px-4 py-2 text-center">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        r.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                        r.status === 'waitlisted' ? 'bg-yellow-100 text-yellow-700' :
+                        r.status === 'confirmed' ? 'bg-success/10 text-success border border-success/20' :
+                        r.status === 'waitlisted' ? 'bg-warning/10 text-warning border border-warning/20' :
                         'bg-secondary text-muted-foreground'
                       }`}>{r.status === 'confirmed' ? '已确认' : r.status === 'waitlisted' ? '候补' : r.status === 'cancelled' ? '已取消' : r.status}</span>
                     </td>
@@ -551,7 +551,7 @@ function RegistrationTab({ tournaments, selectedId, onSelectId, selectedTourname
           {/* 新增报名弹窗 */}
           {showAdd && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowAdd(false)}>
-              <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl" onClick={e => e.stopPropagation()}>
+              <div className="bg-card rounded-xl p-6 w-full max-w-md shadow-xl" onClick={e => e.stopPropagation()}>
                 <h3 className="font-bold text-foreground mb-4">新增报名</h3>
                 <div className="space-y-3">
                   <input className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="球员姓名 *"
@@ -638,7 +638,7 @@ function GroupingTab({ tournaments, selectedId, onSelectId }: any) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {groups.map((g: any) => (
-                <div key={g._id} className="bg-white rounded-xl border p-4">
+                <div key={g._id} className="bg-card rounded-xl border p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="w-8 h-8 flex items-center justify-center bg-success/10 text-success font-bold rounded-full text-sm">
@@ -655,7 +655,7 @@ function GroupingTab({ tournaments, selectedId, onSelectId }: any) {
                   <div className="space-y-2">
                     {(g.players || []).map((p: any, i: number) => (
                       <div key={i} className="flex items-center gap-2 px-3 py-2 bg-secondary/50 rounded-lg">
-                        <span className="w-5 h-5 flex items-center justify-center text-xs text-muted-foreground bg-white rounded-full border">
+                        <span className="w-5 h-5 flex items-center justify-center text-xs text-muted-foreground bg-card rounded-full border">
                           {p.orderInGroup}
                         </span>
                         <span className="text-sm font-medium text-foreground flex-1">{p.playerName}</span>
@@ -724,7 +724,7 @@ function ScoringTab({ tournaments, selectedId, onSelectId }: any) {
       {selectedId ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* 录入表单 */}
-          <div className="bg-white rounded-xl border p-4 space-y-3">
+          <div className="bg-card rounded-xl border p-4 space-y-3">
             <h3 className="font-bold text-foreground text-sm">录入成绩</h3>
             <select className="w-full px-3 py-2 border rounded-lg text-sm"
               value={form.regId} onChange={e => {
@@ -758,7 +758,7 @@ function ScoringTab({ tournaments, selectedId, onSelectId }: any) {
           </div>
 
           {/* 已录入列表 */}
-          <div className="lg:col-span-2 bg-white rounded-xl border overflow-hidden">
+          <div className="lg:col-span-2 bg-card rounded-xl border overflow-hidden">
             <div className="px-4 py-3 border-b bg-secondary/50">
               <h3 className="font-bold text-foreground text-sm">已录入成绩 ({scores.length})</h3>
             </div>
@@ -847,7 +847,7 @@ function LeaderboardTab({ tournaments, selectedId, onSelectId, onFinalize }: any
           </div>
 
           {/* 排行榜 */}
-          <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="bg-card rounded-xl border overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-success to-success text-white">
                 <tr>
@@ -897,7 +897,7 @@ function LeaderboardTab({ tournaments, selectedId, onSelectId, onFinalize }: any
 /* ══════════════════ 通用：赛事选择器 ══════════════════ */
 function TournamentSelector({ tournaments, selectedId, onSelect }: any) {
   return (
-    <div className="flex items-center gap-2 bg-white rounded-xl border p-3">
+    <div className="flex items-center gap-2 bg-card rounded-xl border p-3">
       <Trophy size={16} className="text-success shrink-0" />
       <select className="flex-1 px-2 py-1 text-sm border-none outline-none bg-transparent"
         value={selectedId || ''} onChange={e => onSelect(e.target.value || null)}>

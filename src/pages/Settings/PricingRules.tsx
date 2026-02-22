@@ -70,7 +70,7 @@ function Toggle({ label, checked, onChange, description }: {
         role="switch" aria-checked={checked} onClick={() => onChange(!checked)}
         className={`relative mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-colors ${checked ? 'bg-success/100' : 'bg-secondary'}`}
       >
-        <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-4' : ''}`} />
+        <span className={`absolute top-1 left-1 w-4 h-4 bg-card rounded-full shadow transition-transform ${checked ? 'translate-x-4' : ''}`} />
       </button>
       <div>
         <div className="text-sm font-medium text-foreground">{label}</div>

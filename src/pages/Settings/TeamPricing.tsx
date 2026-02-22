@@ -128,7 +128,7 @@ export default function TeamPricing() {
             onClick={() => setData(p => ({ ...p, enabled: !p.enabled }))}
             className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${data.enabled ? 'bg-success/100' : 'bg-secondary'}`}
           >
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${data.enabled ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-card shadow transition-transform ${data.enabled ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
           </div>
           <span className="text-sm font-medium text-foreground">{data.enabled ? '已启用团队折扣' : '团队折扣已关闭'}</span>
         </label>
@@ -199,7 +199,7 @@ export default function TeamPricing() {
             max={1}
             step={0.05}
             onChange={e => setData(p => ({ ...p, floorPriceRate: Number(e.target.value) }))}
-            className="w-20 px-2 py-1.5 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+            className="w-20 px-2 py-1.5 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-card"
           />
           <span className="text-sm text-amber-700 font-medium">
             即不低于散客价的 {Math.round(data.floorPriceRate * 100)}%

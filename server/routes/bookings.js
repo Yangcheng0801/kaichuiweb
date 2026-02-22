@@ -389,6 +389,8 @@ function createBookingsRouter(getDb) {
         needCart    = false,
         teamBooking = null,   // { isTeam, teamName, totalPlayers, contactName, contactPhone }
         caddyDesignation = null, // 点号信息 { type, caddyId, caddyNo, caddyName, caddyLevel, fee, designationFeeOverride }
+        bookingSource = '',   // v10: 预订来源（7种：walk_in/phone/wechat/ota/agent/member_self/internal）
+        discountReason = '',  // v10: 折扣原因（财务审计用）
       } = req.body;
 
       // 生成订单号
@@ -523,6 +525,9 @@ function createBookingsRouter(getDb) {
         },
         // 住宿类型（统一枚举：day | overnight_1 | overnight_2 | overnight_3 | custom）
         stayType,
+        // v10: 预订来源 & 折扣原因
+        bookingSource: bookingSource || '',
+        discountReason: discountReason || '',
         // 元数据
         source,       // 'staff' | 'miniprogram'
         note,
@@ -865,19 +870,23 @@ function createBookingsRouter(getDb) {
         lockers, rooms, bagStorage, parking,
         tempCardId, tempCardNo, generateTempCard,
         stayType,
+        accountType,  // v10: 消费凭证类型（qr_scan/physical/temp/courtesy）
+        courtesy,     // v10: 接待免账信息 { host, reason }
       } = req.body;
 
       const oldAssigned = old.assignedResources || {};
       const newAssigned = {
         ...oldAssigned,
-        ...(caddyId    !== undefined ? { caddyId }   : {}),
-        ...(caddyName  !== undefined ? { caddyName } : {}),
-        ...(cartId     !== undefined ? { cartId }    : {}),
-        ...(cartNo     !== undefined ? { cartNo }    : {}),
-        ...(lockers    !== undefined ? { lockers }   : {}),
-        ...(rooms      !== undefined ? { rooms }     : {}),
-        ...(bagStorage !== undefined ? { bagStorage }: {}),
-        ...(parking    !== undefined ? { parking }   : {}),
+        ...(caddyId     !== undefined ? { caddyId }    : {}),
+        ...(caddyName   !== undefined ? { caddyName }  : {}),
+        ...(cartId      !== undefined ? { cartId }     : {}),
+        ...(cartNo      !== undefined ? { cartNo }     : {}),
+        ...(lockers     !== undefined ? { lockers }    : {}),
+        ...(rooms       !== undefined ? { rooms }      : {}),
+        ...(bagStorage  !== undefined ? { bagStorage } : {}),
+        ...(parking     !== undefined ? { parking }    : {}),
+        ...(accountType !== undefined ? { accountType }: {}),
+        ...(courtesy    !== undefined ? { courtesy }   : {}),
       };
 
       // ── 球童变更联动 ────────────────────────────────────────────────────────

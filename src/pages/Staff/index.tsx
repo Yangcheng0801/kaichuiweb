@@ -28,7 +28,7 @@ export default function Staff() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/50 to-violet-50/30">
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-card border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-white">
@@ -42,7 +42,7 @@ export default function Staff() {
         </div>
       </div>
 
-      <div className="bg-white border-b">
+      <div className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex gap-1 overflow-x-auto">
             {tabs.map(tab => (
@@ -143,7 +143,7 @@ function EmployeesTab() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl shadow-sm border p-4">
+      <div className="bg-card rounded-xl shadow-sm border p-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -166,7 +166,7 @@ function EmployeesTab() {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-card rounded-xl shadow-sm border p-6">
           <h3 className="font-bold text-foreground mb-4">{editItem ? '编辑员工' : '新增员工'}</h3>
             <div className="grid grid-cols-4 gap-4">
             <div><label className="block text-xs text-muted-foreground mb-1">姓名 *</label>
@@ -213,7 +213,7 @@ function EmployeesTab() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         {employees.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground"><Users className="w-10 h-10 text-muted-foreground mx-auto mb-2" />暂无员工</div>
         ) : (
@@ -292,7 +292,7 @@ function DepartmentsTab() {
         <Plus className="w-4 h-4" /> 新增部门
       </button>
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-card rounded-xl shadow-sm border p-6">
           <h3 className="font-bold mb-4">{editItem ? '编辑部门' : '新增部门'}</h3>
           <div className="grid grid-cols-4 gap-4">
             <div><label className="block text-xs text-muted-foreground mb-1">名称 *</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
@@ -308,7 +308,7 @@ function DepartmentsTab() {
       )}
       <div className="grid grid-cols-3 gap-4">
         {departments.map(d => (
-          <div key={d._id} className="bg-white rounded-xl shadow-sm border p-5">
+          <div key={d._id} className="bg-card rounded-xl shadow-sm border p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2"><Building2 className="w-5 h-5 text-violet-500" /><h3 className="font-bold text-foreground">{d.name}</h3></div>
               <div className="flex gap-1">
@@ -356,7 +356,7 @@ function ShiftsTab() {
         <Plus className="w-4 h-4" /> 新增班次
       </button>
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-card rounded-xl shadow-sm border p-6">
           <h3 className="font-bold mb-4">新增班次模板</h3>
           <div className="grid grid-cols-4 gap-4">
             <div><label className="block text-xs text-muted-foreground mb-1">名称 *</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="如: 早班A" /></div>
@@ -376,7 +376,7 @@ function ShiftsTab() {
       )}
       <div className="grid grid-cols-3 gap-4">
         {shifts.map(s => (
-          <div key={s._id} className="bg-white rounded-xl shadow-sm border p-5">
+          <div key={s._id} className="bg-card rounded-xl shadow-sm border p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: s.color || '#3B82F6' }} />
               <h3 className="font-bold text-foreground">{s.name}</h3>
@@ -471,7 +471,7 @@ function ScheduleTab() {
         <button onClick={fetchData} className="p-2 rounded-lg hover:bg-secondary"><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /></button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-auto">
+      <div className="bg-card rounded-xl shadow-sm border overflow-auto">
         <table className="w-full text-sm min-w-[800px]">
           <thead className="bg-secondary/50 border-b">
             <tr>
@@ -487,7 +487,7 @@ function ScheduleTab() {
           <tbody className="divide-y divide-border/50">
             {employees.map(emp => (
               <tr key={emp._id} className="hover:bg-secondary/50/30">
-                <td className="px-3 py-2 sticky left-0 bg-white z-10 border-r">
+                <td className="px-3 py-2 sticky left-0 bg-card z-10 border-r">
                   <div className="text-sm font-medium">{emp.name}</div>
                   <div className="text-[10px] text-muted-foreground">{emp.position || emp.departmentName}</div>
                 </td>
@@ -583,7 +583,7 @@ function AttendanceTab() {
         <span className="text-sm text-muted-foreground">已签到: {records.filter(r => r.clockIn).length}/{employees.length}</span>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-secondary/50 border-b">
             <tr>
@@ -677,7 +677,7 @@ function LeavesTab() {
         <Plus className="w-4 h-4" /> 提交请假
       </button>
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-card rounded-xl shadow-sm border p-6">
           <h3 className="font-bold mb-4">提交请假申请</h3>
           <div className="grid grid-cols-3 gap-4">
             <div><label className="block text-xs text-muted-foreground mb-1">员工 *</label>
@@ -704,7 +704,7 @@ function LeavesTab() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         {leaves.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground">暂无请假记录</div>
         ) : (
@@ -781,14 +781,14 @@ function StatsTab() {
           { label: '迟到次数', value: s.totalLateCount, color: 'amber' },
           { label: '旷工次数', value: s.totalAbsentCount, color: 'red' },
         ].map((c, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-sm border p-5">
+          <div key={i} className="bg-card rounded-xl shadow-sm border p-5">
             <p className="text-sm text-muted-foreground">{c.label}</p>
             <p className={`text-2xl font-bold text-${c.color}-600 mt-1`}>{c.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-5">
+      <div className="bg-card rounded-xl shadow-sm border p-5">
         <h3 className="font-bold text-foreground mb-4">按部门统计</h3>
         <div className="grid grid-cols-4 gap-3">
           {Object.entries(stats.byDepartment || {}).map(([dept, d]: [string, any]) => (
@@ -801,7 +801,7 @@ function StatsTab() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         <div className="px-5 py-3 border-b bg-secondary/50/50 font-semibold text-foreground">员工月度明细</div>
         <table className="w-full text-sm">
           <thead className="bg-secondary/50 border-b">

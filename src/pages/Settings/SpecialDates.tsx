@@ -30,7 +30,7 @@ interface SpecialDate {
 const DATE_TYPES = [
   { key: 'holiday',     label: '节假日', color: 'bg-red-100 text-red-700 border-red-200' },
   { key: 'member_day',  label: '会员日', color: 'bg-purple-100 text-purple-700 border-purple-200' },
-  { key: 'tournament',  label: '赛事日', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  { key: 'tournament',  label: '赛事日', color: 'bg-info/10 text-info border border-info/20 border-blue-200' },
   { key: 'closed',      label: '封场日', color: 'bg-secondary text-muted-foreground border-border' },
 ]
 
@@ -267,7 +267,7 @@ export default function SpecialDates() {
       {/* 编辑弹窗 */}
       {editDate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground flex items-center gap-2">
                 <CalendarDays size={18} className="text-success" />

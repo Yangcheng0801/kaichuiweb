@@ -263,7 +263,7 @@ export default function RateSheets() {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
           {/* 标题 */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
@@ -397,14 +397,14 @@ export default function RateSheets() {
                     const newAddOn: Record<string, number> = {}
                     activeIdentities.forEach(i => { newAddOn[i.code] = Math.round((prices[i.code] || 0) * 0.5) })
                     setEditForm((p: any) => ({ ...p, addOnPrices: newAddOn }))
-                  }} className="px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
+                  }} className="px-3 py-1.5 text-xs bg-info/10 text-info border border-info/20 rounded-lg hover:bg-blue-200">
                     一键填充（50%）
                   </button>
                   <button onClick={() => {
                     const newAddOn: Record<string, number> = {}
                     activeIdentities.forEach(i => { newAddOn[i.code] = Math.round((prices[i.code] || 0) * 0.4) })
                     setEditForm((p: any) => ({ ...p, addOnPrices: newAddOn }))
-                  }} className="px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
+                  }} className="px-3 py-1.5 text-xs bg-info/10 text-info border border-info/20 rounded-lg hover:bg-blue-200">
                     一键填充（40%）
                   </button>
                   <button onClick={() => setEditForm((p: any) => ({ ...p, addOnPrices: {} }))}
@@ -548,7 +548,7 @@ export default function RateSheets() {
       {/* 批量初始化弹窗 */}
       {showBatchForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">一键生成价格矩阵</h2>
               <button onClick={() => setShowBatchForm(false)} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>

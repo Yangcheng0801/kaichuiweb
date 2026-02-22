@@ -156,11 +156,11 @@ export default function RolesManager() {
       <div className="flex items-center justify-between">
         <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
           <button onClick={() => setActiveTab('roles')}
-            className={`px-3 py-1.5 text-xs rounded-md ${activeTab === 'roles' ? 'bg-white shadow text-indigo-600 font-medium' : 'text-muted-foreground'}`}>
+            className={`px-3 py-1.5 text-xs rounded-md ${activeTab === 'roles' ? 'bg-card shadow text-indigo-600 font-medium' : 'text-muted-foreground'}`}>
             <Shield size={14} className="inline mr-1" /> 角色管理
           </button>
           <button onClick={() => setActiveTab('audit')}
-            className={`px-3 py-1.5 text-xs rounded-md ${activeTab === 'audit' ? 'bg-white shadow text-indigo-600 font-medium' : 'text-muted-foreground'}`}>
+            className={`px-3 py-1.5 text-xs rounded-md ${activeTab === 'audit' ? 'bg-card shadow text-indigo-600 font-medium' : 'text-muted-foreground'}`}>
             <ScrollText size={14} className="inline mr-1" /> 审计日志
           </button>
         </div>
@@ -204,7 +204,7 @@ export default function RolesManager() {
             {roles.map(role => (
               <div key={role._id}
                 onClick={() => setEditingRole({ ...role })}
-                className={`rounded-xl p-3 cursor-pointer transition-all ${editingRole?._id === role._id ? 'bg-indigo-50 border-indigo-300 border shadow-sm' : 'bg-white border border-border hover:border-border'}`}>
+                className={`rounded-xl p-3 cursor-pointer transition-all ${editingRole?._id === role._id ? 'bg-indigo-50 border-indigo-300 border shadow-sm' : 'bg-card border border-border hover:border-border'}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {role.isSystem && <Lock size={12} className="text-muted-foreground" />}
@@ -231,7 +231,7 @@ export default function RolesManager() {
                 <p className="text-sm">选择左侧角色以编辑权限</p>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-border overflow-hidden">
+              <div className="bg-card rounded-xl border border-border overflow-hidden">
                 <div className="bg-secondary/50 px-4 py-3 flex items-center justify-between border-b">
                   <div>
                     <h3 className="text-sm font-semibold text-foreground">
@@ -324,7 +324,7 @@ export default function RolesManager() {
 
           <div className="space-y-2">
             {auditLogs.map((log: any) => (
-              <div key={log._id} className="bg-white rounded-xl p-3 border border-border flex items-start gap-3">
+              <div key={log._id} className="bg-card rounded-xl p-3 border border-border flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0 mt-0.5">
                   <ScrollText size={14} className="text-indigo-600" />
                 </div>

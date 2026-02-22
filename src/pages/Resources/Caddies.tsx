@@ -133,7 +133,7 @@ export default function Caddies() {
       {/* 新增/编辑弹窗 */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">{editing ? '编辑球童' : '新增球童'}</h2>
               <button onClick={() => setModalOpen(false)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
@@ -160,7 +160,7 @@ export default function Caddies() {
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">性别</label>
                   <select value={form.gender} onChange={e => set('gender', e.target.value as Caddie['gender'])}
-                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
                     <option value="female">女</option>
                     <option value="male">男</option>
                   </select>
@@ -168,7 +168,7 @@ export default function Caddies() {
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">等级</label>
                   <select value={form.level} onChange={e => set('level', e.target.value as Caddie['level'])}
-                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
                     {Object.entries(LEVEL_MAP).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                   </select>
                 </div>
@@ -181,7 +181,7 @@ export default function Caddies() {
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">状态</label>
                 <select value={form.status} onChange={e => set('status', e.target.value as Caddie['status'])}
-                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
                   {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
                 </select>
               </div>
@@ -205,7 +205,7 @@ export default function Caddies() {
       {/* 删除确认 */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={20} className="text-red-500" /></div>
             <h3 className="font-semibold text-foreground mb-2">确认删除该球童？</h3>
             <p className="text-sm text-muted-foreground mb-6">删除后无法恢复。</p>

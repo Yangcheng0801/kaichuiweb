@@ -83,7 +83,7 @@ export default function StarterStation() {
   return (
     <div className="min-h-screen bg-secondary/50/80">
       {/* ── 顶栏 ── */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">
           <button onClick={() => navigate('/home')} className="p-2 rounded-xl hover:bg-secondary transition-colors">
             <ArrowLeft size={20} className="text-muted-foreground" />
@@ -95,12 +95,12 @@ export default function StarterStation() {
 
           {/* 日期选择 */}
           <div className="flex items-center gap-1 bg-secondary/50 rounded-xl p-1 border border-border">
-            <button onClick={() => setDate(d => shiftDate(d, -1))} className="p-1.5 rounded-lg hover:bg-white transition-colors">
+            <button onClick={() => setDate(d => shiftDate(d, -1))} className="p-1.5 rounded-lg hover:bg-card transition-colors">
               <ChevronLeft size={16} className="text-muted-foreground" />
             </button>
             <input type="date" value={date} onChange={e => setDate(e.target.value)}
               className="bg-transparent text-sm font-medium text-foreground px-1 py-1 w-[130px] outline-none" />
-            <button onClick={() => setDate(d => shiftDate(d, 1))} className="p-1.5 rounded-lg hover:bg-white transition-colors">
+            <button onClick={() => setDate(d => shiftDate(d, 1))} className="p-1.5 rounded-lg hover:bg-card transition-colors">
               <ChevronRight size={16} className="text-muted-foreground" />
             </button>
             {date !== todayStr && (
@@ -141,7 +141,7 @@ export default function StarterStation() {
             ].map(r => {
               const pct = r.total > 0 ? Math.round((r.used / r.total) * 100) : 0
               return (
-                <div key={r.label} className="bg-white rounded-xl p-3 border border-border">
+                <div key={r.label} className="bg-card rounded-xl p-3 border border-border">
                   <div className="flex items-center justify-between text-xs mb-1.5">
                     <span className="text-muted-foreground">{r.label}</span>
                     <span className="font-medium text-foreground">{r.used}/{r.total}</span>
@@ -241,7 +241,7 @@ function QueuePanel({ date, refreshKey, onRefresh }: { date: string; refreshKey:
         const players = b.players || []
         const isExpanded = expandId === b._id
         return (
-          <div key={b._id} className="bg-white rounded-xl border border-border overflow-hidden">
+          <div key={b._id} className="bg-card rounded-xl border border-border overflow-hidden">
             <div className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-secondary/50/50 transition-colors"
               onClick={() => setExpandId(isExpanded ? null : b._id)}>
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -291,7 +291,7 @@ function QueuePanel({ date, refreshKey, onRefresh }: { date: string; refreshKey:
       {/* 调度弹窗 */}
       {dispatchForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setDispatchForm(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-foreground mb-4">出发调度</h3>
             {dispatchForm.isDesignated && (
               <div className="mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
@@ -387,7 +387,7 @@ function OnCoursePanel({ date, refreshKey, onRefresh }: { date: string; refreshK
         const actions = nextActions(b.status)
 
         return (
-          <div key={b._id} className="bg-white rounded-xl border border-border px-4 py-3">
+          <div key={b._id} className="bg-card rounded-xl border border-border px-4 py-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -462,7 +462,7 @@ function ReturnedPanel({ date, refreshKey, onRefresh }: { date: string; refreshK
         const totalFee = pricing.totalFee || 0
 
         return (
-          <div key={b._id} className="bg-white rounded-xl border border-border px-4 py-3 flex items-center justify-between gap-3">
+          <div key={b._id} className="bg-card rounded-xl border border-border px-4 py-3 flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-foreground">{b.teeTime}</span>
@@ -583,7 +583,7 @@ function BagsPanel({ refreshKey, onRefresh }: { refreshKey: number; onRefresh: (
           {bags.map(b => {
             const bs = BAG_STATUS[b.status] || BAG_STATUS.stored
             return (
-              <div key={b._id} className="bg-white rounded-xl border border-border px-4 py-3 flex items-center justify-between gap-3">
+              <div key={b._id} className="bg-card rounded-xl border border-border px-4 py-3 flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-foreground">{b.playerName}</span>
@@ -615,7 +615,7 @@ function BagsPanel({ refreshKey, onRefresh }: { refreshKey: number; onRefresh: (
       {/* 入库弹窗 */}
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setFormOpen(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-foreground mb-4">球包入库</h3>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
@@ -711,11 +711,11 @@ function TimelinePanel({ date, refreshKey }: { date: string; refreshKey: number 
       {/* 视图切换 */}
       <div className="flex gap-2">
         <button onClick={() => setViewMode('caddy')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${viewMode === 'caddy' ? 'bg-success text-white border-success' : 'bg-white text-muted-foreground border-border hover:bg-secondary/50'}`}>
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${viewMode === 'caddy' ? 'bg-success text-white border-success' : 'bg-card text-muted-foreground border-border hover:bg-secondary/50'}`}>
           球童视图
         </button>
         <button onClick={() => setViewMode('cart')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${viewMode === 'cart' ? 'bg-success text-white border-success' : 'bg-white text-muted-foreground border-border hover:bg-secondary/50'}`}>
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${viewMode === 'cart' ? 'bg-success text-white border-success' : 'bg-card text-muted-foreground border-border hover:bg-secondary/50'}`}>
           球车视图
         </button>
       </div>
@@ -741,7 +741,7 @@ function TimelinePanel({ date, refreshKey }: { date: string; refreshKey: number 
           暂无{viewMode === 'caddy' ? '球童' : '球车'}调度数据
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-border overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           {/* 时间刻度 */}
           <div className="flex border-b border-border">
             <div className="w-24 flex-shrink-0 px-3 py-2 text-xs font-medium text-muted-foreground bg-secondary/50 border-r border-border">

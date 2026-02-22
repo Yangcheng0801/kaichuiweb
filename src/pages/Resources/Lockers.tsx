@@ -45,7 +45,7 @@ const RENTAL_TYPE_MAP: Record<string, string> = { daily: '日租', monthly: '月
 const CONTRACT_STATUS: Record<string, { label: string; cls: string }> = {
   active:          { label: '生效中', cls: 'bg-success/10 text-success' },
   expired:         { label: '已到期', cls: 'bg-secondary text-muted-foreground' },
-  terminated:      { label: '已终止', cls: 'bg-red-100 text-red-600' },
+  terminated:      { label: '已终止', cls: 'bg-destructive/10 text-destructive border border-destructive/20' },
   pending_renewal: { label: '待续费', cls: 'bg-orange-100 text-orange-700' },
 }
 const ACTION_MAP: Record<string, string> = {
@@ -237,7 +237,7 @@ export default function Lockers() {
             { label: '维护', value: stats.maintenance, color: 'text-muted-foreground' },
             { label: '停用', value: stats.retired, color: 'text-muted-foreground' },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-xl border border-border p-4 text-center">
+            <div key={s.label} className="bg-card rounded-xl border border-border p-4 text-center">
               <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
               <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
             </div>
@@ -246,7 +246,7 @@ export default function Lockers() {
       )}
 
       {/* Tab 切换 */}
-      <div className="flex bg-white rounded-xl p-1 shadow-sm border border-border w-fit">
+      <div className="flex bg-card rounded-xl p-1 shadow-sm border border-border w-fit">
         {[
           { key: 'grid' as const, label: '柜位总览' },
           { key: 'contracts' as const, label: '合同管理' },
@@ -265,12 +265,12 @@ export default function Lockers() {
         <>
           <div className="flex items-center gap-3 flex-wrap">
             <select value={filterArea} onChange={e => setFilterArea(e.target.value)}
-              className="px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring">
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
               <option value="">全部区域</option>
               {areas.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-              className="px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring">
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
               <option value="">全部状态</option>
               <option value="available">可用</option>
               <option value="occupied">占用</option>
@@ -370,7 +370,7 @@ export default function Lockers() {
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
             {contracts.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground text-sm">暂无合同</div>
             ) : (
@@ -412,7 +412,7 @@ export default function Lockers() {
       {tab === 'keys' && (
         <>
           <h3 className="text-sm font-semibold text-foreground">钥匙/手环发放状态</h3>
-          <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
             <div className="divide-y divide-border/50">
               {lockers.filter(l => l.keyInfo?.keyNo).map(l => (
                 <div key={l._id} className="px-5 py-3 flex items-center gap-4">
@@ -456,12 +456,12 @@ export default function Lockers() {
               </span>
             )}
             <select value={logLockerId} onChange={e => { setLogLockerId(e.target.value); loadUsageLogs(e.target.value) }}
-              className="ml-auto px-3 py-2 border border-border rounded-lg text-sm bg-white">
+              className="ml-auto px-3 py-2 border border-border rounded-lg text-sm bg-card">
               <option value="">选择更衣柜</option>
               {lockers.map(l => <option key={l._id} value={l._id}>{l.lockerNo}</option>)}
             </select>
           </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
             {usageLogs.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground text-sm">{logLockerId ? '暂无记录' : '请选择更衣柜查看使用记录'}</div>
             ) : (
@@ -492,7 +492,7 @@ export default function Lockers() {
       {/* ======== 新增更衣柜弹窗 ======== */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">新增更衣柜</h2>
               <button onClick={() => setShowAdd(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>
@@ -518,7 +518,7 @@ export default function Lockers() {
                 </>
               )}
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-medium text-muted-foreground mb-1">规格</label><select value={formSize} onChange={e => setFormSize(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring">{Object.entries(SIZE_MAP).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
+                <div><label className="block text-xs font-medium text-muted-foreground mb-1">规格</label><select value={formSize} onChange={e => setFormSize(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">{Object.entries(SIZE_MAP).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
                 <div><label className="block text-xs font-medium text-muted-foreground mb-1">日租金</label><input type="number" value={formFee} onChange={e => setFormFee(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
               </div>
             </div>
@@ -533,7 +533,7 @@ export default function Lockers() {
       {/* ======== 新建合同弹窗 ======== */}
       {showNewContract && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">新建租赁合同</h2>
               <button onClick={() => setShowNewContract(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>
@@ -542,7 +542,7 @@ export default function Lockers() {
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1">选择更衣柜</label>
                 <select value={cfLockerId} onChange={e => { setCfLockerId(e.target.value); const l = lockers.find(x => x._id === e.target.value); setCfLockerNo(l?.lockerNo || '') }}
-                  className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
                   <option value="">请选择</option>
                   {lockers.filter(l => l.status === 'available').map(l => <option key={l._id} value={l._id}>{l.lockerNo} ({l.area})</option>)}
                 </select>
@@ -578,7 +578,7 @@ export default function Lockers() {
       {/* ======== 钥匙弹窗 ======== */}
       {showKeyDialog && selectedLocker && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">{keyAction === 'issue' ? '发放钥匙/手环' : '回收钥匙'}</h2>
               <button onClick={() => setShowKeyDialog(false)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>
@@ -589,7 +589,7 @@ export default function Lockers() {
                 <>
                   <div>
                     <label className="block text-xs font-medium text-muted-foreground mb-1">类型</label>
-                    <select value={keyType} onChange={e => setKeyType(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white">
+                    <select value={keyType} onChange={e => setKeyType(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-card">
                       <option value="physical_key">实体钥匙</option>
                       <option value="wristband">RFID手环</option>
                       <option value="card">门禁卡</option>

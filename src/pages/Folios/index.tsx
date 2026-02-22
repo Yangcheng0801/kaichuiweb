@@ -54,7 +54,7 @@ interface FolioPayment {
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   open:    { label: '消费中', cls: 'bg-success/10 text-success' },
   settled: { label: '已结算', cls: 'bg-secondary text-muted-foreground' },
-  void:    { label: '已作废', cls: 'bg-red-100 text-red-600' },
+  void:    { label: '已作废', cls: 'bg-destructive/10 text-destructive border border-destructive/20' },
 }
 
 const CHARGE_LABELS: Record<string, string> = {
@@ -133,11 +133,11 @@ export default function Folios() {
   const voidedCharges = charges.filter(c => c.status === 'voided')
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] p-4 sm:p-6">
+    <div className="min-h-screen bg-page-bg p-4 sm:p-6">
       {/* 头部 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/home')} className="p-2 rounded-lg hover:bg-white text-muted-foreground transition-colors">
+          <button onClick={() => navigate('/home')} className="p-2 rounded-lg hover:bg-card text-muted-foreground transition-colors">
             <ArrowLeft size={20} />
           </button>
           <div>
@@ -145,14 +145,14 @@ export default function Folios() {
             <p className="text-sm text-muted-foreground">Folio 统一消费 / 挂账中心</p>
           </div>
         </div>
-        <button onClick={fetchFolios} disabled={loading} className="p-2 rounded-lg hover:bg-white text-muted-foreground transition-colors disabled:opacity-50">
+        <button onClick={fetchFolios} disabled={loading} className="p-2 rounded-lg hover:bg-card text-muted-foreground transition-colors disabled:opacity-50">
           <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
 
       {/* Tab + 搜索 */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-border">
+        <div className="flex bg-card rounded-xl p-1 shadow-sm border border-border">
           <button onClick={() => setTab('active')} className={`px-4 py-2 text-sm rounded-lg font-medium transition-all ${tab === 'active' ? 'bg-success/10 text-success shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
             未结算
           </button>
@@ -166,14 +166,14 @@ export default function Folios() {
             <input
               value={search} onChange={e => setSearch(e.target.value)}
               placeholder="搜索客人姓名..."
-              className="w-full pl-9 pr-3 py-2 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         )}
       </div>
 
       {/* 列表 */}
-      <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+      <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-muted-foreground text-sm">加载中...</div>
         ) : folios.length === 0 ? (
@@ -220,9 +220,9 @@ export default function Folios() {
       {/* 详情弹窗 */}
       {selectedFolio && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-white z-10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
               <div>
                 <h2 className="font-semibold text-foreground">账单详情</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -332,7 +332,7 @@ export default function Folios() {
 
             {/* Footer */}
             {selectedFolio.status === 'open' && (
-              <div className="flex gap-3 px-6 py-4 border-t border-border sticky bottom-0 bg-white">
+              <div className="flex gap-3 px-6 py-4 border-t border-border sticky bottom-0 bg-card">
                 <button onClick={() => setSelectedFolio(null)}
                   className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50 transition-colors">
                   关闭

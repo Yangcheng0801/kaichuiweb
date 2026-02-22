@@ -13,7 +13,7 @@ const METHOD_MAP: Record<string, string> = {
   card: '银行卡', member_card: '会员卡', transfer: '转账', other: '其他'
 }
 const METHOD_COLORS: Record<string, string> = {
-  cash: '#22c55e', wechat: '#10b981', alipay: '#3b82f6',
+  cash: 'hsl(var(--success))', wechat: 'hsl(var(--success))', alipay: 'hsl(var(--info))',
   card: '#8b5cf6', member_card: '#f59e0b', transfer: '#06b6d4', other: '#6b7280'
 }
 
@@ -56,7 +56,7 @@ function HBar({ items, height = 24 }: { items: { label: string; value: number; c
 function KpiCard({ label, value, sub, icon: Icon, color = 'text-muted-foreground', bg = 'bg-secondary/50' }: any) {
   return (
     <div className={`${bg} rounded-xl p-4 flex items-center gap-3`}>
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color} bg-white/60`}>
+      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color} bg-card/60`}>
         <Icon size={20} />
       </div>
       <div>
@@ -133,7 +133,7 @@ export default function Reports() {
   return (
     <div className="min-h-screen bg-secondary/50 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b px-6 py-4 flex items-center justify-between shrink-0">
+      <header className="bg-card border-b px-6 py-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={() => window.history.back()} className="p-2 hover:bg-secondary rounded-lg">
             <ChevronLeft size={20} />
@@ -146,7 +146,7 @@ export default function Reports() {
             <div className="flex bg-secondary rounded-lg p-0.5">
               {PERIOD_OPTIONS.map(opt => (
                 <button key={opt.value}
-                  className={`px-3 py-1.5 text-xs rounded-md transition-all ${period === opt.value ? 'bg-white shadow text-blue-600 font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`px-3 py-1.5 text-xs rounded-md transition-all ${period === opt.value ? 'bg-card shadow text-blue-600 font-medium' : 'text-muted-foreground hover:text-foreground'}`}
                   onClick={() => setPeriod(opt.value)}>
                   {opt.label}
                 </button>
@@ -166,7 +166,7 @@ export default function Reports() {
       </header>
 
       {/* Tabs */}
-      <div className="bg-white border-b px-6">
+      <div className="bg-card border-b px-6">
         <div className="flex gap-0">
           {TABS.map(tab => (
             <button key={tab.key}
@@ -212,7 +212,7 @@ function RevenuePanel({ data }: { data: any }) {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* 收款方式分布 */}
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">收款方式分布</h3>
           <HBar items={methodItems} height={28} />
           <div className="mt-3 space-y-2">
@@ -229,7 +229,7 @@ function RevenuePanel({ data }: { data: any }) {
         </div>
 
         {/* 消费类别分布 */}
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">消费类别分布</h3>
           <div className="space-y-3">
             {catItems.map((item, idx) => {
@@ -252,7 +252,7 @@ function RevenuePanel({ data }: { data: any }) {
 
       {/* 趋势图 */}
       {data.dailyTrend && data.dailyTrend.length > 0 && (
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">营收趋势</h3>
           <SimpleBarChart data={data.dailyTrend} labelKey="date" valueKey="revenue" color="#3b82f6" />
         </div>
@@ -268,7 +268,7 @@ function BookingPanel({ data }: { data: any }) {
     playing: '打球中', completed: '已完赛', cancelled: '已取消', no_show: '未到场'
   }
   const STATUS_COLORS: Record<string, string> = {
-    pending: '#eab308', confirmed: '#3b82f6', checked_in: '#10b981',
+    pending: 'hsl(var(--warning))', confirmed: 'hsl(var(--info))', checked_in: 'hsl(var(--success))',
     playing: '#22c55e', completed: '#6b7280', cancelled: '#ef4444', no_show: '#f97316'
   }
 
@@ -288,7 +288,7 @@ function BookingPanel({ data }: { data: any }) {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* 状态分布 */}
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">预订状态分布</h3>
           <HBar items={statusItems} height={28} />
           <div className="mt-3 grid grid-cols-2 gap-2">
@@ -303,7 +303,7 @@ function BookingPanel({ data }: { data: any }) {
         </div>
 
         {/* 身份分布 */}
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">球员身份分布</h3>
           <div className="space-y-2">
             {Object.entries(data.identityDist || {}).sort((a: any, b: any) => b[1] - a[1]).map(([k, v]: any) => (
@@ -319,9 +319,9 @@ function BookingPanel({ data }: { data: any }) {
 
       {/* 预订趋势 */}
       {data.dailyTrend && data.dailyTrend.length > 0 && (
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">预订趋势</h3>
-          <SimpleBarChart data={data.dailyTrend} labelKey="date" valueKey="count" color="#10b981" />
+          <SimpleBarChart data={data.dailyTrend} labelKey="date" valueKey="count" color="hsl(var(--success))" />
         </div>
       )}
     </div>
@@ -341,7 +341,7 @@ function PlayerPanel({ data }: { data: any }) {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* 会员等级分布 */}
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">会员等级分布</h3>
           <div className="space-y-2">
             {Object.entries(data.levelDist || {}).sort((a: any, b: any) => b[1] - a[1]).map(([k, v]: any) => {
@@ -362,7 +362,7 @@ function PlayerPanel({ data }: { data: any }) {
         </div>
 
         {/* 消费排行榜 */}
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">消费排行榜 TOP 10</h3>
           <div className="space-y-2">
             {(data.topSpenders || []).slice(0, 10).map((s: any, idx: number) => (
@@ -382,7 +382,7 @@ function PlayerPanel({ data }: { data: any }) {
 
       {/* 新增趋势 */}
       {data.newTrend && data.newTrend.length > 0 && (
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-4">新增球员趋势（按月）</h3>
           <SimpleBarChart data={data.newTrend} labelKey="month" valueKey="count" color="#8b5cf6" />
         </div>
@@ -403,7 +403,7 @@ function ResourcePanel({ data }: { data: any }) {
     const circumference = 2 * Math.PI * 40
     const offset = circumference - (pct / 100) * circumference
     return (
-      <div className="bg-white rounded-xl p-5 shadow-sm flex flex-col items-center">
+      <div className="bg-card rounded-xl p-5 shadow-sm flex flex-col items-center">
         <svg width="100" height="100" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" strokeWidth="8" />
           <circle cx="50" cy="50" r="40" fill="none" stroke={color} strokeWidth="8"
@@ -423,14 +423,14 @@ function ResourcePanel({ data }: { data: any }) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <GaugeCard label="球车利用率" value={c.inUse || 0} total={c.total || 0} color="#f59e0b" />
-        <GaugeCard label="球童利用率" value={cad.busy || 0} total={cad.total || 0} color="#10b981" />
+        <GaugeCard label="球童利用率" value={cad.busy || 0} total={cad.total || 0} color="hsl(var(--success))" />
         <GaugeCard label="更衣柜使用率" value={l.occupied || 0} total={l.total || 0} color="#3b82f6" />
         <GaugeCard label="客房入住率" value={r.occupied || 0} total={r.total || 0} color="#8b5cf6" />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* 球车详情 */}
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2"><Car size={16} /> 球车详情</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">总数</span><span className="font-medium">{c.total}</span></div>
@@ -443,7 +443,7 @@ function ResourcePanel({ data }: { data: any }) {
         </div>
 
         {/* 客房详情 */}
-        <div className="bg-white rounded-xl p-5 shadow-sm">
+        <div className="bg-card rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2"><BedDouble size={16} /> 客房详情</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">总房数</span><span className="font-medium">{r.total}</span></div>

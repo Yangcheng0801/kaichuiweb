@@ -33,9 +33,9 @@ export default function Resources() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] flex flex-col">
+    <div className="min-h-screen bg-page-bg flex flex-col">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-10 bg-white border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
+      <header className="sticky top-0 z-10 bg-card border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
         <button
           onClick={() => navigate('/home')}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -49,7 +49,7 @@ export default function Resources() {
 
       <div className="flex-1 flex flex-col px-6 py-6 gap-4">
         {/* Tabs */}
-        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-border w-fit flex-wrap">
+        <div className="flex gap-1 bg-card rounded-xl p-1 shadow-sm border border-border w-fit flex-wrap">
           {TABS.map(tab => (
             <button
               key={tab.key}
@@ -67,7 +67,7 @@ export default function Resources() {
         </div>
 
         {/* 内容区 */}
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-border p-6 sm:p-8">
+        <div className="flex-1 bg-card rounded-2xl shadow-sm border border-border p-6 sm:p-8">
           {renderContent()}
         </div>
       </div>

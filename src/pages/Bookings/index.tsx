@@ -28,9 +28,9 @@ export default function Bookings() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] flex flex-col">
+    <div className="min-h-screen bg-page-bg flex flex-col">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-10 bg-white border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
+      <header className="sticky top-0 z-10 bg-card border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
         <button
           onClick={() => navigate('/home')}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -44,7 +44,7 @@ export default function Bookings() {
 
       <div className="flex-1 flex flex-col px-6 py-6 gap-4">
         {/* 视图切换 Tabs */}
-        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-border w-fit">
+        <div className="flex gap-1 bg-card rounded-xl p-1 shadow-sm border border-border w-fit">
           {VIEWS.map(v => (
             <button
               key={v.key}
@@ -62,7 +62,7 @@ export default function Bookings() {
         </div>
 
         {/* 内容区：撐满剩余高度 */}
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-border p-6 sm:p-8">
+        <div className="flex-1 bg-card rounded-2xl shadow-sm border border-border p-6 sm:p-8">
           {activeView === 'teesheet' && (
             <TeeSheet
               key={refreshKey}
@@ -195,12 +195,12 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
       {/* ── 顶部：日期 + 搜索 + 新增 ── */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1 bg-secondary/50 rounded-xl p-1 border border-border">
-          <button onClick={() => setDate(d => shiftDate(d, -1))} className="p-1.5 rounded-lg hover:bg-white transition-colors">
+          <button onClick={() => setDate(d => shiftDate(d, -1))} className="p-1.5 rounded-lg hover:bg-card transition-colors">
             <ChevronLeft size={16} className="text-muted-foreground" />
           </button>
           <input type="date" value={date} onChange={e => setDate(e.target.value)}
             className="bg-transparent text-sm font-medium text-foreground px-2 py-1 w-[140px] outline-none" />
-          <button onClick={() => setDate(d => shiftDate(d, 1))} className="p-1.5 rounded-lg hover:bg-white transition-colors">
+          <button onClick={() => setDate(d => shiftDate(d, 1))} className="p-1.5 rounded-lg hover:bg-card transition-colors">
             <ChevronRight size={16} className="text-muted-foreground" />
           </button>
           {date !== today && (
@@ -244,12 +244,12 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 active
                   ? 'bg-success text-white border-success shadow-sm'
-                  : 'bg-white text-muted-foreground border-border hover:border-border hover:bg-secondary/50'
+                  : 'bg-card text-muted-foreground border-border hover:border-border hover:bg-secondary/50'
               }`}>
               <tab.icon size={13} />
               {tab.label}
               <span className={`ml-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                active ? 'bg-white/20 text-white' : 'bg-secondary text-muted-foreground'
+                active ? 'bg-card/20 text-white' : 'bg-secondary text-muted-foreground'
               }`}>{cnt}</span>
             </button>
           )
@@ -289,7 +289,7 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
                     <div key={b._id}
                       onClick={() => setDetailId(detailId === b._id ? null : b._id)}
                       className={`rounded-xl border px-4 py-3 cursor-pointer transition-all hover:shadow-sm ${
-                        detailId === b._id ? 'border-success/30 bg-success/10/30 shadow-sm' : 'border-border bg-white hover:border-border'
+                        detailId === b._id ? 'border-success/30 bg-success/10/30 shadow-sm' : 'border-border bg-card hover:border-border'
                       }`}>
                       <div className="flex items-start justify-between gap-3">
                         {/* 左侧信息 */}
@@ -337,7 +337,7 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
                             )}
                             {(b.status === 'pending' || b.status === 'confirmed') && (
                               <button onClick={e => { e.stopPropagation(); handleAction(b._id, 'cancel') }}
-                                className="text-[11px] px-2.5 py-1 bg-white text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors font-medium">
+                                className="text-[11px] px-2.5 py-1 bg-card text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors font-medium">
                                 取消
                               </button>
                             )}

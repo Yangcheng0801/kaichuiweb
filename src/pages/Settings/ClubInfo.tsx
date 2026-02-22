@@ -166,7 +166,7 @@ export default function ClubInfo() {
             <select
               value={form.timezone}
               onChange={e => set('timezone', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-white"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-card"
             >
               {TIMEZONES.map(tz => (
                 <option key={tz.value} value={tz.value}>{tz.label}</option>
@@ -178,7 +178,7 @@ export default function ClubInfo() {
             <select
               value={form.currency}
               onChange={e => set('currency', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-white"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-card"
             >
               {CURRENCIES.map(c => (
                 <option key={c.value} value={c.value}>{c.label}</option>

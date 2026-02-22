@@ -176,7 +176,7 @@ function CaddieSelectDialog({ open, onClose, onSelect, date, teeTime }: CaddieSe
   if (!open) return null
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[70vh] flex flex-col">
+      <div className="bg-card rounded-xl shadow-xl w-full max-w-md max-h-[70vh] flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h3 className="font-semibold text-foreground">选择球童（点号）</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-muted-foreground"><X size={18} /></button>
@@ -307,11 +307,11 @@ function PlayerSearchDropdown({ value, onChange, onSelect, placeholder }: Player
       <div className="relative">
         <input type="text" value={value} onChange={e => handleInput(e.target.value)} onFocus={() => results.length > 0 && setOpen(true)}
           placeholder={placeholder || '姓名 / 手机 / 球员号'}
-          className="w-full px-2.5 py-2 pr-7 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white" />
+          className="w-full px-2.5 py-2 pr-7 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card" />
         {searching && <Search size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground animate-pulse" />}
       </div>
       {open && results.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-border rounded-xl shadow-lg overflow-hidden">
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-card border border-border rounded-xl shadow-lg overflow-hidden">
           {results.map(p => (
             <button key={p._id} type="button" className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-success/10 text-left transition-colors"
               onMouseDown={e => { e.preventDefault(); onSelect(p); setOpen(false) }}>
@@ -319,7 +319,7 @@ function PlayerSearchDropdown({ value, onChange, onSelect, placeholder }: Player
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-medium text-foreground">{p.name}</span>
-                  {p.profile?.memberLevel && <span className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 rounded-full">{MEMBER_LEVEL_LABEL[p.profile.memberLevel] || p.profile.memberLevel}</span>}
+                  {p.profile?.memberLevel && <span className="text-[10px] bg-warning/10 text-warning border border-warning/20 px-1.5 rounded-full">{MEMBER_LEVEL_LABEL[p.profile.memberLevel] || p.profile.memberLevel}</span>}
                 </div>
                 <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
                   <span className="font-mono">#{p.playerNo}</span>
@@ -593,11 +593,11 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
   const feeItems = feeFields.filter(f => (form as any)[f.key] > 0)
 
   const priceSourceLabel = form.priceSource === 'auto' ? '系统定价' : form.priceSource === 'package' ? '套餐价' : form.priceSource === 'addOn' ? '加打价' : form.priceSource === 'reduced' ? '减打价' : '手动'
-  const priceSourceStyle = form.priceSource === 'auto' ? 'bg-success/10 text-success' : form.priceSource === 'package' ? 'bg-purple-100 text-purple-700' : form.priceSource === 'addOn' ? 'bg-blue-100 text-blue-700' : form.priceSource === 'reduced' ? 'bg-amber-100 text-amber-700' : 'bg-amber-100 text-amber-700'
+  const priceSourceStyle = form.priceSource === 'auto' ? 'bg-success/10 text-success' : form.priceSource === 'package' ? 'bg-purple-100 text-purple-700' : form.priceSource === 'addOn' ? 'bg-info/10 text-info border border-info/20' : form.priceSource === 'reduced' ? 'bg-amber-100 text-amber-700' : 'bg-amber-100 text-amber-700'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-6">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
 
         {/* 标题栏 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
@@ -608,7 +608,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${pricingResult.dayType === 'holiday' ? 'bg-red-100 text-red-700' : pricingResult.dayType === 'weekend' ? 'bg-amber-100 text-amber-700' : 'bg-success/10 text-success'}`}>
                   {pricingResult.dayTypeName}
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-info/10 text-info border border-info/20">
                   {pricingResult.timeSlotName}
                 </span>
                 {pricingResult.dateName && <span className="text-[10px] text-muted-foreground">{pricingResult.dateName}</span>}
@@ -634,21 +634,21 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">时间 <span className="text-red-500">*</span></label>
                 <select value={form.teeTime} onChange={e => set('teeTime', e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
                   {TEE_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">预订来源</label>
                 <select value={form.bookingSource} onChange={e => set('bookingSource', e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
                   {BOOKING_SOURCES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
                 </select>
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-foreground mb-1">球场 <span className="text-red-500">*</span></label>
                 <select value={form.courseId} onChange={e => handleCourseChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
                   <option value="">请选择球场</option>
                   {courses.map(c => <option key={c._id} value={c._id}>{c.name}（{c.holes}洞）</option>)}
                 </select>
@@ -656,7 +656,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">套餐</label>
                 <select value={form.packageId} onChange={e => set('packageId', e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
                   <option value="">无套餐</option>
                   {packages.map(p => <option key={p._id} value={p._id}>{p.packageName}</option>)}
                 </select>
@@ -721,7 +721,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                       }
                       set('players', next)
                     }}
-                      className="w-24 px-2 py-2 border border-border rounded-lg text-xs focus:outline-none bg-white flex-shrink-0">
+                      className="w-24 px-2 py-2 border border-border rounded-lg text-xs focus:outline-none bg-card flex-shrink-0">
                       {activeIdentities.length > 0 ? (
                         activeIdentities.map(id => (
                           <option key={id.code} value={id.code}>{id.name}</option>
@@ -747,7 +747,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                   {!player.memberId && (
                     <div className="flex items-center gap-2 pl-6">
                       <input type="tel" value={player.phone} placeholder="手机号（选填）" onChange={e => setPlayer(idx, 'phone', e.target.value)}
-                        className="flex-1 px-2.5 py-1.5 border border-border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-ring bg-white" />
+                        className="flex-1 px-2.5 py-1.5 border border-border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-ring bg-card" />
                     </div>
                   )}
                 </div>
@@ -767,7 +767,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                 <span className="text-sm text-blue-800 font-medium">团队模式</span>
               </label>
               {form.isTeam && form.players.length >= 8 && pricingResult?.teamDiscount && (
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{pricingResult.teamDiscount.label}</span>
+                <span className="text-xs bg-info/10 text-info border border-info/20 px-2 py-0.5 rounded-full">{pricingResult.teamDiscount.label}</span>
               )}
             </div>
             {form.isTeam && (
@@ -903,7 +903,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                       readOnly={!form.priceOverride && lockedFields[f.key]}
                       onChange={e => set(f.key as keyof BookingFormData, parseFloat(e.target.value) || 0)}
                       className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring ${
-                        !form.priceOverride && lockedFields[f.key] ? 'border-success/20 bg-success/10/50 text-success' : 'border-border bg-white'
+                        !form.priceOverride && lockedFields[f.key] ? 'border-success/20 bg-success/10/50 text-success' : 'border-border bg-card'
                       }`} />
                   </div>
                 ))}
@@ -924,7 +924,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                 <input type="number" value={form.discount || ''} readOnly={!form.priceOverride && lockedFields.discount}
                   onChange={e => set('discount', parseFloat(e.target.value) || 0)}
                   className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring ${
-                    !form.priceOverride && lockedFields.discount ? 'border-success/20 bg-success/10/50 text-success' : 'border-border bg-white'
+                    !form.priceOverride && lockedFields.discount ? 'border-success/20 bg-success/10/50 text-success' : 'border-border bg-card'
                   }`} />
               </div>
               <div>

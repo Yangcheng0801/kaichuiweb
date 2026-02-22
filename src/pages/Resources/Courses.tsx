@@ -140,7 +140,7 @@ export default function Courses() {
       {/* 新增/编辑弹窗 */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">{editing ? '编辑球场' : '新增球场'}</h2>
               <button onClick={() => setModalOpen(false)} className="text-muted-foreground hover:text-foreground">
@@ -177,7 +177,7 @@ export default function Courses() {
                 <select
                   value={form.status}
                   onChange={e => set('status', e.target.value as Course['status'])}
-                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card"
                 >
                   {Object.entries(STATUS_MAP).map(([v, { label }]) => (
                     <option key={v} value={v}>{label}</option>
@@ -209,7 +209,7 @@ export default function Courses() {
       {/* 删除确认弹窗 */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 size={20} className="text-red-500" />
             </div>

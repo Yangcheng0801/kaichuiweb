@@ -40,7 +40,7 @@ const CATEGORY_LABELS: Record<string, { label: string; icon: React.ReactNode; de
 }
 
 const PRESET_COLORS = [
-  '#6b7280', '#3b82f6', '#10b981', '#eab308', '#8b5cf6',
+  'hsl(var(--muted-foreground))', 'hsl(var(--info))', 'hsl(var(--success))', 'hsl(var(--warning))', 'hsl(var(--chart-1))',
   '#f43f5e', '#06b6d4', '#f97316', '#14b8a6', '#a855f7',
   '#64748b', '#ef4444', '#84cc16', '#ec4899', '#0ea5e9',
 ]
@@ -164,7 +164,7 @@ export default function IdentityTypes() {
     <div
       key={item._id}
       className={`flex items-center gap-3 p-3 rounded-xl border transition-all group ${
-        item.status === 'inactive' ? 'bg-secondary/50 border-border opacity-60' : 'bg-white border-border hover:border-border hover:shadow-sm'
+        item.status === 'inactive' ? 'bg-secondary/50 border-border opacity-60' : 'bg-card border-border hover:border-border hover:shadow-sm'
       }`}
     >
       {/* 色彩标识 */}
@@ -211,7 +211,7 @@ export default function IdentityTypes() {
     if (!isNew && !editItem) return null
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col">
+        <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col">
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
             <h2 className="font-semibold text-foreground">{isNew ? '新建身份类型' : '编辑身份类型'}</h2>
             <button onClick={closeForm} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
@@ -239,7 +239,7 @@ export default function IdentityTypes() {
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">分类</label>
               <select value={form.category || 'special'} onChange={e => setForm(p => ({ ...p, category: e.target.value as any }))}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
                 <option value="standard">标准身份</option>
                 <option value="member">会员身份</option>
                 <option value="special">特殊身份</option>

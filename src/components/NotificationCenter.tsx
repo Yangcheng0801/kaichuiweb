@@ -214,7 +214,7 @@ export default function NotificationCenter({
 
       {/* 下拉面板 */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-border z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-96 bg-card rounded-xl shadow-2xl border border-border z-50 overflow-hidden">
           {/* 头部 */}
           <div className="flex items-center justify-between px-4 py-3 border-b bg-secondary/50/50">
             <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function NotificationCenter({
                         {n.title}
                       </span>
                       {n.priority === 'urgent' && (
-                        <span className="text-[10px] bg-red-100 text-red-600 px-1.5 rounded">紧急</span>
+                        <span className="text-[10px] bg-destructive/10 text-destructive border border-destructive/20 px-1.5 rounded">紧急</span>
                       )}
                       {n.priority === 'important' && (
                         <span className="text-[10px] bg-amber-100 text-amber-600 px-1.5 rounded">重要</span>

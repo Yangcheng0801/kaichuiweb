@@ -54,10 +54,10 @@ const TABS: { key: TabKey; label: string; icon: any }[] = [
 ]
 
 const LEVEL_NAMES: Record<number, string> = { 0: '非会员', 1: '普通会员', 2: '金卡会员', 3: '钻石会员', 4: '白金会员' }
-const LEVEL_COLORS: Record<number, string> = { 0: 'bg-secondary text-muted-foreground', 1: 'bg-blue-100 text-blue-700', 2: 'bg-yellow-100 text-yellow-700', 3: 'bg-purple-100 text-purple-700', 4: 'bg-success/10 text-success' }
+const LEVEL_COLORS: Record<number, string> = { 0: 'bg-secondary text-muted-foreground', 1: 'bg-info/10 text-info border border-info/20', 2: 'bg-warning/10 text-warning border border-warning/20', 3: 'bg-purple-100 text-purple-700', 4: 'bg-success/10 text-success' }
 const INTERACTION_TYPES: Record<string, { label: string; color: string }> = {
-  call: { label: '电话', color: 'bg-blue-100 text-blue-700' },
-  visit: { label: '到访', color: 'bg-green-100 text-green-700' },
+  call: { label: '电话', color: 'bg-info/10 text-info border border-info/20' },
+  visit: { label: '到访', color: 'bg-success/10 text-success border border-success/20' },
   complaint: { label: '投诉', color: 'bg-red-100 text-red-700' },
   feedback: { label: '反馈', color: 'bg-amber-100 text-amber-700' },
   note: { label: '备注', color: 'bg-secondary text-muted-foreground' },
@@ -67,16 +67,16 @@ const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
   high: { label: '高', color: 'text-orange-600' }, urgent: { label: '紧急', color: 'text-red-600' },
 }
 const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
-  pending: { label: '待处理', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
-  in_progress: { label: '进行中', color: 'bg-blue-100 text-blue-700', icon: RefreshCw },
-  completed: { label: '已完成', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
+  pending: { label: '待处理', color: 'bg-warning/10 text-warning border border-warning/20', icon: Clock },
+  in_progress: { label: '进行中', color: 'bg-info/10 text-info border border-info/20', icon: RefreshCw },
+  completed: { label: '已完成', color: 'bg-success/10 text-success border border-success/20', icon: CheckCircle2 },
   cancelled: { label: '已取消', color: 'bg-secondary text-muted-foreground', icon: X },
 }
 const CAMPAIGN_STATUS: Record<string, { label: string; color: string }> = {
   draft: { label: '草稿', color: 'bg-secondary text-muted-foreground' },
-  running: { label: '进行中', color: 'bg-blue-100 text-blue-700' },
-  completed: { label: '已完成', color: 'bg-green-100 text-green-700' },
-  cancelled: { label: '已取消', color: 'bg-red-100 text-red-600' },
+  running: { label: '进行中', color: 'bg-info/10 text-info border border-info/20' },
+  completed: { label: '已完成', color: 'bg-success/10 text-success border border-success/20' },
+  cancelled: { label: '已取消', color: 'bg-destructive/10 text-destructive border border-destructive/20' },
 }
 const CAMPAIGN_TYPES: Record<string, string> = {
   promotion: '促销优惠', event_invite: '赛事邀请', membership: '会籍推广',
@@ -114,7 +114,7 @@ export default function CRM() {
   const [drawerLoading, setDrawerLoading] = useState(false)
   const [tagDialogOpen, setTagDialogOpen] = useState(false)
   const [editingTag, setEditingTag] = useState<CrmTag | null>(null)
-  const [tagForm, setTagForm] = useState({ name: '', color: '#10b981', category: '通用' })
+  const [tagForm, setTagForm] = useState({ name: '', color: 'hsl(var(--success))', category: '通用' })
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [interactionDialogOpen, setInteractionDialogOpen] = useState(false)
   const [interactionForm, setInteractionForm] = useState({ playerId: '', playerName: '', type: 'call', direction: 'outbound', content: '', summary: '', followUpRequired: false })
@@ -166,7 +166,7 @@ export default function CRM() {
 
   const openTagDialog = (tag?: CrmTag) => {
     if (tag) { setEditingTag(tag); setTagForm({ name: tag.name, color: tag.color, category: tag.category }) }
-    else { setEditingTag(null); setTagForm({ name: '', color: '#10b981', category: '通用' }) }
+    else { setEditingTag(null); setTagForm({ name: '', color: 'hsl(var(--success))', category: '通用' }) }
     setTagDialogOpen(true)
   }
   const saveTag = async () => {
@@ -214,7 +214,7 @@ export default function CRM() {
 
   return (
     <div className="flex flex-col h-screen bg-secondary/50">
-      <div className="flex items-center gap-2 px-4 py-3 bg-white border-b shrink-0">
+      <div className="flex items-center gap-2 px-4 py-3 bg-card border-b shrink-0">
         <Users className="w-5 h-5 text-success" />
         <h1 className="text-lg font-bold">CRM 客户关系管理</h1>
         <div className="flex-1" />
@@ -222,7 +222,7 @@ export default function CRM() {
         <button onClick={runRFM} className="flex items-center gap-1 px-3 py-1.5 text-xs border rounded-lg hover:bg-secondary/50" title="重新计算全部客户 RFM 评分"><TrendingUp className="w-3.5 h-3.5 text-blue-500" />计算RFM</button>
       </div>
 
-      <div className="flex gap-1 px-4 pt-3 bg-white border-b shrink-0 overflow-x-auto">
+      <div className="flex gap-1 px-4 pt-3 bg-card border-b shrink-0 overflow-x-auto">
         {TABS.map(t => {
           const Icon = t.icon; const active = activeTab === t.key
           return <button key={t.key} onClick={() => setActiveTab(t.key)}
@@ -332,7 +332,7 @@ function OverviewTab({ customers, tags, loading, searchQ, setSearchQ, filterTag,
         <button onClick={() => openTagDialog()} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><Tag className="w-4 h-4" />标签管理</button>
       </div>
       {loading ? <div className="text-center py-20 text-muted-foreground">加载中...</div> : customers.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无客户数据</div> : (
-        <div className="bg-white rounded-xl border overflow-hidden">
+        <div className="bg-card rounded-xl border overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-secondary/50 text-muted-foreground"><tr><th className="text-left px-4 py-3 font-medium">客户</th><th className="text-left px-4 py-3 font-medium">等级</th><th className="text-left px-4 py-3 font-medium">标签</th><th className="text-right px-4 py-3 font-medium">总消费</th><th className="text-right px-4 py-3 font-medium">总轮次</th><th className="text-right px-4 py-3 font-medium">余额</th><th className="text-center px-4 py-3 font-medium">操作</th></tr></thead>
             <tbody className="divide-y">{customers.map((c: Customer) => (
@@ -368,7 +368,7 @@ function InteractionTab({ interactions, customers, onNew, onRefresh, onCreateFol
     </div>
     {interactions.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无互动记录</div> : <div className="space-y-3">{interactions.map((item: Interaction) => {
       const typeInfo = INTERACTION_TYPES[item.type] || INTERACTION_TYPES.note
-      return <div key={item._id} className="bg-white rounded-xl border p-4">
+      return <div key={item._id} className="bg-card rounded-xl border p-4">
         <div className="flex items-start justify-between"><div className="flex items-center gap-2"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeInfo.color}`}>{typeInfo.label}</span><span className="text-xs text-muted-foreground">{item.direction === 'inbound' ? '客户来访' : '主动联系'}</span><span className="font-medium text-sm text-foreground">{item.playerName}</span></div><span className="text-xs text-muted-foreground">{fmtTime(item.createTime)}</span></div>
         <p className="text-sm text-foreground mt-2">{item.content}</p>
         {item.summary && <p className="text-xs text-muted-foreground mt-1">摘要: {item.summary}</p>}
@@ -393,7 +393,7 @@ function FollowupTab({ followups, filter, setFilter, onNew, onRefresh, onUpdateS
     {followups.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无跟进任务</div> : <div className="space-y-3">{followups.map((item: Followup) => {
       const si = STATUS_MAP[item.status] || STATUS_MAP.pending; const pi = PRIORITY_MAP[item.priority] || PRIORITY_MAP.medium; const SI = si.icon
       const overdue = item.dueDate && item.status !== 'completed' && item.status !== 'cancelled' && new Date(item.dueDate) < new Date()
-      return <div key={item._id} className={`bg-white rounded-xl border p-4 ${overdue ? 'border-red-300' : ''}`}>
+      return <div key={item._id} className={`bg-card rounded-xl border p-4 ${overdue ? 'border-red-300' : ''}`}>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 flex-wrap"><SI className={`w-4 h-4 ${si.color.split(' ')[1]}`} /><span className="font-medium text-sm text-foreground">{item.title}</span><span className={`text-xs font-medium ${pi.color}`}>[{pi.label}]</span>{overdue && <span className="text-xs text-red-600 font-medium flex items-center gap-0.5"><AlertCircle className="w-3 h-3" />已逾期</span>}{item.autoType && <span className="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">自动</span>}</div>
           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${si.color}`}>{si.label}</span>
@@ -413,8 +413,8 @@ function FollowupTab({ followups, filter, setFilter, onNew, onRefresh, onUpdateS
 function SegmentTab({ segments, onNew, onRefresh, onDelete }: any) {
   return (<div className="space-y-4">
     <div className="flex items-center justify-between"><h2 className="text-base font-semibold text-foreground">客户分群</h2><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新建分群</button></div>
-    {segments.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无分群</div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{segments.map((seg: Segment) => <div key={seg._id} className="bg-white rounded-xl border p-4">
-      <div className="flex items-start justify-between"><div><h3 className="font-medium text-foreground">{seg.name}</h3><p className="text-xs text-muted-foreground mt-0.5">{seg.description || '无描述'}</p></div><span className={`px-2 py-0.5 rounded-full text-xs ${seg.type === 'auto' ? 'bg-blue-100 text-blue-700' : 'bg-secondary text-muted-foreground'}`}>{seg.type === 'auto' ? '自动' : '手动'}</span></div>
+    {segments.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无分群</div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{segments.map((seg: Segment) => <div key={seg._id} className="bg-card rounded-xl border p-4">
+      <div className="flex items-start justify-between"><div><h3 className="font-medium text-foreground">{seg.name}</h3><p className="text-xs text-muted-foreground mt-0.5">{seg.description || '无描述'}</p></div><span className={`px-2 py-0.5 rounded-full text-xs ${seg.type === 'auto' ? 'bg-info/10 text-info border border-info/20' : 'bg-secondary text-muted-foreground'}`}>{seg.type === 'auto' ? '自动' : '手动'}</span></div>
       <div className="mt-3"><span className="text-muted-foreground text-sm"><span className="font-semibold text-lg text-foreground">{seg.playerCount || 0}</span> 位客户</span></div>
       {seg.rules?.length > 0 && <div className="mt-2 space-y-1">{seg.rules.map((r: any, i: number) => <p key={i} className="text-xs text-muted-foreground">{SEGMENT_FIELDS.find(f => f.value === r.field)?.label || r.field} {SEGMENT_OPERATORS.find(o => o.value === r.operator)?.label || r.operator} {r.value}</p>)}</div>}
       <div className="flex items-center justify-between mt-3 pt-3 border-t"><span className="text-xs text-muted-foreground">{seg.lastRefreshedAt ? `刷新: ${fmtTime(seg.lastRefreshedAt)}` : '未刷新'}</span><div className="flex gap-2">{seg.type === 'auto' && <button onClick={() => onRefresh(seg._id)} className="text-xs text-blue-600 flex items-center gap-1"><RefreshCw className="w-3 h-3" />刷新</button>}<button onClick={() => onDelete(seg._id)} className="text-xs text-red-500"><Trash2 className="w-3 h-3" /></button></div></div>
@@ -433,7 +433,7 @@ function CampaignTab({ campaigns, segments, onNew, onLaunch, onDelete, onRefresh
     </div>
     {campaigns.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无营销活动</div> : <div className="space-y-4">{campaigns.map((c: Campaign) => {
       const si = CAMPAIGN_STATUS[c.status] || CAMPAIGN_STATUS.draft
-      return <div key={c._id} className="bg-white rounded-xl border p-5">
+      return <div key={c._id} className="bg-card rounded-xl border p-5">
         <div className="flex items-start justify-between">
           <div><h3 className="font-semibold text-foreground">{c.name}</h3><p className="text-xs text-muted-foreground mt-0.5">{c.description || CAMPAIGN_TYPES[c.type] || c.type}</p></div>
           <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${si.color}`}>{si.label}</span>
@@ -469,7 +469,7 @@ function InsightsTab({ data, onRefresh }: any) {
   const memberTotal = memberEntries.reduce((s, [, c]: any) => s + c, 0) || 1
 
   const RFM_COLORS: Record<string, string> = {
-    '重要价值客户': '#10b981', '重要发展客户': '#3b82f6', '重要保持客户': '#f59e0b',
+    '重要价值客户': 'hsl(var(--success))', '重要发展客户': 'hsl(var(--info))', '重要保持客户': 'hsl(var(--warning))',
     '重要挽留客户': '#ef4444', '一般价值客户': '#6366f1', '新客户': '#06b6d4', '低价值/流失客户': '#9ca3af'
   }
 
@@ -488,7 +488,7 @@ function InsightsTab({ data, onRefresh }: any) {
 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* RFM 分布 */}
-      <div className="bg-white rounded-xl border p-5">
+      <div className="bg-card rounded-xl border p-5">
         <h3 className="font-semibold text-foreground mb-4">RFM 客户分层</h3>
         {rfmEntries.length === 0 ? <p className="text-sm text-muted-foreground">请先点击顶部「计算RFM」按钮</p> :
           <div className="space-y-3">{rfmEntries.map(([level, count]: any) => (
@@ -500,11 +500,11 @@ function InsightsTab({ data, onRefresh }: any) {
       </div>
 
       {/* 会员等级分布 */}
-      <div className="bg-white rounded-xl border p-5">
+      <div className="bg-card rounded-xl border p-5">
         <h3 className="font-semibold text-foreground mb-4">会员等级分布</h3>
         <div className="space-y-3">{memberEntries.map(([level, count]: any) => {
           const lvl = parseInt(level); const name = LEVEL_NAMES[lvl] || `等级${level}`
-          const colors = ['#9ca3af', '#3b82f6', '#eab308', '#a855f7', '#10b981']
+          const colors = ['hsl(var(--muted-foreground))', 'hsl(var(--info))', 'hsl(var(--warning))', 'hsl(var(--chart-1))', 'hsl(var(--success))']
           return <div key={level}>
             <div className="flex justify-between text-sm mb-1"><span className="font-medium">{name}</span><span className="text-muted-foreground">{count} 人 ({((count / memberTotal) * 100).toFixed(0)}%)</span></div>
             <div className="h-2.5 bg-secondary rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${(count / memberTotal) * 100}%`, backgroundColor: colors[lvl] || '#6b7280' }} /></div>
@@ -514,7 +514,7 @@ function InsightsTab({ data, onRefresh }: any) {
     </div>
 
     {/* 热门标签 */}
-    {topTags.length > 0 && <div className="bg-white rounded-xl border p-5">
+    {topTags.length > 0 && <div className="bg-card rounded-xl border p-5">
       <h3 className="font-semibold text-foreground mb-4">热门标签 Top 10</h3>
       <div className="flex flex-wrap gap-3">{topTags.map((t: any) => <span key={t.name} className="px-3 py-1.5 bg-secondary/50 rounded-lg text-sm"><span className="font-medium">{t.name}</span> <span className="text-muted-foreground ml-1">{t.count}人</span></span>)}</div>
     </div>}
@@ -536,8 +536,8 @@ function Customer360Drawer({ data, loading, tags, onClose, onToggleTag }: any) {
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="flex-1 bg-black/30" onClick={onClose} />
-      <div className="w-[500px] bg-white shadow-2xl overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-5 py-4 flex items-center justify-between z-10">
+      <div className="w-[500px] bg-card shadow-2xl overflow-y-auto">
+        <div className="sticky top-0 bg-card border-b px-5 py-4 flex items-center justify-between z-10">
           <h2 className="font-bold text-lg">客户 360</h2>
           <button onClick={onClose} className="p-1 rounded hover:bg-secondary"><X className="w-5 h-5" /></button>
         </div>
@@ -620,7 +620,7 @@ function Customer360Drawer({ data, loading, tags, onClose, onToggleTag }: any) {
  * ═══════════════════════════════════════════════════════════ */
 function Dialog({ title, onClose, children, wide }: { title: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
-    <div className={`bg-white rounded-2xl shadow-2xl p-6 ${wide ? 'w-[560px]' : 'w-[420px]'} max-h-[90vh] overflow-y-auto`} onClick={e => e.stopPropagation()}>
+    <div className={`bg-card rounded-2xl shadow-2xl p-6 ${wide ? 'w-[560px]' : 'w-[420px]'} max-h-[90vh] overflow-y-auto`} onClick={e => e.stopPropagation()}>
       <div className="flex items-center justify-between mb-4"><h3 className="text-lg font-bold">{title}</h3><button onClick={onClose} className="p-1 rounded hover:bg-secondary"><X className="w-5 h-5" /></button></div>
       {children}
     </div>
@@ -628,7 +628,7 @@ function Dialog({ title, onClose, children, wide }: { title: string; onClose: ()
 }
 
 function KpiCard({ label, value, icon: Icon, color, sub }: { label: string; value: any; icon: any; color: string; sub?: string }) {
-  return <div className="bg-white rounded-xl border p-4">
+  return <div className="bg-card rounded-xl border p-4">
     <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${color}`}><Icon className="w-4 h-4" /></div>
     <p className="text-xs text-muted-foreground">{label}</p>
     <p className="text-xl font-bold text-foreground">{value}</p>
