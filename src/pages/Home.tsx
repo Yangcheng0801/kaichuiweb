@@ -262,8 +262,8 @@ export default function Home() {
 
       {/* 主内容区 */}
       <div className={`flex-1 flex flex-col min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ml-0 ${sidebarOpen ? 'lg:ml-[230px]' : 'lg:ml-[8px]'}`}>
-        <div className="min-h-screen pt-0 pb-6 px-4 sm:px-5 lg:px-5">
-          <div className="flex flex-col gap-6">
+        <div className="min-h-screen pt-0 pb-0">
+          <div className="flex flex-col gap-0">
             <div className="flex-1 flex flex-col overflow-hidden rounded-[32px] bg-card shadow-[0_25px_80px_rgba(15,23,42,0.12)] border border-white/80">
 
               {/* 顶部导航 */}
