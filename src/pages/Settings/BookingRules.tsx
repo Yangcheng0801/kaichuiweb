@@ -40,7 +40,7 @@ function NumberInput({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
       <div className="flex items-center gap-2">
         <input
           type="number"
@@ -52,11 +52,11 @@ function NumberInput({
             const v = parseFloat(e.target.value)
             if (!isNaN(v)) onChange(v)
           }}
-          className="w-28 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+          className="w-28 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
         />
-        {unit && <span className="text-sm text-gray-500">{unit}</span>}
+        {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
       </div>
-      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
     </div>
   )
 }
@@ -65,12 +65,12 @@ function NumberInput({
 function TimeInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
       <input
         type="time"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+        className="w-32 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
       />
     </div>
   )
@@ -86,13 +86,13 @@ function Toggle({ label, checked, onChange, description }: {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-colors ${checked ? 'bg-emerald-500' : 'bg-gray-200'}`}
+        className={`relative mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-colors ${checked ? 'bg-success/100' : 'bg-secondary'}`}
       >
         <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-4' : ''}`} />
       </button>
       <div>
-        <div className="text-sm font-medium text-gray-700">{label}</div>
-        {description && <div className="text-xs text-gray-400 mt-0.5">{description}</div>}
+        <div className="text-sm font-medium text-foreground">{label}</div>
+        {description && <div className="text-xs text-muted-foreground mt-0.5">{description}</div>}
       </div>
     </div>
   )
@@ -143,14 +143,14 @@ export default function BookingRules() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20 text-gray-400 text-sm">加载中...</div>
+    return <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">加载中...</div>
   }
 
   return (
     <div className="max-w-2xl space-y-8">
       {/* 基础时间设置 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">基础时间设置</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">基础时间设置</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <TimeInput label="开放时间" value={form.openTime} onChange={v => setForm(p => ({ ...p, openTime: v }))} />
           <TimeInput label="关闭时间" value={form.closeTime} onChange={v => setForm(p => ({ ...p, closeTime: v }))} />
@@ -173,7 +173,7 @@ export default function BookingRules() {
 
       {/* 提前预订天数 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">提前预订天数</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">提前预订天数</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <NumberInput
             label="会员" value={form.advanceBookingDays.member} min={1} unit="天"
@@ -192,7 +192,7 @@ export default function BookingRules() {
 
       {/* 取消政策 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">取消政策</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">取消政策</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <NumberInput
             label="免费取消截止" value={form.cancellationPolicy.freeBeforeHours} min={0} unit="小时前"
@@ -214,7 +214,7 @@ export default function BookingRules() {
 
       {/* 嘉宾政策 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">嘉宾政策</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">嘉宾政策</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <NumberInput
             label="每会员最多携嘉宾数" value={form.guestPolicy.maxGuestsPerMember} min={0} max={10} unit="人"
@@ -236,7 +236,7 @@ export default function BookingRules() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2.5 bg-success text-white rounded-lg text-sm font-medium hover:bg-success/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? '保存中...' : '保存设置'}
         </button>

@@ -23,10 +23,11 @@ import { selectUserInfo, selectIsLoggedIn, logout, fetchUserInfo } from '@/store
 import type { AppDispatch } from '@/store'
 import { api } from '@/utils/api'
 import NotificationCenter from '@/components/NotificationCenter'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 /* ========== 侧边栏导航项 ========== */
 const navItems = [
-  { key: 'bookings',        label: '预订管理', path: '/bookings',        icon: CalendarDays, color: 'bg-emerald-50 text-emerald-600' },
+  { key: 'bookings',        label: '预订管理', path: '/bookings',        icon: CalendarDays, color: 'bg-success/10 text-success' },
   { key: 'starter',         label: '出发台',   path: '/starter',         icon: Flag,         color: 'bg-teal-50 text-teal-600' },
   { key: 'folios',          label: '账单管理', path: '/folios',          icon: Receipt,      color: 'bg-orange-50 text-orange-600' },
   { key: 'resources',       label: '资源管理', path: '/resources',       icon: Layers,       color: 'bg-blue-50 text-blue-600' },
@@ -41,20 +42,20 @@ const navItems = [
   { key: 'staff',           label: '排班考勤', path: '/staff',           icon: ClipboardCheck, color: 'bg-violet-50 text-violet-600' },
   { key: 'reports',         label: '报表分析', path: '/reports',         icon: BarChart3,    color: 'bg-cyan-50 text-cyan-600' },
   { key: 'daily-close',     label: '日结/夜审', path: '/daily-close',     icon: Moon,         color: 'bg-indigo-50 text-indigo-600' },
-  { key: 'settings',        label: '系统设置', path: '/settings',        icon: Settings,     color: 'bg-gray-100 text-gray-600' },
+  { key: 'settings',        label: '系统设置', path: '/settings',        icon: Settings,     color: 'bg-secondary text-muted-foreground' },
 ]
 
 /* ========== 预订状态中文映射 ========== */
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   pending:    { label: '待确认', cls: 'bg-yellow-100 text-yellow-700' },
   confirmed:  { label: '已确认', cls: 'bg-blue-100 text-blue-700' },
-  checked_in: { label: '已签到', cls: 'bg-emerald-100 text-emerald-700' },
+  checked_in: { label: '已签到', cls: 'bg-success/10 text-success' },
   dispatched: { label: '已出发', cls: 'bg-teal-100 text-teal-700' },
   front_9:    { label: '前9洞',  cls: 'bg-green-100 text-green-700' },
   turning:    { label: '转场中', cls: 'bg-amber-100 text-amber-700' },
   back_9:     { label: '后9洞',  cls: 'bg-indigo-100 text-indigo-700' },
-  returned:   { label: '已回场', cls: 'bg-gray-100 text-gray-600' },
-  completed:  { label: '已完赛', cls: 'bg-gray-100 text-gray-500' },
+  returned:   { label: '已回场', cls: 'bg-secondary text-muted-foreground' },
+  completed:  { label: '已完赛', cls: 'bg-secondary text-muted-foreground' },
   settled:    { label: '已结账', cls: 'bg-green-100 text-green-600' },
   cancelled:  { label: '已取消', cls: 'bg-red-100 text-red-600' },
   no_show:    { label: '未到场', cls: 'bg-orange-100 text-orange-600' },
@@ -148,20 +149,20 @@ export default function Home() {
   /* ---------- 侧边栏内容 ---------- */
   const sidebarContent = (
     <>
-      <div className="h-[70px] flex items-center border-b border-gray-100 px-5">
+      <div className="h-[70px] flex items-center border-b border-border px-5">
         <div>
-          <h3 className="m-0 text-lg font-semibold text-emerald-600 tracking-wide">开锤后台</h3>
-          <p className="m-0 text-[12px] text-gray-400">KAICHUI ADMIN</p>
+          <h3 className="m-0 text-lg font-semibold text-foreground tracking-wide">开锤后台</h3>
+          <p className="m-0 text-[12px] text-muted-foreground">KAICHUI ADMIN</p>
         </div>
       </div>
       <nav className="flex-1 py-4 px-4 space-y-1">
         {/* 首页（当前页） */}
         <button
           onClick={() => {}}
-          className="relative w-full flex items-center gap-3 px-4 py-3 text-sm text-left bg-gray-50 text-gray-900 shadow-inner shadow-gray-100 font-semibold rounded-xl"
+          className="relative w-full flex items-center gap-3 px-4 py-3 text-sm text-left bg-secondary/50 text-foreground shadow-inner shadow-border font-semibold rounded-xl"
         >
-          <span className="absolute left-2 top-1/2 h-7 w-1 rounded-full bg-emerald-500 -translate-y-1/2" />
-          <span className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 p-1.5">
+          <span className="absolute left-2 top-1/2 h-7 w-1 rounded-full bg-foreground -translate-y-1/2" />
+          <span className="flex items-center justify-center rounded-full bg-primary/10 text-primary p-1.5">
             <BarChart3 size={16} />
           </span>
           <span>管理驾驶舱</span>
@@ -170,7 +171,7 @@ export default function Home() {
           <button
             key={item.key}
             onClick={() => { navigate(item.path); closeDrawer() }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all rounded-xl"
           >
             <span className={`flex items-center justify-center rounded-full p-1.5 ${item.color}`}>
               <item.icon size={16} />
@@ -188,25 +189,25 @@ export default function Home() {
   }) => {
     const pct = total > 0 ? Math.round((used / total) * 100) : 0
     return (
-      <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
+      <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Icon size={18} className={color} />
-            <span className="text-sm font-medium text-gray-700">{label}</span>
+            <span className="text-sm font-medium text-foreground">{label}</span>
           </div>
-          <span className="text-xs text-gray-400">{used}/{total}</span>
+          <span className="text-xs text-muted-foreground">{used}/{total}</span>
         </div>
-        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-700 ${
-              pct > 80 ? 'bg-red-400' : pct > 50 ? 'bg-amber-400' : 'bg-emerald-400'
+              pct > 80 ? 'bg-red-400' : pct > 50 ? 'bg-amber-400' : 'bg-success'
             }`}
             style={{ width: `${pct}%` }}
           />
         </div>
-        <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
+        <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>使用率 {pct}%</span>
-          <span className="text-emerald-600 font-medium">{total - used} 可用</span>
+          <span className="text-success font-medium">{total - used} 可用</span>
         </div>
       </div>
     )
@@ -214,7 +215,7 @@ export default function Home() {
 
   /* ---------- 骨架屏 ---------- */
   const Skeleton = ({ className = '' }: { className?: string }) => (
-    <div className={`animate-pulse bg-gray-100 rounded-2xl ${className}`} />
+    <div className={`animate-pulse bg-secondary rounded-2xl ${className}`} />
   )
 
   /* ========== 渲染 ========== */
@@ -237,19 +238,19 @@ export default function Home() {
         <>
           <div className="lg:hidden fixed inset-0 z-30 bg-black/40" onClick={closeDrawer} />
           <aside className="lg:hidden fixed left-0 top-0 z-40 h-full w-[260px] max-w-[85vw] bg-white rounded-r-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] flex flex-col animate-slide-in-left">
-            <div className="h-[70px] flex items-center justify-between border-b border-gray-100 px-5">
-              <h3 className="m-0 text-lg font-semibold text-emerald-600">开锤后台</h3>
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500" onClick={closeDrawer}><X size={20} /></button>
+            <div className="h-[70px] flex items-center justify-between border-b border-border px-5">
+              <h3 className="m-0 text-lg font-semibold text-foreground">开锤后台</h3>
+              <button className="p-2 rounded-full hover:bg-secondary text-muted-foreground" onClick={closeDrawer}><X size={20} /></button>
             </div>
             <nav className="flex-1 py-4 px-4 space-y-1 overflow-auto">
-              <button className="relative w-full flex items-center gap-3 px-4 py-3 text-sm text-left bg-gray-50 text-gray-900 font-semibold rounded-xl">
-                <span className="absolute left-2 top-1/2 h-7 w-1 rounded-full bg-emerald-500 -translate-y-1/2" />
-                <span className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 p-1.5"><BarChart3 size={16} /></span>
+              <button className="relative w-full flex items-center gap-3 px-4 py-3 text-sm text-left bg-secondary/50 text-foreground font-semibold rounded-xl">
+                <span className="absolute left-2 top-1/2 h-7 w-1 rounded-full bg-foreground -translate-y-1/2" />
+                <span className="flex items-center justify-center rounded-full bg-primary/10 text-primary p-1.5"><BarChart3 size={16} /></span>
                 <span>管理驾驶舱</span>
               </button>
               {navItems.map(item => (
                 <button key={item.key} onClick={() => { navigate(item.path); closeDrawer() }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all rounded-xl">
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all rounded-xl">
                   <span className={`flex items-center justify-center rounded-full p-1.5 ${item.color}`}><item.icon size={16} /></span>
                   <span>{item.label}</span>
                 </button>
@@ -266,30 +267,31 @@ export default function Home() {
             <div className="flex-1 flex flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.12)] border border-white/80">
 
               {/* 顶部导航 */}
-              <header className="border-b border-gray-100 flex items-center justify-between px-6 py-4 sm:px-8 sm:h-[70px]">
+              <header className="border-b border-border flex items-center justify-between px-6 py-4 sm:px-8 sm:h-[70px]">
                 <div className="flex items-center gap-3">
-                  <button className="lg:hidden p-2 rounded-full hover:bg-gray-100 text-gray-600" onClick={() => setDrawerOpen(true)}>
+                  <button className="lg:hidden p-2 rounded-full hover:bg-secondary text-muted-foreground" onClick={() => setDrawerOpen(true)}>
                     <Menu size={22} />
                   </button>
-                  <nav className="flex items-center gap-1 text-sm text-gray-500">
+                  <nav className="flex items-center gap-1 text-sm text-muted-foreground">
                     <span>首页</span>
                     <span className="mx-1">/</span>
-                    <span className="text-gray-900 font-medium">管理驾驶舱</span>
+                    <span className="text-foreground font-medium">管理驾驶舱</span>
                   </nav>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={fetchDashboard}
                     disabled={loading}
-                    className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                    className="p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-muted-foreground transition-colors disabled:opacity-50"
                     title="刷新数据"
                   >
                     <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
                   </button>
                   <NotificationCenter recipientRole="admin" pollInterval={30000} />
+                  <ThemeToggle />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 cursor-pointer bg-gray-50 px-3 py-2 rounded-full shadow-inner shadow-white/40">
+                      <button className="flex items-center gap-2 text-sm text-foreground hover:text-foreground cursor-pointer bg-secondary/50 px-3 py-2 rounded-full shadow-inner shadow-white/40">
                         <UserCircle size={18} />
                         <span>{userInfo?.nickname || userInfo?.openid || '用户'}</span>
                         <ChevronDown size={14} />
@@ -319,7 +321,7 @@ export default function Home() {
               </header>
 
               {/* 仪表盘主体 */}
-              <main className="flex-1 overflow-auto p-6 sm:p-8 bg-gradient-to-b from-white to-gray-50/30 space-y-6">
+              <main className="flex-1 overflow-auto p-6 sm:p-8 bg-gradient-to-b from-white to-secondary/50/30 space-y-6">
 
                 {/* ──── 第一行：核心 KPI（4 大卡） ──── */}
                 {loading && !data ? (
@@ -329,17 +331,17 @@ export default function Home() {
                 ) : (
                   <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
                     {/* 今日预订 */}
-                    <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-200/50">
+                    <div className="bg-gradient-to-br from-success to-success rounded-2xl p-5 text-white shadow-lg shadow-success/20">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-3xl font-bold tracking-tight">{kpi?.todayBookings ?? 0}</div>
-                          <div className="text-emerald-100 text-sm mt-1">今日预订</div>
+                          <div className="text-white/70 text-sm mt-1">今日预订</div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
                           <CalendarDays size={24} />
                         </div>
                       </div>
-                      <div className="mt-3 text-xs text-emerald-200 flex items-center gap-3">
+                      <div className="mt-3 text-xs text-white/60 flex items-center gap-3">
                         <span>{kpi?.todayPlayers ?? 0} 人</span>
                         <span>·</span>
                         <span>未到 {kpi?.notArrivedCount ?? 0}</span>
@@ -349,17 +351,17 @@ export default function Home() {
                     </div>
 
                     {/* 场上 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
+                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{kpi?.onCourseCount ?? 0}<span className="text-lg font-normal text-gray-400 ml-1">组</span></div>
-                          <div className="text-gray-500 text-sm mt-1">场上进行中</div>
+                          <div className="text-3xl font-bold text-foreground tracking-tight">{kpi?.onCourseCount ?? 0}<span className="text-lg font-normal text-muted-foreground ml-1">组</span></div>
+                          <div className="text-muted-foreground text-sm mt-1">场上进行中</div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500">
                           <Flag size={24} />
                         </div>
                       </div>
-                      <div className="mt-3 text-xs text-gray-400 flex items-center gap-1">
+                      <div className="mt-3 text-xs text-muted-foreground flex items-center gap-1">
                         <Users size={12} className="text-teal-500" />
                         <span>{kpi?.onCoursePlayers ?? 0} 人在场</span>
                         <span className="ml-2">完赛 {kpi?.todayCompleted ?? 0}</span>
@@ -367,21 +369,21 @@ export default function Home() {
                     </div>
 
                     {/* 今日营收 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
+                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-3xl font-bold text-gray-900 tracking-tight">
-                            <span className="text-lg font-normal text-gray-400 mr-0.5">¥</span>
+                          <div className="text-3xl font-bold text-foreground tracking-tight">
+                            <span className="text-lg font-normal text-muted-foreground mr-0.5">¥</span>
                             {((kpi?.todayRevenue ?? 0) / 1).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                           </div>
-                          <div className="text-gray-500 text-sm mt-1">今日营收</div>
+                          <div className="text-muted-foreground text-sm mt-1">今日营收</div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
                           <DollarSign size={24} />
                         </div>
                       </div>
-                      <div className="mt-3 text-xs text-gray-400 flex items-center gap-3">
-                        <span className="text-emerald-600">已收 ¥{(kpi?.todayPaid ?? 0).toLocaleString()}</span>
+                      <div className="mt-3 text-xs text-muted-foreground flex items-center gap-3">
+                        <span className="text-success">已收 ¥{(kpi?.todayPaid ?? 0).toLocaleString()}</span>
                         {(kpi?.todayPendingFee ?? 0) > 0 && (
                           <span className="text-amber-600">待收 ¥{(kpi?.todayPendingFee ?? 0).toLocaleString()}</span>
                         )}
@@ -389,22 +391,22 @@ export default function Home() {
                     </div>
 
                     {/* 未结账单 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100">
+                    <div className="bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-3xl font-bold text-gray-900 tracking-tight">{data?.folios?.openCount ?? 0}</div>
-                          <div className="text-gray-500 text-sm mt-1">未结账单</div>
+                          <div className="text-3xl font-bold text-foreground tracking-tight">{data?.folios?.openCount ?? 0}</div>
+                          <div className="text-muted-foreground text-sm mt-1">未结账单</div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
                           <Receipt size={24} />
                         </div>
                       </div>
-                      <div className="mt-3 text-xs text-gray-400 flex items-center gap-3">
+                      <div className="mt-3 text-xs text-muted-foreground flex items-center gap-3">
                         {(data?.folios?.openBalance ?? 0) > 0 && (
                           <span className="text-orange-600">¥{(data?.folios?.openBalance ?? 0).toLocaleString()}</span>
                         )}
                         <button onClick={() => navigate('/folios')}
-                          className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1 ml-auto">
+                          className="text-success hover:text-success/80 font-medium flex items-center gap-1 ml-auto">
                           查看 <ArrowRight size={12} />
                         </button>
                       </div>
@@ -415,9 +417,9 @@ export default function Home() {
                 {/* ──── 第二行：预订漏斗 + 资源概况 ──── */}
                 <div className="grid gap-6 grid-cols-1 xl:grid-cols-5">
                   {/* 预订状态漏斗 */}
-                  <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100 p-5">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                      <CalendarCheck size={16} className="text-gray-400" />
+                  <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border p-5">
+                    <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                      <CalendarCheck size={16} className="text-muted-foreground" />
                       今日预订状态
                     </h3>
                     {(() => {
@@ -425,13 +427,13 @@ export default function Home() {
                       const funnelItems = [
                         { label: '待确认', count: sc.pending || 0, color: 'bg-amber-400' },
                         { label: '已确认', count: sc.confirmed || 0, color: 'bg-blue-400' },
-                        { label: '已签到', count: sc.checked_in || 0, color: 'bg-emerald-400' },
+                        { label: '已签到', count: sc.checked_in || 0, color: 'bg-success' },
                         { label: '已出发', count: sc.dispatched || 0, color: 'bg-teal-400' },
                         { label: '前9洞', count: sc.front_9 || 0, color: 'bg-green-500' },
                         { label: '转场中', count: sc.turning || 0, color: 'bg-amber-500' },
                         { label: '后9洞', count: sc.back_9 || 0, color: 'bg-indigo-500' },
-                        { label: '已回场', count: sc.returned || 0, color: 'bg-gray-400' },
-                        { label: '已完赛', count: sc.completed || 0, color: 'bg-gray-300' },
+                        { label: '已回场', count: sc.returned || 0, color: 'bg-muted' },
+                        { label: '已完赛', count: sc.completed || 0, color: 'bg-secondary' },
                         { label: '已结账', count: sc.settled || 0, color: 'bg-green-400' },
                         { label: '已取消', count: sc.cancelled || 0, color: 'bg-red-300' },
                       ]
@@ -440,12 +442,12 @@ export default function Home() {
                         <div className="space-y-2">
                           {funnelItems.map(f => (
                             <div key={f.label} className="flex items-center gap-2">
-                              <span className="text-xs text-gray-500 w-12 text-right flex-shrink-0">{f.label}</span>
-                              <div className="flex-1 h-5 bg-gray-50 rounded-full overflow-hidden">
+                              <span className="text-xs text-muted-foreground w-12 text-right flex-shrink-0">{f.label}</span>
+                              <div className="flex-1 h-5 bg-secondary/50 rounded-full overflow-hidden">
                                 <div className={`h-full rounded-full ${f.color} transition-all duration-700`}
                                   style={{ width: `${Math.max((f.count / maxCount) * 100, f.count > 0 ? 8 : 0)}%` }} />
                               </div>
-                              <span className="text-xs font-bold text-gray-700 w-6 text-right">{f.count}</span>
+                              <span className="text-xs font-bold text-foreground w-6 text-right">{f.count}</span>
                             </div>
                           ))}
                         </div>
@@ -455,8 +457,8 @@ export default function Home() {
 
                   {/* 资源使用概况 */}
                   <div className="xl:col-span-3">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                      <Layers size={16} className="text-gray-400" />
+                    <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                      <Layers size={16} className="text-muted-foreground" />
                       资源使用概况
                     </h3>
                     {loading && !data ? (
@@ -468,7 +470,7 @@ export default function Home() {
                         <ResourceBar label="球车" icon={Car}         used={res?.carts?.inUse ?? 0}     total={res?.carts?.total ?? 0}    color="text-amber-500" />
                         <ResourceBar label="球童" icon={Users}       used={res?.caddies?.busy ?? 0}    total={res?.caddies?.total ?? 0}  color="text-purple-500" />
                         <ResourceBar label="更衣柜" icon={Armchair}  used={res?.lockers?.occupied ?? 0} total={res?.lockers?.total ?? 0}  color="text-blue-500" />
-                        <ResourceBar label="客房" icon={BedDouble}   used={res?.rooms?.occupied ?? 0}   total={res?.rooms?.total ?? 0}    color="text-emerald-500" />
+                        <ResourceBar label="客房" icon={BedDouble}   used={res?.rooms?.occupied ?? 0}   total={res?.rooms?.total ?? 0}    color="text-success" />
                         <ResourceBar label="消费卡" icon={CreditCard} used={res?.tempCards?.inUse ?? 0}  total={res?.tempCards?.total ?? 0} color="text-rose-500" />
                       </div>
                     )}
@@ -478,10 +480,10 @@ export default function Home() {
                 {/* ──── 第三行：近期预订 + 快捷入口 ──── */}
                 <div className="grid gap-6 grid-cols-1 xl:grid-cols-3">
                   {/* 近期预订列表 */}
-                  <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                      <h4 className="text-sm font-semibold text-gray-700">近期预订动态</h4>
-                      <button onClick={() => navigate('/bookings')} className="text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
+                  <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-foreground">近期预订动态</h4>
+                      <button onClick={() => navigate('/bookings')} className="text-xs text-success hover:text-success/80 font-medium flex items-center gap-1">
                         查看全部 <ArrowRight size={12} />
                       </button>
                     </div>
@@ -490,27 +492,27 @@ export default function Home() {
                         {[1,2,3,4].map(i => <Skeleton key={i} className="h-12" />)}
                       </div>
                     ) : recent.length === 0 ? (
-                      <div className="p-12 text-center text-gray-400 text-sm">暂无预订数据</div>
+                      <div className="p-12 text-center text-muted-foreground text-sm">暂无预订数据</div>
                     ) : (
-                      <div className="divide-y divide-gray-50">
+                      <div className="divide-y divide-border/50">
                         {recent.map(b => {
-                          const st = STATUS_MAP[b.status] || { label: b.status, cls: 'bg-gray-100 text-gray-600' }
+                          const st = STATUS_MAP[b.status] || { label: b.status, cls: 'bg-secondary text-muted-foreground' }
                           return (
-                            <div key={b._id} className="px-6 py-3.5 flex items-center gap-4 hover:bg-gray-50/50 transition-colors">
+                            <div key={b._id} className="px-6 py-3.5 flex items-center gap-4 hover:bg-secondary/50/50 transition-colors">
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium text-gray-900 truncate">{b.playerName || '未知球员'}</span>
+                                  <span className="text-sm font-medium text-foreground truncate">{b.playerName || '未知球员'}</span>
                                   <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${st.cls}`}>{st.label}</span>
                                 </div>
-                                <div className="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                                <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
                                   <span>{b.date}</span>
                                   <span>{b.teeTime}</span>
                                   {b.courseName && <span>· {b.courseName}</span>}
-                                  {b.orderNo && <span className="text-gray-300">#{b.orderNo}</span>}
+                                  {b.orderNo && <span className="text-muted-foreground">#{b.orderNo}</span>}
                                 </div>
                               </div>
                               {b.totalFee > 0 && (
-                                <span className="text-sm font-medium text-gray-700 whitespace-nowrap">¥{b.totalFee.toLocaleString()}</span>
+                                <span className="text-sm font-medium text-foreground whitespace-nowrap">¥{b.totalFee.toLocaleString()}</span>
                               )}
                             </div>
                           )
@@ -520,39 +522,39 @@ export default function Home() {
                   </div>
 
                   {/* 快捷入口 */}
-                  <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-gray-100 p-6">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-4">快捷操作</h4>
+                  <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-border p-6">
+                    <h4 className="text-sm font-semibold text-foreground mb-4">快捷操作</h4>
                     <div className="grid grid-cols-3 gap-2">
                       {navItems.slice(0, 9).map(item => (
                         <button key={item.key} onClick={() => navigate(item.path)}
-                          className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                          className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-secondary/50 transition-colors group">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
                             <item.icon size={18} />
                           </div>
-                          <span className="text-[11px] text-gray-600 font-medium">{item.label}</span>
+                          <span className="text-[11px] text-muted-foreground font-medium">{item.label}</span>
                         </button>
                       ))}
                     </div>
 
                     {/* Folio 速览 */}
-                    <div className="mt-5 pt-4 border-t border-gray-100">
-                      <h5 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">账务速览</h5>
+                    <div className="mt-5 pt-4 border-t border-border">
+                      <h5 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">账务速览</h5>
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-center justify-between text-gray-600">
+                        <div className="flex items-center justify-between text-muted-foreground">
                           <span>开放 Folio</span>
-                          <span className="font-medium text-gray-900">{data?.folios?.openCount ?? 0} 张</span>
+                          <span className="font-medium text-foreground">{data?.folios?.openCount ?? 0} 张</span>
                         </div>
-                        <div className="flex items-center justify-between text-gray-600">
+                        <div className="flex items-center justify-between text-muted-foreground">
                           <span>未结余额</span>
                           <span className="font-medium text-orange-600">¥{(data?.folios?.openBalance ?? 0).toLocaleString()}</span>
                         </div>
-                        <div className="flex items-center justify-between text-gray-600">
+                        <div className="flex items-center justify-between text-muted-foreground">
                           <span>今日应收</span>
-                          <span className="font-medium text-gray-900">¥{(kpi?.todayRevenue ?? 0).toLocaleString()}</span>
+                          <span className="font-medium text-foreground">¥{(kpi?.todayRevenue ?? 0).toLocaleString()}</span>
                         </div>
-                        <div className="flex items-center justify-between text-gray-600">
+                        <div className="flex items-center justify-between text-muted-foreground">
                           <span>今日已收</span>
-                          <span className="font-medium text-emerald-600">¥{(kpi?.todayPaid ?? 0).toLocaleString()}</span>
+                          <span className="font-medium text-success">¥{(kpi?.todayPaid ?? 0).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>

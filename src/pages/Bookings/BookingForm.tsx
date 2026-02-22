@@ -178,19 +178,19 @@ function CaddieSelectDialog({ open, onClose, onSelect, date, teeTime }: CaddieSe
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[70vh] flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h3 className="font-semibold text-gray-800">选择球童（点号）</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <h3 className="font-semibold text-foreground">选择球童（点号）</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-muted-foreground"><X size={18} /></button>
         </div>
         <div className="p-3 border-b">
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="球童号 / 姓名"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+            className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
         <div className="flex-1 overflow-y-auto p-3 space-y-1">
           {loading ? (
-            <div className="text-center py-8 text-gray-400 text-sm">加载中...</div>
+            <div className="text-center py-8 text-muted-foreground text-sm">加载中...</div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-gray-400 text-sm">暂无球童</div>
+            <div className="text-center py-8 text-muted-foreground text-sm">暂无球童</div>
           ) : (
             filtered.map(c => {
               const avail = availabilityMap[c._id]
@@ -201,17 +201,17 @@ function CaddieSelectDialog({ open, onClose, onSelect, date, teeTime }: CaddieSe
                   disabled={!!checking || !available}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                     available && !checking
-                      ? 'hover:bg-emerald-50 cursor-pointer'
-                      : 'opacity-60 cursor-not-allowed bg-gray-50'
+                      ? 'hover:bg-success/10 cursor-pointer'
+                      : 'opacity-60 cursor-not-allowed bg-secondary/50'
                   }`}>
                   <div className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center flex-shrink-0 ${
-                    available ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'
+                    available ? 'bg-success/10 text-success' : 'bg-secondary text-muted-foreground'
                   }`}>
                     {(c.caddyNo || c.no)?.toString().slice(-2) || '?'}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium text-gray-800">{c.name || '未命名'}</div>
-                    <div className="text-xs text-gray-500">{c.caddyNo || c.no}号 · {c.level === 'gold' ? '金牌' : c.level === 'silver' ? '特级' : '普通'}</div>
+                    <div className="text-sm font-medium text-foreground">{c.name || '未命名'}</div>
+                    <div className="text-xs text-muted-foreground">{c.caddyNo || c.no}号 · {c.level === 'gold' ? '金牌' : c.level === 'silver' ? '特级' : '普通'}</div>
                     {!available && reason && (
                       <div className="text-[11px] text-amber-600 mt-0.5">{reason}</div>
                     )}
@@ -307,27 +307,27 @@ function PlayerSearchDropdown({ value, onChange, onSelect, placeholder }: Player
       <div className="relative">
         <input type="text" value={value} onChange={e => handleInput(e.target.value)} onFocus={() => results.length > 0 && setOpen(true)}
           placeholder={placeholder || '姓名 / 手机 / 球员号'}
-          className="w-full px-2.5 py-2 pr-7 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white" />
-        {searching && <Search size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 animate-pulse" />}
+          className="w-full px-2.5 py-2 pr-7 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white" />
+        {searching && <Search size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground animate-pulse" />}
       </div>
       {open && results.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-border rounded-xl shadow-lg overflow-hidden">
           {results.map(p => (
-            <button key={p._id} type="button" className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-emerald-50 text-left transition-colors"
+            <button key={p._id} type="button" className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-success/10 text-left transition-colors"
               onMouseDown={e => { e.preventDefault(); onSelect(p); setOpen(false) }}>
-              <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center flex-shrink-0">{p.name?.[0]}</div>
+              <div className="w-7 h-7 rounded-full bg-success/10 text-success text-xs font-bold flex items-center justify-center flex-shrink-0">{p.name?.[0]}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-medium text-gray-800">{p.name}</span>
+                  <span className="text-sm font-medium text-foreground">{p.name}</span>
                   {p.profile?.memberLevel && <span className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 rounded-full">{MEMBER_LEVEL_LABEL[p.profile.memberLevel] || p.profile.memberLevel}</span>}
                 </div>
-                <div className="text-xs text-gray-400 flex items-center gap-2 mt-0.5">
+                <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
                   <span className="font-mono">#{p.playerNo}</span>
                   {p.phoneNumber && <span>{p.phoneNumber}</span>}
-                  {(p.profile?.account?.balance ?? 0) > 0 && <span className="text-emerald-600">余额¥{p.profile!.account.balance}</span>}
+                  {(p.profile?.account?.balance ?? 0) > 0 && <span className="text-success">余额¥{p.profile!.account.balance}</span>}
                 </div>
               </div>
-              <Check size={14} className="text-emerald-400 flex-shrink-0" />
+              <Check size={14} className="text-success flex-shrink-0" />
             </button>
           ))}
         </div>
@@ -582,41 +582,41 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
 
   // ── 费用行渲染 ──
   const feeFields = [
-    { key: 'greenFee',     label: '果岭费',   color: 'text-emerald-600' },
+    { key: 'greenFee',     label: '果岭费',   color: 'text-success' },
     { key: 'caddyFee',     label: '球童费',   color: 'text-blue-600' },
     { key: 'caddyDesignationFee', label: '点号费', color: 'text-amber-600' },
     { key: 'cartFee',      label: '球车费',   color: 'text-indigo-600' },
-    { key: 'insuranceFee', label: '保险费',   color: 'text-gray-600' },
+    { key: 'insuranceFee', label: '保险费',   color: 'text-muted-foreground' },
     { key: 'roomFee',      label: '客房费',   color: 'text-purple-600' },
-    { key: 'otherFee',     label: '其他费用', color: 'text-gray-500' },
+    { key: 'otherFee',     label: '其他费用', color: 'text-muted-foreground' },
   ]
   const feeItems = feeFields.filter(f => (form as any)[f.key] > 0)
 
   const priceSourceLabel = form.priceSource === 'auto' ? '系统定价' : form.priceSource === 'package' ? '套餐价' : form.priceSource === 'addOn' ? '加打价' : form.priceSource === 'reduced' ? '减打价' : '手动'
-  const priceSourceStyle = form.priceSource === 'auto' ? 'bg-emerald-100 text-emerald-700' : form.priceSource === 'package' ? 'bg-purple-100 text-purple-700' : form.priceSource === 'addOn' ? 'bg-blue-100 text-blue-700' : form.priceSource === 'reduced' ? 'bg-amber-100 text-amber-700' : 'bg-amber-100 text-amber-700'
+  const priceSourceStyle = form.priceSource === 'auto' ? 'bg-success/10 text-success' : form.priceSource === 'package' ? 'bg-purple-100 text-purple-700' : form.priceSource === 'addOn' ? 'bg-blue-100 text-blue-700' : form.priceSource === 'reduced' ? 'bg-amber-100 text-amber-700' : 'bg-amber-100 text-amber-700'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-6">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
 
         {/* 标题栏 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
-            <h2 className="font-semibold text-gray-900 text-lg">新建预订</h2>
+            <h2 className="font-semibold text-foreground text-lg">新建预订</h2>
             {pricingResult && pricingResult.success && (
               <div className="flex items-center gap-1.5">
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${pricingResult.dayType === 'holiday' ? 'bg-red-100 text-red-700' : pricingResult.dayType === 'weekend' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${pricingResult.dayType === 'holiday' ? 'bg-red-100 text-red-700' : pricingResult.dayType === 'weekend' ? 'bg-amber-100 text-amber-700' : 'bg-success/10 text-success'}`}>
                   {pricingResult.dayTypeName}
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
                   {pricingResult.timeSlotName}
                 </span>
-                {pricingResult.dateName && <span className="text-[10px] text-gray-400">{pricingResult.dateName}</span>}
+                {pricingResult.dateName && <span className="text-[10px] text-muted-foreground">{pricingResult.dateName}</span>}
               </div>
             )}
-            {pricingLoading && <span className="text-xs text-gray-400 animate-pulse">算价中...</span>}
+            {pricingLoading && <span className="text-xs text-muted-foreground animate-pulse">算价中...</span>}
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><X size={20} /></button>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
         </div>
 
         {/* 表单主体 */}
@@ -624,39 +624,39 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
 
           {/* ── 预订信息 ── */}
           <section>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">预订信息</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">预订信息</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">日期 <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-foreground mb-1">日期 <span className="text-red-500">*</span></label>
                 <input type="date" value={form.date} min={today} onChange={e => set('date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">时间 <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-foreground mb-1">时间 <span className="text-red-500">*</span></label>
                 <select value={form.teeTime} onChange={e => set('teeTime', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
                   {TEE_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">预订来源</label>
+                <label className="block text-sm font-medium text-foreground mb-1">预订来源</label>
                 <select value={form.bookingSource} onChange={e => set('bookingSource', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
                   {BOOKING_SOURCES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
                 </select>
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">球场 <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-foreground mb-1">球场 <span className="text-red-500">*</span></label>
                 <select value={form.courseId} onChange={e => handleCourseChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
                   <option value="">请选择球场</option>
                   {courses.map(c => <option key={c._id} value={c._id}>{c.name}（{c.holes}洞）</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">套餐</label>
+                <label className="block text-sm font-medium text-foreground mb-1">套餐</label>
                 <select value={form.packageId} onChange={e => set('packageId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
                   <option value="">无套餐</option>
                   {packages.map(p => <option key={p._id} value={p._id}>{p.packageName}</option>)}
                 </select>
@@ -664,14 +664,14 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
             </div>
             {/* 次要选项：住宿类型（大多数预订为日归，折叠到此） */}
             <div className="mt-3 flex items-center gap-3">
-              <span className="text-xs text-gray-400">住宿</span>
+              <span className="text-xs text-muted-foreground">住宿</span>
               <div className="flex gap-1">
                 {STAY_TYPES.map(st => (
                   <button key={st.key} type="button" onClick={() => set('stayType', st.key)}
                     className={`px-2.5 py-1 text-xs rounded-full transition-all ${
                       form.stayType === st.key
-                        ? 'bg-emerald-100 text-emerald-700 font-medium'
-                        : 'text-gray-400 hover:bg-gray-100'
+                        ? 'bg-success/10 text-success font-medium'
+                        : 'text-muted-foreground hover:bg-secondary'
                     }`}>{st.label}</button>
                 ))}
               </div>
@@ -681,26 +681,26 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
           {/* ── 球员信息 ── */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                球员 <span className="text-gray-300 font-normal normal-case">（{form.players.length}{form.isTeam ? ` / 团队${form.totalPlayers}人` : '/4'}）</span>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                球员 <span className="text-muted-foreground font-normal normal-case">（{form.players.length}{form.isTeam ? ` / 团队${form.totalPlayers}人` : '/4'}）</span>
               </h3>
-              <button onClick={addPlayer} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700">
+              <button onClick={addPlayer} className="flex items-center gap-1 text-xs text-success hover:text-success">
                 <UserPlus size={13} /> 添加球员
               </button>
             </div>
             <div className="space-y-3">
               {form.players.map((player, idx) => (
-                <div key={idx} className="bg-gray-50 rounded-xl p-3 space-y-2">
+                <div key={idx} className="bg-secondary/50 rounded-xl p-3 space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 font-medium w-4 text-center flex-shrink-0">{idx + 1}</span>
+                    <span className="text-xs text-muted-foreground font-medium w-4 text-center flex-shrink-0">{idx + 1}</span>
                     <div className="flex-1 min-w-0">
                       {player.memberId ? (
-                        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5">
-                          <div className="w-5 h-5 rounded-full bg-emerald-200 text-emerald-800 text-[10px] font-bold flex items-center justify-center flex-shrink-0">{player.name?.[0]}</div>
-                          <span className="text-sm font-medium text-emerald-800 flex-1 truncate">{player.name}</span>
-                          <span className="text-[10px] font-mono text-emerald-500">#{player.playerNo}</span>
+                        <div className="flex items-center gap-2 bg-success/10 border border-success/20 rounded-lg px-2.5 py-1.5">
+                          <div className="w-5 h-5 rounded-full bg-success/20 text-success text-[10px] font-bold flex items-center justify-center flex-shrink-0">{player.name?.[0]}</div>
+                          <span className="text-sm font-medium text-success flex-1 truncate">{player.name}</span>
+                          <span className="text-[10px] font-mono text-success">#{player.playerNo}</span>
                           <button type="button" onClick={() => { const next = [...form.players]; next[idx] = { ...EMPTY_PLAYER }; set('players', next) }}
-                            className="p-0.5 text-emerald-400 hover:text-red-400 transition-colors"><X size={12} /></button>
+                            className="p-0.5 text-success hover:text-red-400 transition-colors"><X size={12} /></button>
                         </div>
                       ) : (
                         <PlayerSearchDropdown value={player.name} onChange={val => setPlayer(idx, 'name', val)}
@@ -721,7 +721,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                       }
                       set('players', next)
                     }}
-                      className="w-24 px-2 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none bg-white flex-shrink-0">
+                      className="w-24 px-2 py-2 border border-border rounded-lg text-xs focus:outline-none bg-white flex-shrink-0">
                       {activeIdentities.length > 0 ? (
                         activeIdentities.map(id => (
                           <option key={id.code} value={id.code}>{id.name}</option>
@@ -734,11 +734,11 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                         </>
                       )}
                     </select>
-                    <button onClick={() => removePlayer(idx)} className="p-1 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
+                    <button onClick={() => removePlayer(idx)} className="p-1 text-muted-foreground hover:text-red-400 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
                   </div>
                   {/* 每人明细 */}
                   {pricingResult?.playerBreakdown?.[idx] && (
-                    <div className="pl-6 text-xs text-gray-400 flex items-center gap-2">
+                    <div className="pl-6 text-xs text-muted-foreground flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getIdentityColor(player.identityCode) }} />
                       {getIdentityName(player.identityCode)}
                       {' '}¥{pricingResult.playerBreakdown[idx].greenFee}
@@ -747,7 +747,7 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                   {!player.memberId && (
                     <div className="flex items-center gap-2 pl-6">
                       <input type="tel" value={player.phone} placeholder="手机号（选填）" onChange={e => setPlayer(idx, 'phone', e.target.value)}
-                        className="flex-1 px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400 bg-white" />
+                        className="flex-1 px-2.5 py-1.5 border border-border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-ring bg-white" />
                     </div>
                   )}
                 </div>
@@ -773,24 +773,24 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
             {form.isTeam && (
               <div className="grid grid-cols-2 gap-3 mt-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">团队名称</label>
+                  <label className="block text-xs text-muted-foreground mb-1">团队名称</label>
                   <input value={form.teamName} onChange={e => set('teamName', e.target.value)} placeholder="如：XX公司团建"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">总人数</label>
+                  <label className="block text-xs text-muted-foreground mb-1">总人数</label>
                   <input type="number" value={form.totalPlayers || ''} onChange={e => set('totalPlayers', Number(e.target.value))} min={1}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">联系人</label>
+                  <label className="block text-xs text-muted-foreground mb-1">联系人</label>
                   <input value={form.contactName} onChange={e => set('contactName', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">联系电话</label>
+                  <label className="block text-xs text-muted-foreground mb-1">联系电话</label>
                   <input value={form.contactPhone} onChange={e => set('contactPhone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
                 </div>
               </div>
             )}
@@ -798,20 +798,20 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
 
           {/* ── 服务需求（具体分配由出发台调度） ── */}
           <section>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">服务需求</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">服务需求</h3>
             <div className="flex gap-3">
               <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                form.needCaddy ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'
+                form.needCaddy ? 'border-success/30 bg-success/10' : 'border-border hover:bg-secondary/50'
               }`}>
                 <input type="checkbox" checked={form.needCaddy} onChange={e => {
                   const checked = e.target.checked
                   set('needCaddy', checked)
                   if (!checked) set('caddyDesignation', { type: 'none', caddyId: '', caddyNo: '', caddyName: '', caddyLevel: 'trainee' })
                 }}
-                  className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-400" />
+                  className="w-4 h-4 rounded text-success focus:ring-ring" />
                 <div className="flex-1 min-w-0">
-                  <span className={`text-sm font-medium ${form.needCaddy ? 'text-emerald-800' : 'text-gray-600'}`}>需要球童</span>
-                  <p className="text-[10px] text-gray-400">出发台统一调度分配</p>
+                  <span className={`text-sm font-medium ${form.needCaddy ? 'text-success' : 'text-muted-foreground'}`}>需要球童</span>
+                  <p className="text-[10px] text-muted-foreground">出发台统一调度分配</p>
                   {form.needCaddy && (
                     <label className="mt-2 flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={form.caddyDesignation?.type === 'designated'}
@@ -838,13 +838,13 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                 </div>
               </label>
               <label className={`flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                form.needCart ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'
+                form.needCart ? 'border-success/30 bg-success/10' : 'border-border hover:bg-secondary/50'
               }`}>
                 <input type="checkbox" checked={form.needCart} onChange={e => set('needCart', e.target.checked)}
-                  className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-400" />
+                  className="w-4 h-4 rounded text-success focus:ring-ring" />
                 <div>
-                  <span className={`text-sm font-medium ${form.needCart ? 'text-emerald-800' : 'text-gray-600'}`}>需要球车</span>
-                  <p className="text-[10px] text-gray-400">出发台统一调度分配</p>
+                  <span className={`text-sm font-medium ${form.needCart ? 'text-success' : 'text-muted-foreground'}`}>需要球车</span>
+                  <p className="text-[10px] text-muted-foreground">出发台统一调度分配</p>
                 </div>
               </label>
             </div>
@@ -855,10 +855,10 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
             <div className="flex items-center justify-between mb-2">
               <button type="button" onClick={() => setFeeExpanded(p => !p)}
                 className="flex items-center gap-2 group">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">费用信息</h3>
-                <ChevronDown size={14} className={`text-gray-300 transition-transform ${feeExpanded ? 'rotate-180' : ''}`} />
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">费用信息</h3>
+                <ChevronDown size={14} className={`text-muted-foreground transition-transform ${feeExpanded ? 'rotate-180' : ''}`} />
                 {!feeExpanded && feeItems.length > 0 && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground">
                     {feeItems.map(r => `${r.label}¥${(form as any)[r.key]}`).join('、')}
                   </span>
                 )}
@@ -895,15 +895,15 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                       {!form.priceOverride && (
                         <button type="button" onClick={() => toggleLock(f.key)} className="p-0.5"
                           title={lockedFields[f.key] ? '系统自动（点击解锁手动输入）' : '已手动覆盖（点击恢复自动）'}>
-                          {lockedFields[f.key] ? <Lock size={10} className="text-emerald-400" /> : <Unlock size={10} className="text-amber-500" />}
+                          {lockedFields[f.key] ? <Lock size={10} className="text-success" /> : <Unlock size={10} className="text-amber-500" />}
                         </button>
                       )}
                     </div>
                     <input type="number" value={(form as any)[f.key] || ''}
                       readOnly={!form.priceOverride && lockedFields[f.key]}
                       onChange={e => set(f.key as keyof BookingFormData, parseFloat(e.target.value) || 0)}
-                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
-                        !form.priceOverride && lockedFields[f.key] ? 'border-emerald-200 bg-emerald-50/50 text-emerald-700' : 'border-gray-200 bg-white'
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring ${
+                        !form.priceOverride && lockedFields[f.key] ? 'border-success/20 bg-success/10/50 text-success' : 'border-border bg-white'
                       }`} />
                   </div>
                 ))}
@@ -917,21 +917,21 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
                   <label className="text-xs font-medium text-red-500">折扣减免</label>
                   {!form.priceOverride && (
                     <button type="button" onClick={() => toggleLock('discount')} className="p-0.5">
-                      {lockedFields.discount ? <Lock size={10} className="text-emerald-400" /> : <Unlock size={10} className="text-amber-500" />}
+                      {lockedFields.discount ? <Lock size={10} className="text-success" /> : <Unlock size={10} className="text-amber-500" />}
                     </button>
                   )}
                 </div>
                 <input type="number" value={form.discount || ''} readOnly={!form.priceOverride && lockedFields.discount}
                   onChange={e => set('discount', parseFloat(e.target.value) || 0)}
-                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
-                    !form.priceOverride && lockedFields.discount ? 'border-emerald-200 bg-emerald-50/50 text-emerald-700' : 'border-gray-200 bg-white'
+                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring ${
+                    !form.priceOverride && lockedFields.discount ? 'border-success/20 bg-success/10/50 text-success' : 'border-border bg-white'
                   }`} />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500 mb-1 block">折扣原因</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">折扣原因</label>
                 <input type="text" value={form.discountReason} onChange={e => set('discountReason', e.target.value)}
                   placeholder="如：会员折扣、赛事赞助…"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
             </div>
 
@@ -944,33 +944,33 @@ export default function BookingForm({ onClose, onSuccess, initialDate }: Props) 
 
           {/* ── 备注 ── */}
           <section>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">备注</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">备注</h3>
             <textarea rows={2} value={form.note} onChange={e => set('note', e.target.value)} placeholder="特殊需求、注意事项等..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none" />
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
           </section>
         </div>
 
         {/* 底部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-secondary/50/50 rounded-b-2xl flex-shrink-0">
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-sm text-gray-500">应收合计：</span>
-              <span className="text-xl font-bold text-emerald-600">¥{form.totalFee}</span>
+              <span className="text-sm text-muted-foreground">应收合计：</span>
+              <span className="text-xl font-bold text-success">¥{form.totalFee}</span>
               <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${priceSourceStyle}`}>
                 {priceSourceLabel}
               </span>
             </div>
             {feeItems.length > 0 && (
-              <div className="text-xs text-gray-400 mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 {feeItems.map(r => `${r.label}¥${(form as any)[r.key]}`).join(' + ')}
                 {form.discount > 0 && ` - 折扣¥${form.discount}`}
               </div>
             )}
           </div>
           <div className="flex gap-3">
-            <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">取消</button>
+            <button onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">取消</button>
             <button onClick={handleSave} disabled={saving}
-              className="px-6 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-medium">
+              className="px-6 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors font-medium">
               {saving ? '创建中...' : '确认预订'}
             </button>
           </div>

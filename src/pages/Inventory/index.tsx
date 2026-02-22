@@ -31,7 +31,7 @@ export default function Inventory() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-secondary/50 to-orange-50/30">
       {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -40,8 +40,8 @@ export default function Inventory() {
               <Store className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800">库存管理 / Pro Shop</h1>
-              <p className="text-sm text-gray-500">商品、库存、采购、供应商、销售一站式管理</p>
+              <h1 className="text-xl font-bold text-foreground">库存管理 / Pro Shop</h1>
+              <p className="text-sm text-muted-foreground">商品、库存、采购、供应商、销售一站式管理</p>
             </div>
           </div>
         </div>
@@ -58,7 +58,7 @@ export default function Inventory() {
                 className={`flex items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium whitespace-nowrap transition-colors ${
                   activeTab === tab.id
                     ? 'border-orange-600 text-orange-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -172,7 +172,7 @@ function ProductsTab() {
       <div className="bg-white rounded-xl shadow-sm border p-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               value={keyword} onChange={e => { setKeyword(e.target.value); setPage(1); }}
               placeholder="搜索商品名称/SKU/品牌..."
@@ -189,8 +189,8 @@ function ProductsTab() {
             className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
             <Plus className="w-4 h-4" /> 新增商品
           </button>
-          <button onClick={fetchProducts} className="p-2 rounded-lg hover:bg-gray-100">
-            <RefreshCw className={`w-4 h-4 text-gray-500 ${loading ? 'animate-spin' : ''}`} />
+          <button onClick={fetchProducts} className="p-2 rounded-lg hover:bg-secondary">
+            <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -198,15 +198,15 @@ function ProductsTab() {
       {/* 新增/编辑表单 */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h3 className="font-bold text-gray-800 mb-4">{editItem ? '编辑商品' : '新增商品'}</h3>
+          <h3 className="font-bold text-foreground mb-4">{editItem ? '编辑商品' : '新增商品'}</h3>
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-2">
-              <label className="block text-xs text-gray-500 mb-1">商品名称 *</label>
+              <label className="block text-xs text-muted-foreground mb-1">商品名称 *</label>
               <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="如: Titleist Pro V1 高尔夫球" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">分类</label>
+              <label className="block text-xs text-muted-foreground mb-1">分类</label>
               <select value={form.categoryId} onChange={e => {
                 const cat = categories.find(c => c._id === e.target.value);
                 setForm(f => ({ ...f, categoryId: e.target.value, categoryName: cat?.name || '' }));
@@ -216,53 +216,53 @@ function ProductsTab() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">品牌</label>
+              <label className="block text-xs text-muted-foreground mb-1">品牌</label>
               <input value={form.brand} onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Titleist" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">零售价 (¥)</label>
+              <label className="block text-xs text-muted-foreground mb-1">零售价 (¥)</label>
               <input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="0" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">成本价 (¥)</label>
+              <label className="block text-xs text-muted-foreground mb-1">成本价 (¥)</label>
               <input type="number" value={form.costPrice} onChange={e => setForm(f => ({ ...f, costPrice: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="0" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">会员价 (¥)</label>
+              <label className="block text-xs text-muted-foreground mb-1">会员价 (¥)</label>
               <input type="number" value={form.memberPrice} onChange={e => setForm(f => ({ ...f, memberPrice: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="留空=无会员价" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">条码</label>
+              <label className="block text-xs text-muted-foreground mb-1">条码</label>
               <input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="EAN/UPC" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">单位</label>
+              <label className="block text-xs text-muted-foreground mb-1">单位</label>
               <input value={form.unit} onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">最低库存</label>
+              <label className="block text-xs text-muted-foreground mb-1">最低库存</label>
               <input type="number" value={form.minStock} onChange={e => setForm(f => ({ ...f, minStock: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">库位</label>
+              <label className="block text-xs text-muted-foreground mb-1">库位</label>
               <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="A-01-03" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">描述</label>
+              <label className="block text-xs text-muted-foreground mb-1">描述</label>
               <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="简要描述" />
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button>
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
             <button onClick={handleSubmit} className="px-5 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
               {editItem ? '保存修改' : '创建商品'}
             </button>
@@ -273,48 +273,48 @@ function ProductsTab() {
       {/* 商品列表 */}
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         {loading && products.length === 0 ? (
-          <div className="py-20 text-center text-gray-400"><RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin" />加载中...</div>
+          <div className="py-20 text-center text-muted-foreground"><RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin" />加载中...</div>
         ) : products.length === 0 ? (
-          <div className="py-20 text-center"><Package className="w-10 h-10 text-gray-200 mx-auto mb-2" /><p className="text-gray-400">暂无商品</p></div>
+          <div className="py-20 text-center"><Package className="w-10 h-10 text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">暂无商品</p></div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-secondary/50 border-b">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">SKU</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">商品名称</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">分类</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">品牌</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">零售价</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">成本价</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">库存</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">已售</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">状态</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">操作</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">SKU</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">商品名称</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">分类</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">品牌</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">零售价</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">成本价</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">库存</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">已售</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">状态</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border/50">
               {products.map(p => (
-                <tr key={p._id} className="hover:bg-gray-50/50">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{p.sku}</td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{p.name}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.categoryName || '-'}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.brand || '-'}</td>
+                <tr key={p._id} className="hover:bg-secondary/50/50">
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.sku}</td>
+                  <td className="px-4 py-3 font-medium text-foreground">{p.name}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{p.categoryName || '-'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{p.brand || '-'}</td>
                   <td className="px-4 py-3 text-right font-medium">¥{(p.price || 0).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-right text-gray-500">¥{(p.costPrice || 0).toFixed(2)}</td>
-                  <td className={`px-4 py-3 text-right font-medium ${(p.stock || 0) <= (p.minStock || 5) ? 'text-red-600' : 'text-gray-800'}`}>
+                  <td className="px-4 py-3 text-right text-muted-foreground">¥{(p.costPrice || 0).toFixed(2)}</td>
+                  <td className={`px-4 py-3 text-right font-medium ${(p.stock || 0) <= (p.minStock || 5) ? 'text-red-600' : 'text-foreground'}`}>
                     {p.stock || 0}
                     {(p.stock || 0) <= (p.minStock || 5) && <AlertTriangle className="inline w-3.5 h-3.5 ml-1 text-red-500" />}
                   </td>
-                  <td className="px-4 py-3 text-right text-gray-500">{p.totalSold || 0}</td>
+                  <td className="px-4 py-3 text-right text-muted-foreground">{p.totalSold || 0}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      p.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'
+                      p.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-secondary text-muted-foreground'
                     }`}>{p.status === 'active' ? '在售' : '已下架'}</span>
                   </td>
                   <td className="px-4 py-3 text-center">
                     <div className="flex items-center justify-center gap-1">
-                      <button onClick={() => handleEdit(p)} className="p-1.5 rounded hover:bg-blue-50 text-gray-400 hover:text-blue-500"><Edit2 className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => handleDelete(p._id)} className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleEdit(p)} className="p-1.5 rounded hover:bg-blue-50 text-muted-foreground hover:text-blue-500"><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleDelete(p._id)} className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
                 </tr>
@@ -323,12 +323,12 @@ function ProductsTab() {
           </table>
         )}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50/50">
-            <span className="text-sm text-gray-500">共 {total} 条</span>
+          <div className="flex items-center justify-between px-4 py-3 border-t bg-secondary/50/50">
+            <span className="text-sm text-muted-foreground">共 {total} 条</span>
             <div className="flex gap-1">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-30"><ChevronLeft className="w-4 h-4" /></button>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded hover:bg-secondary disabled:opacity-30"><ChevronLeft className="w-4 h-4" /></button>
               <span className="px-2 py-1 text-sm">{page}/{totalPages}</span>
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded hover:bg-secondary disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
             </div>
           </div>
         )}
@@ -402,11 +402,11 @@ function StockTab() {
           <div className="grid grid-cols-4 gap-3">
             {lowStock.slice(0, 8).map(p => (
               <div key={p._id} className="bg-white rounded-lg p-3 border border-red-100">
-                <p className="text-sm font-medium text-gray-800 truncate">{p.name}</p>
-                <p className="text-xs text-gray-500">{p.sku}</p>
+                <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                <p className="text-xs text-muted-foreground">{p.sku}</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-lg font-bold text-red-600">{p.stock || 0}</span>
-                  <span className="text-xs text-gray-400">最低: {p.minStock || 5}</span>
+                  <span className="text-xs text-muted-foreground">最低: {p.minStock || 5}</span>
                 </div>
               </div>
             ))}
@@ -420,18 +420,18 @@ function StockTab() {
           className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
           <Plus className="w-4 h-4" /> 库存变动
         </button>
-        <button onClick={fetchData} className="p-2 rounded-lg hover:bg-gray-100">
-          <RefreshCw className={`w-4 h-4 text-gray-500 ${loading ? 'animate-spin' : ''}`} />
+        <button onClick={fetchData} className="p-2 rounded-lg hover:bg-secondary">
+          <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {/* 变动表单 */}
       {showMovForm && (
         <div className="bg-white rounded-xl shadow-sm border p-5">
-          <h3 className="font-bold text-gray-800 mb-4">库存变动</h3>
+          <h3 className="font-bold text-foreground mb-4">库存变动</h3>
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-2">
-              <label className="block text-xs text-gray-500 mb-1">商品</label>
+              <label className="block text-xs text-muted-foreground mb-1">商品</label>
               <select value={movForm.productId} onChange={e => setMovForm(f => ({ ...f, productId: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm">
                 <option value="">选择商品</option>
@@ -441,7 +441,7 @@ function StockTab() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">类型</label>
+              <label className="block text-xs text-muted-foreground mb-1">类型</label>
               <select value={movForm.type} onChange={e => setMovForm(f => ({ ...f, type: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm">
                 <option value="in">入库</option>
@@ -451,18 +451,18 @@ function StockTab() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">数量</label>
+              <label className="block text-xs text-muted-foreground mb-1">数量</label>
               <input type="number" value={movForm.quantity} onChange={e => setMovForm(f => ({ ...f, quantity: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="数量" />
             </div>
           </div>
           <div className="mt-3">
-            <label className="block text-xs text-gray-500 mb-1">原因</label>
+            <label className="block text-xs text-muted-foreground mb-1">原因</label>
             <input value={movForm.reason} onChange={e => setMovForm(f => ({ ...f, reason: e.target.value }))}
               className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="入库原因/出库原因" />
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <button onClick={() => setShowMovForm(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button>
+            <button onClick={() => setShowMovForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
             <button onClick={handleMovement} className="px-5 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700">提交</button>
           </div>
         </div>
@@ -470,40 +470,40 @@ function StockTab() {
 
       {/* 流水 */}
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div className="px-5 py-3 border-b bg-gray-50/50 font-semibold text-gray-700">库存变动流水</div>
+        <div className="px-5 py-3 border-b bg-secondary/50/50 font-semibold text-foreground">库存变动流水</div>
         {movements.length === 0 ? (
-          <div className="py-16 text-center text-gray-400">暂无记录</div>
+          <div className="py-16 text-center text-muted-foreground">暂无记录</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-secondary/50 border-b">
               <tr>
-                <th className="text-left px-4 py-2.5 font-medium text-gray-500">时间</th>
-                <th className="text-left px-4 py-2.5 font-medium text-gray-500">商品</th>
-                <th className="text-center px-4 py-2.5 font-medium text-gray-500">类型</th>
-                <th className="text-right px-4 py-2.5 font-medium text-gray-500">数量</th>
-                <th className="text-right px-4 py-2.5 font-medium text-gray-500">变动前</th>
-                <th className="text-right px-4 py-2.5 font-medium text-gray-500">变动后</th>
-                <th className="text-left px-4 py-2.5 font-medium text-gray-500">原因</th>
-                <th className="text-left px-4 py-2.5 font-medium text-gray-500">操作人</th>
+                <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">时间</th>
+                <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">商品</th>
+                <th className="text-center px-4 py-2.5 font-medium text-muted-foreground">类型</th>
+                <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">数量</th>
+                <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">变动前</th>
+                <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">变动后</th>
+                <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">原因</th>
+                <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">操作人</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border/50">
               {movements.map((m, i) => {
                 const t = typeLabels[m.type] || typeLabels.adjust;
                 return (
-                  <tr key={m._id || i} className="hover:bg-gray-50/50">
-                    <td className="px-4 py-2.5 text-xs text-gray-500">{(m.createdAt || '').replace('T', ' ').slice(0, 16)}</td>
-                    <td className="px-4 py-2.5">{m.productName} <span className="text-xs text-gray-400">({m.productSku})</span></td>
+                  <tr key={m._id || i} className="hover:bg-secondary/50/50">
+                    <td className="px-4 py-2.5 text-xs text-muted-foreground">{(m.createdAt || '').replace('T', ' ').slice(0, 16)}</td>
+                    <td className="px-4 py-2.5">{m.productName} <span className="text-xs text-muted-foreground">({m.productSku})</span></td>
                     <td className="px-4 py-2.5 text-center">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${t.color}`}>{t.label}</span>
                     </td>
                     <td className={`px-4 py-2.5 text-right font-medium ${m.type === 'in' ? 'text-green-600' : m.type === 'out' ? 'text-red-600' : 'text-blue-600'}`}>
                       {m.type === 'in' ? '+' : m.type === 'out' ? '-' : ''}{Math.abs(m.quantity)}
                     </td>
-                    <td className="px-4 py-2.5 text-right text-gray-500">{m.beforeStock}</td>
+                    <td className="px-4 py-2.5 text-right text-muted-foreground">{m.beforeStock}</td>
                     <td className="px-4 py-2.5 text-right font-medium">{m.afterStock}</td>
-                    <td className="px-4 py-2.5 text-gray-500 truncate max-w-[160px]">{m.reason || '-'}</td>
-                    <td className="px-4 py-2.5 text-gray-500">{m.operatorName || '-'}</td>
+                    <td className="px-4 py-2.5 text-muted-foreground truncate max-w-[160px]">{m.reason || '-'}</td>
+                    <td className="px-4 py-2.5 text-muted-foreground">{m.operatorName || '-'}</td>
                   </tr>
                 );
               })}
@@ -599,7 +599,7 @@ function PurchaseTab() {
   };
 
   const statusLabels: Record<string, { label: string; color: string }> = {
-    draft: { label: '草稿', color: 'bg-gray-100 text-gray-600' },
+    draft: { label: '草稿', color: 'bg-secondary text-muted-foreground' },
     submitted: { label: '已提交', color: 'bg-blue-50 text-blue-600' },
     approved: { label: '已审批', color: 'bg-indigo-50 text-indigo-600' },
     ordered: { label: '已下单', color: 'bg-purple-50 text-purple-600' },
@@ -615,18 +615,18 @@ function PurchaseTab() {
           className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
           <Plus className="w-4 h-4" /> 新建采购单
         </button>
-        <button onClick={fetchOrders} className="p-2 rounded-lg hover:bg-gray-100">
-          <RefreshCw className={`w-4 h-4 text-gray-500 ${loading ? 'animate-spin' : ''}`} />
+        <button onClick={fetchOrders} className="p-2 rounded-lg hover:bg-secondary">
+          <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {/* 新建表单 */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h3 className="font-bold text-gray-800 mb-4">新建采购单</h3>
+          <h3 className="font-bold text-foreground mb-4">新建采购单</h3>
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">供应商</label>
+              <label className="block text-xs text-muted-foreground mb-1">供应商</label>
               <select value={form.supplierId} onChange={e => {
                 const s = suppliers.find(ss => ss._id === e.target.value);
                 setForm(f => ({ ...f, supplierId: e.target.value, supplierName: s?.name || '' }));
@@ -636,13 +636,13 @@ function PurchaseTab() {
               </select>
             </div>
             <div className="col-span-2">
-              <label className="block text-xs text-gray-500 mb-1">备注</label>
+              <label className="block text-xs text-muted-foreground mb-1">备注</label>
               <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="采购备注" />
             </div>
           </div>
           <div className="space-y-2 mb-4">
-            <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
               <span className="flex-1">商品</span><span className="w-20">数量</span><span className="w-24">单价</span><span className="w-24">小计</span><span className="w-8"></span>
             </div>
             {form.items.map((item, idx) => (
@@ -665,7 +665,7 @@ function PurchaseTab() {
           <div className="flex justify-between items-center">
             <span className="text-sm font-bold">合计: ¥{form.items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unitCost) || 0), 0).toFixed(2)}</span>
             <div className="flex gap-3">
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button>
+              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
               <button onClick={handleCreate} className="px-5 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700">创建采购单</button>
             </div>
           </div>
@@ -675,31 +675,31 @@ function PurchaseTab() {
       {/* 采购单列表 */}
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         {orders.length === 0 ? (
-          <div className="py-16 text-center text-gray-400"><Truck className="w-10 h-10 text-gray-200 mx-auto mb-2" />暂无采购单</div>
+          <div className="py-16 text-center text-muted-foreground"><Truck className="w-10 h-10 text-muted-foreground mx-auto mb-2" />暂无采购单</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-secondary/50 border-b">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">采购单号</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">供应商</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">项数</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">金额</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">状态</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">创建时间</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">操作</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">采购单号</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">供应商</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">项数</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">金额</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">状态</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">创建时间</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border/50">
               {orders.map(po => {
                 const st = statusLabels[po.status] || statusLabels.draft;
                 return (
-                  <tr key={po._id} className="hover:bg-gray-50/50">
+                  <tr key={po._id} className="hover:bg-secondary/50/50">
                     <td className="px-4 py-3 font-mono text-xs">{po.poNo}</td>
                     <td className="px-4 py-3">{po.supplierName || '-'}</td>
                     <td className="px-4 py-3 text-right">{po.totalItems || 0}</td>
                     <td className="px-4 py-3 text-right font-medium">¥{(po.totalAmount || 0).toFixed(2)}</td>
                     <td className="px-4 py-3 text-center"><span className={`text-xs px-2 py-0.5 rounded-full ${st.color}`}>{st.label}</span></td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{(po.createdAt || '').replace('T', ' ').slice(0, 16)}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{(po.createdAt || '').replace('T', ' ').slice(0, 16)}</td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-1">
                         {po.status === 'draft' && <button onClick={() => changeStatus(po._id, 'submitted')} className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">提交</button>}
@@ -768,30 +768,30 @@ function SuppliersTab() {
           className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
           <Plus className="w-4 h-4" /> 新增供应商
         </button>
-        <button onClick={fetchSuppliers} className="p-2 rounded-lg hover:bg-gray-100">
-          <RefreshCw className={`w-4 h-4 text-gray-500 ${loading ? 'animate-spin' : ''}`} />
+        <button onClick={fetchSuppliers} className="p-2 rounded-lg hover:bg-secondary">
+          <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h3 className="font-bold text-gray-800 mb-4">{editItem ? '编辑供应商' : '新增供应商'}</h3>
+          <h3 className="font-bold text-foreground mb-4">{editItem ? '编辑供应商' : '新增供应商'}</h3>
           <div className="grid grid-cols-3 gap-4">
-            <div><label className="block text-xs text-gray-500 mb-1">名称 *</label>
+            <div><label className="block text-xs text-muted-foreground mb-1">名称 *</label>
               <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
-            <div><label className="block text-xs text-gray-500 mb-1">联系人</label>
+            <div><label className="block text-xs text-muted-foreground mb-1">联系人</label>
               <input value={form.contactPerson} onChange={e => setForm(f => ({ ...f, contactPerson: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
-            <div><label className="block text-xs text-gray-500 mb-1">电话</label>
+            <div><label className="block text-xs text-muted-foreground mb-1">电话</label>
               <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
-            <div><label className="block text-xs text-gray-500 mb-1">邮箱</label>
+            <div><label className="block text-xs text-muted-foreground mb-1">邮箱</label>
               <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
-            <div><label className="block text-xs text-gray-500 mb-1">付款条件</label>
+            <div><label className="block text-xs text-muted-foreground mb-1">付款条件</label>
               <input value={form.paymentTerms} onChange={e => setForm(f => ({ ...f, paymentTerms: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="如: 月结30天" /></div>
-            <div><label className="block text-xs text-gray-500 mb-1">地址</label>
+            <div><label className="block text-xs text-muted-foreground mb-1">地址</label>
               <input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button>
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
             <button onClick={handleSubmit} className="px-5 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700">{editItem ? '保存' : '创建'}</button>
           </div>
         </div>
@@ -799,35 +799,35 @@ function SuppliersTab() {
 
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         {suppliers.length === 0 ? (
-          <div className="py-16 text-center text-gray-400"><Users2 className="w-10 h-10 text-gray-200 mx-auto mb-2" />暂无供应商</div>
+          <div className="py-16 text-center text-muted-foreground"><Users2 className="w-10 h-10 text-muted-foreground mx-auto mb-2" />暂无供应商</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-secondary/50 border-b">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">名称</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">联系人</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">电话</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">邮箱</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">付款条件</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">订单数</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">累计金额</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">操作</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">名称</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">联系人</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">电话</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">邮箱</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">付款条件</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">订单数</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">累计金额</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border/50">
               {suppliers.map(s => (
-                <tr key={s._id} className="hover:bg-gray-50/50">
+                <tr key={s._id} className="hover:bg-secondary/50/50">
                   <td className="px-4 py-3 font-medium">{s.name}</td>
-                  <td className="px-4 py-3 text-gray-500">{s.contactPerson || '-'}</td>
-                  <td className="px-4 py-3 text-gray-500">{s.phone || '-'}</td>
-                  <td className="px-4 py-3 text-gray-500">{s.email || '-'}</td>
-                  <td className="px-4 py-3 text-gray-500">{s.paymentTerms || '-'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{s.contactPerson || '-'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{s.phone || '-'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{s.email || '-'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{s.paymentTerms || '-'}</td>
                   <td className="px-4 py-3 text-right">{s.totalOrders || 0}</td>
                   <td className="px-4 py-3 text-right font-medium">¥{(s.totalAmount || 0).toFixed(2)}</td>
                   <td className="px-4 py-3 text-center">
                     <div className="flex items-center justify-center gap-1">
-                      <button onClick={() => handleEdit(s)} className="p-1.5 rounded hover:bg-blue-50 text-gray-400 hover:text-blue-500"><Edit2 className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => handleDelete(s._id)} className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleEdit(s)} className="p-1.5 rounded hover:bg-blue-50 text-muted-foreground hover:text-blue-500"><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleDelete(s._id)} className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
                 </tr>
@@ -913,14 +913,14 @@ function SalesTab() {
           className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 shadow-sm">
           <ShoppingCart className="w-4 h-4" /> 新建销售单
         </button>
-        <button onClick={fetchSales} className="p-2 rounded-lg hover:bg-gray-100">
-          <RefreshCw className={`w-4 h-4 text-gray-500 ${loading ? 'animate-spin' : ''}`} />
+        <button onClick={fetchSales} className="p-2 rounded-lg hover:bg-secondary">
+          <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h3 className="font-bold text-gray-800 mb-4">新建销售单 (POS)</h3>
+          <h3 className="font-bold text-foreground mb-4">新建销售单 (POS)</h3>
           <div className="space-y-2 mb-4">
             {saleItems.map((item, idx) => (
               <div key={idx} className="flex items-center gap-2">
@@ -945,7 +945,7 @@ function SalesTab() {
           </div>
           <div className="flex items-center justify-between border-t pt-4">
             <div className="flex items-center gap-3">
-              <label className="text-sm text-gray-500">支付方式:</label>
+              <label className="text-sm text-muted-foreground">支付方式:</label>
               <select value={payMethod} onChange={e => setPayMethod(e.target.value)} className="border rounded-lg px-3 py-1.5 text-sm">
                 <option value="cash">现金</option>
                 <option value="wechat">微信</option>
@@ -957,7 +957,7 @@ function SalesTab() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-lg font-bold">合计: ¥{saleTotal.toFixed(2)}</span>
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button>
+              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
               <button onClick={handleSale} className="px-5 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 shadow-sm">
                 <CheckCircle className="w-4 h-4 inline mr-1" /> 完成销售
               </button>
@@ -968,37 +968,37 @@ function SalesTab() {
 
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         {sales.length === 0 ? (
-          <div className="py-16 text-center text-gray-400"><ShoppingCart className="w-10 h-10 text-gray-200 mx-auto mb-2" />暂无销售记录</div>
+          <div className="py-16 text-center text-muted-foreground"><ShoppingCart className="w-10 h-10 text-muted-foreground mx-auto mb-2" />暂无销售记录</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-secondary/50 border-b">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">单号</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">商品</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">金额</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">支付</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">客户</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">状态</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">时间</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">操作</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">单号</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">商品</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">金额</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">支付</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">客户</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">状态</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">时间</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border/50">
               {sales.map(s => (
-                <tr key={s._id} className="hover:bg-gray-50/50">
+                <tr key={s._id} className="hover:bg-secondary/50/50">
                   <td className="px-4 py-3 font-mono text-xs">{s.saleNo}</td>
-                  <td className="px-4 py-3 text-gray-600 truncate max-w-[200px]">
+                  <td className="px-4 py-3 text-muted-foreground truncate max-w-[200px]">
                     {(s.items || []).map((i: any) => `${i.productName}x${i.quantity}`).join(', ')}
                   </td>
                   <td className="px-4 py-3 text-right font-medium">¥{(s.totalAmount || 0).toFixed(2)}</td>
                   <td className="px-4 py-3 text-center text-xs">{s.payMethod}</td>
-                  <td className="px-4 py-3 text-gray-500">{s.customerName || '-'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{s.customerName || '-'}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                       {s.status === 'completed' ? '已完成' : '已退货'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{(s.createdAt || '').replace('T', ' ').slice(0, 16)}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{(s.createdAt || '').replace('T', ' ').slice(0, 16)}</td>
                   <td className="px-4 py-3 text-center">
                     {s.status === 'completed' && (
                       <button onClick={() => handleRefund(s._id)} className="text-xs px-2 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100">退货</button>
@@ -1029,7 +1029,7 @@ function StatsTab() {
     })();
   }, []);
 
-  if (loading || !stats) return <div className="py-20 text-center text-gray-400"><RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin" />加载中...</div>;
+  if (loading || !stats) return <div className="py-20 text-center text-muted-foreground"><RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin" />加载中...</div>;
 
   return (
     <div className="space-y-6">
@@ -1044,8 +1044,8 @@ function StatsTab() {
           <div key={i} className="bg-white rounded-xl shadow-sm border p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">{c.label}</p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">{c.value}</p>
+                <p className="text-sm text-muted-foreground">{c.label}</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{c.value}</p>
               </div>
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${c.color}-50 text-${c.color}-600`}>
                 <c.icon className="w-5 h-5" />
@@ -1058,7 +1058,7 @@ function StatsTab() {
       {/* 销售统计 */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-5">
-          <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><ShoppingCart className="w-4 h-4 text-orange-500" />销售概况</h3>
+          <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><ShoppingCart className="w-4 h-4 text-orange-500" />销售概况</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-green-50 rounded-lg p-4"><p className="text-xs text-green-600">总销售额</p><p className="text-xl font-bold text-green-700 mt-1">¥{(stats.sales?.totalRevenue || 0).toLocaleString()}</p></div>
             <div className="bg-blue-50 rounded-lg p-4"><p className="text-xs text-blue-600">总订单数</p><p className="text-xl font-bold text-blue-700 mt-1">{stats.sales?.totalCount || 0}</p></div>
@@ -1068,7 +1068,7 @@ function StatsTab() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border p-5">
-          <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><Truck className="w-4 h-4 text-orange-500" />采购概况</h3>
+          <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><Truck className="w-4 h-4 text-orange-500" />采购概况</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-orange-50 rounded-lg p-4"><p className="text-xs text-orange-600">待处理采购单</p><p className="text-xl font-bold text-orange-700 mt-1">{stats.purchases?.pendingCount || 0}</p></div>
             <div className="bg-indigo-50 rounded-lg p-4"><p className="text-xs text-indigo-600">累计采购额</p><p className="text-xl font-bold text-indigo-700 mt-1">¥{(stats.purchases?.totalAmount || 0).toLocaleString()}</p></div>
@@ -1078,30 +1078,30 @@ function StatsTab() {
 
       {/* 畅销 TOP 10 */}
       <div className="bg-white rounded-xl shadow-sm border p-5">
-        <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-orange-500" />畅销商品 TOP 10</h3>
+        <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-orange-500" />畅销商品 TOP 10</h3>
         {(stats.topSellers || []).length === 0 ? (
-          <p className="text-gray-400 text-sm py-4 text-center">暂无销售数据</p>
+          <p className="text-muted-foreground text-sm py-4 text-center">暂无销售数据</p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-secondary/50">
               <tr>
-                <th className="text-left px-4 py-2 text-gray-500">#</th>
-                <th className="text-left px-4 py-2 text-gray-500">商品</th>
-                <th className="text-left px-4 py-2 text-gray-500">SKU</th>
-                <th className="text-right px-4 py-2 text-gray-500">售出数量</th>
-                <th className="text-right px-4 py-2 text-gray-500">销售收入</th>
+                <th className="text-left px-4 py-2 text-muted-foreground">#</th>
+                <th className="text-left px-4 py-2 text-muted-foreground">商品</th>
+                <th className="text-left px-4 py-2 text-muted-foreground">SKU</th>
+                <th className="text-right px-4 py-2 text-muted-foreground">售出数量</th>
+                <th className="text-right px-4 py-2 text-muted-foreground">销售收入</th>
               </tr>
             </thead>
             <tbody>
               {stats.topSellers.map((p: any, i: number) => (
-                <tr key={i} className="border-t border-gray-50">
+                <tr key={i} className="border-t border-border/50">
                   <td className="px-4 py-2">
                     <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      i === 0 ? 'bg-amber-400 text-white' : i === 1 ? 'bg-gray-300 text-white' : i === 2 ? 'bg-orange-300 text-white' : 'bg-gray-100 text-gray-500'
+                      i === 0 ? 'bg-amber-400 text-white' : i === 1 ? 'bg-secondary text-white' : i === 2 ? 'bg-orange-300 text-white' : 'bg-secondary text-muted-foreground'
                     }`}>{i + 1}</span>
                   </td>
                   <td className="px-4 py-2 font-medium">{p.name}</td>
-                  <td className="px-4 py-2 text-xs text-gray-500 font-mono">{p.sku}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground font-mono">{p.sku}</td>
                   <td className="px-4 py-2 text-right">{p.totalSold}</td>
                   <td className="px-4 py-2 text-right font-medium">¥{(p.revenue || 0).toLocaleString()}</td>
                 </tr>
@@ -1113,16 +1113,16 @@ function StatsTab() {
 
       {/* 分类统计 */}
       <div className="bg-white rounded-xl shadow-sm border p-5">
-        <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><Tags className="w-4 h-4 text-orange-500" />按分类统计</h3>
+        <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><Tags className="w-4 h-4 text-orange-500" />按分类统计</h3>
         <div className="grid grid-cols-4 gap-3">
           {Object.entries(stats.byCategory || {}).map(([cat, data]: [string, any]) => (
-            <div key={cat} className="bg-gray-50 rounded-lg p-4 border">
-              <p className="text-sm font-medium text-gray-700">{cat}</p>
+            <div key={cat} className="bg-secondary/50 rounded-lg p-4 border">
+              <p className="text-sm font-medium text-foreground">{cat}</p>
               <div className="flex items-baseline gap-3 mt-2">
-                <span className="text-lg font-bold text-gray-800">{data.count} <span className="text-xs font-normal text-gray-400">件</span></span>
-                <span className="text-sm text-gray-500">售出 {data.totalSold}</span>
+                <span className="text-lg font-bold text-foreground">{data.count} <span className="text-xs font-normal text-muted-foreground">件</span></span>
+                <span className="text-sm text-muted-foreground">售出 {data.totalSold}</span>
               </div>
-              <p className="text-xs text-gray-400 mt-1">库存成本: ¥{(data.stockValue || 0).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mt-1">库存成本: ¥{(data.stockValue || 0).toLocaleString()}</p>
             </div>
           ))}
         </div>

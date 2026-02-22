@@ -50,7 +50,7 @@ const MEMBER_LEVELS = [
 ]
 
 const LEVEL_BADGE: Record<string, string> = {
-  regular:  'bg-gray-100 text-gray-600',
+  regular:  'bg-secondary text-muted-foreground',
   silver:   'bg-slate-100 text-slate-600',
   gold:     'bg-yellow-100 text-yellow-700',
   platinum: 'bg-purple-100 text-purple-700',
@@ -112,42 +112,42 @@ function AddPlayerDialog({ onClose, onSuccess }: AddPlayerDialogProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-          <h2 className="font-semibold text-gray-900">新增球员</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-white z-10">
+          <h2 className="font-semibold text-foreground">新增球员</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground">
             <X size={18} />
           </button>
         </div>
 
         <div className="px-6 py-5 space-y-4">
           {/* 基础信息 */}
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">基础信息</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">基础信息</p>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">姓名 <span className="text-red-400">*</span></label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">姓名 <span className="text-red-400">*</span></label>
             <input value={form.name} onChange={e => set('name', e.target.value)}
               placeholder="真实姓名"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">手机号</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">手机号</label>
             <input value={form.phoneNumber} onChange={e => set('phoneNumber', e.target.value)}
               placeholder="11位手机号"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">性别</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">性别</label>
               <select value={form.gender} onChange={e => set('gender', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none bg-white">
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-white">
                 <option value="male">男</option>
                 <option value="female">女</option>
                 <option value="other">其他</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">国籍</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">国籍</label>
               <select value={form.nationality} onChange={e => set('nationality', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none bg-white">
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-white">
                 <option value="CN">中国</option>
                 <option value="US">美国</option>
                 <option value="UK">英国</option>
@@ -159,29 +159,29 @@ function AddPlayerDialog({ onClose, onSuccess }: AddPlayerDialogProps) {
           </div>
 
           {/* 球场档案 */}
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide pt-2">球场档案</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pt-2">球场档案</p>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">会员等级</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">会员等级</label>
             <select value={form.memberLevel} onChange={e => set('memberLevel', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none bg-white">
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none bg-white">
               {MEMBER_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">消费卡号（可留空，系统自动生成）</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">消费卡号（可留空，系统自动生成）</label>
             <input value={form.consumeCardNo} onChange={e => set('consumeCardNo', e.target.value)}
               placeholder="如：MC260001"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
         </div>
 
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
+        <div className="flex gap-3 px-6 py-4 border-t border-border">
           <button onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50">
+            className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">
             取消
           </button>
           <button onClick={handleSubmit} disabled={saving}
-            className="flex-1 px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 disabled:opacity-50 font-medium">
+            className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
             {saving ? '创建中...' : '创建球员'}
           </button>
         </div>
@@ -226,20 +226,20 @@ function RechargeDialog({ player, onClose, onSuccess }: RechargeDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div>
-            <h2 className="font-semibold text-gray-900">账户充值</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{player.name} · 当前余额 ¥{balance.toFixed(2)}</p>
+            <h2 className="font-semibold text-foreground">账户充值</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">{player.name} · 当前余额 ¥{balance.toFixed(2)}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400"><X size={18} /></button>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"><X size={18} /></button>
         </div>
 
         <div className="px-6 py-5 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">充值金额（元）</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">充值金额（元）</label>
             <input type="number" min="1" step="1" value={amount} onChange={e => setAmount(e.target.value)}
               placeholder="0"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-2xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-right" />
+              className="w-full px-4 py-3 border border-border rounded-xl text-2xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-right" />
           </div>
           {/* 快捷金额 */}
           <div className="flex gap-2">
@@ -247,22 +247,22 @@ function RechargeDialog({ player, onClose, onSuccess }: RechargeDialogProps) {
               <button key={v} onClick={() => setAmount(String(v))}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                   amount === String(v)
-                    ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                    ? 'border-success bg-success/10 text-success'
+                    : 'border-border text-muted-foreground hover:bg-secondary/50'
                 }`}>
                 ¥{v}
               </button>
             ))}
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">支付方式</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">支付方式</label>
             <div className="grid grid-cols-3 gap-2">
               {PAY_METHODS.map(m => (
                 <button key={m.value} onClick={() => setPayMethod(m.value)}
                   className={`py-2 rounded-lg border text-xs font-medium transition-colors ${
                     payMethod === m.value
-                      ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
-                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                      ? 'border-success bg-success/10 text-success'
+                      : 'border-border text-muted-foreground hover:bg-secondary/50'
                   }`}>
                   {m.label}
                 </button>
@@ -270,20 +270,20 @@ function RechargeDialog({ player, onClose, onSuccess }: RechargeDialogProps) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">备注</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">备注</label>
             <input value={note} onChange={e => setNote(e.target.value)}
               placeholder="充值原因（可选）"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
         </div>
 
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
+        <div className="flex gap-3 px-6 py-4 border-t border-border">
           <button onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50">
+            className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">
             取消
           </button>
           <button onClick={handleConfirm} disabled={saving}
-            className="flex-1 px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 disabled:opacity-50 font-medium">
+            className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
             {saving ? '充值中...' : `确认充值 ¥${amount || 0}`}
           </button>
         </div>
@@ -350,47 +350,47 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
       {/* 抽屉 */}
       <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">球员档案</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="font-semibold text-foreground">球员档案</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground">
             <X size={18} />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex items-center justify-center py-20 text-gray-400 text-sm">加载中...</div>
+            <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">加载中...</div>
           ) : !player ? (
-            <div className="flex items-center justify-center py-20 text-gray-400 text-sm">未找到球员信息</div>
+            <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">未找到球员信息</div>
           ) : (
             <div className="px-6 py-5 space-y-6">
               {/* 头部：姓名 + playerNo */}
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl font-bold flex-shrink-0">
+                <div className="w-14 h-14 rounded-full bg-success/10 flex items-center justify-center text-success text-xl font-bold flex-shrink-0">
                   {player.name?.[0] || '?'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xl font-bold text-gray-900">{player.name}</span>
+                    <span className="text-xl font-bold text-foreground">{player.name}</span>
                     {profile?.memberLevel && (
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${LEVEL_BADGE[profile.memberLevel] || LEVEL_BADGE.regular}`}>
                         {MEMBER_LEVELS.find(l => l.value === profile.memberLevel)?.label || profile.memberLevel}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                    <span className="font-mono bg-gray-100 px-2 py-0.5 rounded text-xs"># {player.playerNo}</span>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                    <span className="font-mono bg-secondary px-2 py-0.5 rounded text-xs"># {player.playerNo}</span>
                     {player.phoneNumber && <span>{player.phoneNumber}</span>}
                   </div>
                 </div>
               </div>
 
               {/* 账户余额 */}
-              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white">
-                <p className="text-sm text-emerald-100">会员卡余额</p>
+              <div className="bg-gradient-to-r from-success to-success rounded-2xl p-5 text-white">
+                <p className="text-sm text-white/70">会员卡余额</p>
                 <p className="text-3xl font-bold mt-1">¥ {balance.toFixed(2)}</p>
                 {profile?.consumeCardNo && (
-                  <p className="text-xs text-emerald-200 mt-2 font-mono">消费卡号：{profile.consumeCardNo}</p>
+                  <p className="text-xs text-white/60 mt-2 font-mono">消费卡号：{profile.consumeCardNo}</p>
                 )}
                 <button onClick={() => setShowRecharge(true)}
                   className="mt-3 px-4 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors font-medium">
@@ -401,7 +401,7 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
               {/* 会籍信息 */}
               {membershipInfo ? (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">当前会籍</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">当前会籍</p>
                   <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-5 text-white">
                     <div className="flex items-center gap-2 mb-2">
                       <Crown size={18} className="text-amber-200" />
@@ -457,9 +457,9 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
                 </div>
               ) : (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">当前会籍</p>
-                  <div className="bg-gray-50 rounded-xl p-4 text-center text-gray-400 text-sm">
-                    <Crown size={24} className="mx-auto mb-2 text-gray-300" />
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">当前会籍</p>
+                  <div className="bg-secondary/50 rounded-xl p-4 text-center text-muted-foreground text-sm">
+                    <Crown size={24} className="mx-auto mb-2 text-muted-foreground" />
                     暂无有效会籍
                   </div>
                 </div>
@@ -467,13 +467,13 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
 
               {/* 积分余额 */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">积分账户</p>
-                <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-4">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">积分账户</p>
+                <div className="bg-secondary/50 rounded-xl p-4 flex items-center gap-4">
                   <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <Star size={20} className="text-amber-500" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">可用积分</p>
+                    <p className="text-xs text-muted-foreground">可用积分</p>
                     <p className="text-2xl font-bold text-amber-600">{pointsBalance.toLocaleString()}</p>
                   </div>
                 </div>
@@ -483,20 +483,20 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
               {profile?.qrCode?.code && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">消费二维码</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">消费二维码</p>
                     <button onClick={handleRefreshQr} disabled={refreshingQr}
-                      className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 disabled:opacity-50">
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-muted-foreground disabled:opacity-50">
                       <RefreshCw size={12} className={refreshingQr ? 'animate-spin' : ''} />
                       刷新
                     </button>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <QrCode size={24} className="text-gray-500" />
+                  <div className="bg-secondary/50 rounded-xl p-4 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center flex-shrink-0">
+                      <QrCode size={24} className="text-muted-foreground" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-mono text-gray-700 break-all">{profile.qrCode.code}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">扫码识别消费身份</p>
+                      <p className="text-xs font-mono text-foreground break-all">{profile.qrCode.code}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">扫码识别消费身份</p>
                     </div>
                   </div>
                 </div>
@@ -504,7 +504,7 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
 
               {/* 基础信息 */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">基础信息</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">基础信息</p>
                 <div className="space-y-2">
                   {[
                     { label: '性别',     value: player.gender === 'male' ? '男' : player.gender === 'female' ? '女' : '其他' },
@@ -512,8 +512,8 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
                     { label: '加入时间', value: toDateStr(player.createTime) },
                   ].filter(r => r.value).map(r => (
                     <div key={r.label} className="flex justify-between text-sm">
-                      <span className="text-gray-500">{r.label}</span>
-                      <span className="text-gray-800 font-medium">{r.value}</span>
+                      <span className="text-muted-foreground">{r.label}</span>
+                      <span className="text-foreground font-medium">{r.value}</span>
                     </div>
                   ))}
                 </div>
@@ -522,19 +522,19 @@ function DetailDrawer({ playerId, onClose, onRefresh }: DetailDrawerProps) {
               {/* 车辆信息 */}
               {player.vehicles && player.vehicles.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">登记车辆</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">登记车辆</p>
                   <div className="space-y-2">
                     {player.vehicles.map((v, i) => (
-                      <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
-                        <Car size={16} className="text-gray-400 flex-shrink-0" />
+                      <div key={i} className="flex items-center gap-3 bg-secondary/50 rounded-xl px-4 py-3">
+                        <Car size={16} className="text-muted-foreground flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <span className="text-sm font-medium text-gray-800">{v.plateNo}</span>
+                          <span className="text-sm font-medium text-foreground">{v.plateNo}</span>
                           {(v.brand || v.color) && (
-                            <span className="text-xs text-gray-400 ml-2">{[v.brand, v.color].filter(Boolean).join(' · ')}</span>
+                            <span className="text-xs text-muted-foreground ml-2">{[v.brand, v.color].filter(Boolean).join(' · ')}</span>
                           )}
                         </div>
                         {v.isPrimary && (
-                          <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">常用</span>
+                          <span className="text-xs text-success bg-success/10 px-2 py-0.5 rounded-full">常用</span>
                         )}
                       </div>
                     ))}
@@ -620,47 +620,47 @@ export default function Players() {
   return (
     <div className="min-h-screen bg-[#f4f7fb] flex flex-col">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
+      <header className="sticky top-0 z-10 bg-white border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
         <button onClick={() => navigate('/home')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft size={16} /> 返回
         </button>
-        <div className="h-4 w-px bg-gray-200" />
-        <h1 className="text-base font-semibold text-gray-900">球员管理</h1>
-        <span className="text-sm text-gray-400 ml-1">{total > 0 ? `共 ${total} 人` : ''}</span>
+        <div className="h-4 w-px bg-secondary" />
+        <h1 className="text-base font-semibold text-foreground">球员管理</h1>
+        <span className="text-sm text-muted-foreground ml-1">{total > 0 ? `共 ${total} 人` : ''}</span>
       </header>
 
       <div className="flex-1 flex flex-col px-6 py-6 gap-4">
         {/* 搜索 + 新增 */}
         <div className="flex items-center gap-3">
           <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <input
               value={searchInput}
               onChange={e => handleSearch(e.target.value)}
               placeholder="搜索姓名 / 手机号 / 球员号 / 消费卡号"
-              className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-sm"
+              className="w-full pl-9 pr-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring shadow-sm"
             />
           </div>
           <button onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm font-medium flex-shrink-0">
+            className="flex items-center gap-2 px-4 py-2.5 bg-success text-white text-sm rounded-xl hover:bg-success/90 transition-colors shadow-sm font-medium flex-shrink-0">
             <Plus size={15} /> 新增球员
           </button>
         </div>
 
         {/* 球员列表 */}
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
           {loading && players.length === 0 ? (
-            <div className="flex items-center justify-center py-20 text-gray-400 text-sm">加载中...</div>
+            <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">加载中...</div>
           ) : players.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-300">
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <User size={48} className="mb-3" />
               <p className="text-sm">
                 {searchText ? '未找到匹配的球员' : '暂无球员'}
               </p>
               {!searchText && (
                 <button onClick={() => setShowAdd(true)}
-                  className="mt-4 px-5 py-2 bg-emerald-600 text-white text-sm rounded-full hover:bg-emerald-700 transition-colors">
+                  className="mt-4 px-5 py-2 bg-success text-white text-sm rounded-full hover:bg-success/90 transition-colors">
                   新增第一位球员
                 </button>
               )}
@@ -668,7 +668,7 @@ export default function Players() {
           ) : (
             <div>
               {/* 表头 */}
-              <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50 border-b border-gray-100 text-xs font-medium text-gray-500">
+              <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-secondary/50 border-b border-border text-xs font-medium text-muted-foreground">
                 <span>球员</span>
                 <span>球员号</span>
                 <span>会员等级</span>
@@ -676,7 +676,7 @@ export default function Players() {
                 <span></span>
               </div>
 
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-border/50">
                 {players.map(player => {
                   const profile = player.profile
                   const balance = profile?.account?.balance ?? 0
@@ -685,16 +685,16 @@ export default function Players() {
 
                   return (
                     <div key={player._id}
-                      className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/50 transition-colors cursor-pointer"
                       onClick={() => setDetailId(player._id)}>
                       {/* 头像 + 名字 */}
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success font-bold text-sm flex-shrink-0">
                           {player.name?.[0] || '?'}
                         </div>
                         <div className="min-w-0">
-                          <div className="text-sm font-semibold text-gray-900 truncate">{player.name}</div>
-                          <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-2">
+                          <div className="text-sm font-semibold text-foreground truncate">{player.name}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
                             {player.phoneNumber && (
                               <span className="flex items-center gap-0.5">
                                 <Phone size={10} /> {player.phoneNumber}
@@ -711,7 +711,7 @@ export default function Players() {
 
                       {/* 球员号 */}
                       <div className="hidden sm:block w-20 flex-shrink-0">
-                        <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                        <span className="text-xs font-mono bg-secondary text-muted-foreground px-2 py-0.5 rounded">
                           {player.playerNo}
                         </span>
                       </div>
@@ -725,13 +725,13 @@ export default function Players() {
 
                       {/* 余额 */}
                       <div className="hidden sm:block w-20 flex-shrink-0 text-right">
-                        <span className={`text-sm font-semibold ${balance > 0 ? 'text-emerald-600' : 'text-gray-400'}`}>
+                        <span className={`text-sm font-semibold ${balance > 0 ? 'text-success' : 'text-muted-foreground'}`}>
                           ¥{balance.toFixed(2)}
                         </span>
                       </div>
 
                       {/* 箭头 */}
-                      <ChevronRight size={16} className="text-gray-300 flex-shrink-0" />
+                      <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
                     </div>
                   )
                 })}
@@ -739,9 +739,9 @@ export default function Players() {
 
               {/* 加载更多 */}
               {hasMore && (
-                <div className="flex justify-center py-4 border-t border-gray-50">
+                <div className="flex justify-center py-4 border-t border-border/50">
                   <button onClick={handleLoadMore} disabled={loading}
-                    className="px-6 py-2 text-sm text-emerald-600 border border-emerald-200 rounded-lg hover:bg-emerald-50 disabled:opacity-50 transition-colors">
+                    className="px-6 py-2 text-sm text-success border border-success/20 rounded-lg hover:bg-success/10 disabled:opacity-50 transition-colors">
                     {loading ? '加载中...' : '加载更多'}
                   </button>
                 </div>

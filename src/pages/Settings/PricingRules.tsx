@@ -33,16 +33,16 @@ function NumberInput({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
       <div className="flex items-center gap-2">
         <input
           type="number" value={value} min={min} max={max} step={step}
           onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) onChange(v) }}
-          className="w-28 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+          className="w-28 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
         />
-        {unit && <span className="text-sm text-gray-500">{unit}</span>}
+        {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
       </div>
-      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
     </div>
   )
 }
@@ -51,10 +51,10 @@ function NumberInput({
 function TimeInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
       <input
         type="time" value={value} onChange={e => onChange(e.target.value)}
-        className="w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+        className="w-32 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
       />
     </div>
   )
@@ -68,13 +68,13 @@ function Toggle({ label, checked, onChange, description }: {
     <div className="flex items-start gap-3">
       <button
         role="switch" aria-checked={checked} onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-colors ${checked ? 'bg-emerald-500' : 'bg-gray-200'}`}
+        className={`relative mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-colors ${checked ? 'bg-success/100' : 'bg-secondary'}`}
       >
         <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-4' : ''}`} />
       </button>
       <div>
-        <div className="text-sm font-medium text-gray-700">{label}</div>
-        {description && <div className="text-xs text-gray-400 mt-0.5">{description}</div>}
+        <div className="text-sm font-medium text-foreground">{label}</div>
+        {description && <div className="text-xs text-muted-foreground mt-0.5">{description}</div>}
       </div>
     </div>
   )
@@ -125,15 +125,15 @@ export default function PricingRules() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20 text-gray-400 text-sm">加载中...</div>
+    return <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">加载中...</div>
   }
 
   return (
     <div className="max-w-2xl space-y-8">
       {/* 会员折扣 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">会员折扣</h3>
-        <p className="text-xs text-gray-400 mb-4">系数范围 0~1，例 0.7 表示七折。等级越高折扣越大。</p>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">会员折扣</h3>
+        <p className="text-xs text-muted-foreground mb-4">系数范围 0~1，例 0.7 表示七折。等级越高折扣越大。</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {(['level1', 'level2', 'level3', 'level4'] as const).map((lv, i) => (
             <NumberInput
@@ -150,12 +150,12 @@ export default function PricingRules() {
 
       {/* 时段定价 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">时段定价</h3>
-        <p className="text-xs text-gray-400 mb-4">价格系数基于基础价格计算，1.0 表示原价。</p>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">时段定价</h3>
+        <p className="text-xs text-muted-foreground mb-4">价格系数基于基础价格计算，1.0 表示原价。</p>
         <div className="space-y-4">
           {(['morning', 'afternoon'] as const).map(slot => (
-            <div key={slot} className="p-4 bg-gray-50 rounded-xl">
-              <div className="text-sm font-medium text-gray-700 mb-3">{slot === 'morning' ? '上午时段' : '下午时段'}</div>
+            <div key={slot} className="p-4 bg-secondary/50 rounded-xl">
+              <div className="text-sm font-medium text-foreground mb-3">{slot === 'morning' ? '上午时段' : '下午时段'}</div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <TimeInput
                   label="开始时间"
@@ -182,7 +182,7 @@ export default function PricingRules() {
 
       {/* 节假日政策 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">节假日政策</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">节假日政策</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex items-end pb-1">
             <Toggle
@@ -204,7 +204,7 @@ export default function PricingRules() {
 
       {/* 附加费用 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">附加费用（元）</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">附加费用（元）</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <NumberInput
             label="球童费" value={form.additionalFees.caddyFee} min={0} unit="元"
@@ -230,7 +230,7 @@ export default function PricingRules() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2.5 bg-success text-white rounded-lg text-sm font-medium hover:bg-success/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? '保存中...' : '保存设置'}
         </button>

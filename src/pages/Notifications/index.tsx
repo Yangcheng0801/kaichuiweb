@@ -31,7 +31,7 @@ const ICON_MAP: Record<string, any> = {
 };
 
 const COLOR_MAP: Record<string, string> = {
-  emerald: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+  emerald: 'text-success bg-success/10 border-success/20',
   red: 'text-red-600 bg-red-50 border-red-200',
   blue: 'text-blue-600 bg-blue-50 border-blue-200',
   amber: 'text-amber-600 bg-amber-50 border-amber-200',
@@ -41,7 +41,7 @@ const COLOR_MAP: Record<string, string> = {
   indigo: 'text-indigo-600 bg-indigo-50 border-indigo-200',
   yellow: 'text-yellow-600 bg-yellow-50 border-yellow-200',
   cyan: 'text-cyan-600 bg-cyan-50 border-cyan-200',
-  gray: 'text-gray-600 bg-gray-50 border-gray-200',
+  gray: 'text-muted-foreground bg-secondary/50 border-border',
 };
 
 const CATEGORY_LABELS: Record<string, { label: string; icon: any; color: string }> = {
@@ -225,7 +225,7 @@ export default function Notifications() {
 
   const renderIcon = (icon: string, color: string) => {
     const Icon = ICON_MAP[icon] || Bell;
-    const cls = COLOR_MAP[color] || 'text-gray-600 bg-gray-50 border-gray-200';
+    const cls = COLOR_MAP[color] || 'text-muted-foreground bg-secondary/50 border-border';
     return (
       <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 border ${cls}`}>
         <Icon className="w-4.5 h-4.5" />
@@ -252,7 +252,7 @@ export default function Notifications() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-secondary/50 to-blue-50/30">
       {/* ── 顶部 ─────────────────────────────────────────────────────── */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -262,8 +262,8 @@ export default function Notifications() {
                 <Bell className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-800">通知中心</h1>
-                <p className="text-sm text-gray-500">管理所有系统通知与消息</p>
+                <h1 className="text-xl font-bold text-foreground">通知中心</h1>
+                <p className="text-sm text-muted-foreground">管理所有系统通知与消息</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -273,8 +273,8 @@ export default function Notifications() {
                   全部已读
                 </button>
               )}
-              <button onClick={fetchNotifications} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <RefreshCw className={`w-4 h-4 text-gray-500 ${loading ? 'animate-spin' : ''}`} />
+              <button onClick={fetchNotifications} className="p-2 rounded-lg hover:bg-secondary transition-colors">
+                <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
           </div>
@@ -292,7 +292,7 @@ export default function Notifications() {
                 className={`flex items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -310,7 +310,7 @@ export default function Notifications() {
             {/* 筛选栏 */}
             <div className="bg-white rounded-xl shadow-sm border p-4">
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Filter className="w-4 h-4" />
                   筛选:
                 </div>
@@ -333,7 +333,7 @@ export default function Notifications() {
                   <option value="false">未读</option>
                   <option value="true">已读</option>
                 </select>
-                <label className="flex items-center gap-1.5 text-sm text-gray-500 cursor-pointer">
+                <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filterArchived}
@@ -347,35 +347,35 @@ export default function Notifications() {
 
                 {selectedIds.size > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">已选 {selectedIds.size} 条</span>
+                    <span className="text-xs text-muted-foreground">已选 {selectedIds.size} 条</span>
                     <button onClick={batchMarkRead} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100">
                       批量已读
                     </button>
                   </div>
                 )}
 
-                <span className="text-sm text-gray-400">共 {total} 条</span>
+                <span className="text-sm text-muted-foreground">共 {total} 条</span>
               </div>
             </div>
 
             {/* 通知列表 */}
             <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
               {loading && notifications.length === 0 ? (
-                <div className="py-20 text-center text-gray-400">
+                <div className="py-20 text-center text-muted-foreground">
                   <RefreshCw className="w-8 h-8 mx-auto mb-2 animate-spin" />
                   加载中...
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="py-20 text-center">
-                  <Bell className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                  <p className="text-gray-400">暂无通知</p>
+                  <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">暂无通知</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-50">
+                <div className="divide-y divide-border/50">
                   {notifications.map(n => (
                     <div
                       key={n._id}
-                      className={`flex items-start gap-4 px-5 py-4 hover:bg-gray-50/50 transition-colors ${
+                      className={`flex items-start gap-4 px-5 py-4 hover:bg-secondary/50/50 transition-colors ${
                         !n.read ? 'bg-blue-50/20' : ''
                       }`}
                     >
@@ -393,7 +393,7 @@ export default function Notifications() {
                       {/* 内容 */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`text-sm font-medium ${!n.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                          <span className={`text-sm font-medium ${!n.read ? 'text-foreground' : 'text-muted-foreground'}`}>
                             {n.title}
                           </span>
                           {n.priority === 'urgent' && (
@@ -407,16 +407,16 @@ export default function Notifications() {
                           )}
                         </div>
                         {n.content && (
-                          <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{n.content}</p>
+                          <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{n.content}</p>
                         )}
                         <div className="flex items-center gap-3 mt-1.5">
                           <span className={`text-[11px] px-1.5 py-0.5 rounded ${
-                            COLOR_MAP[CATEGORY_LABELS[n.category]?.color || 'gray'] || 'bg-gray-50 text-gray-600'
+                            COLOR_MAP[CATEGORY_LABELS[n.category]?.color || 'gray'] || 'bg-secondary/50 text-muted-foreground'
                           }`}>
                             {CATEGORY_LABELS[n.category]?.label || n.category}
                           </span>
-                          <span className="text-[11px] text-gray-400">{n.typeLabel}</span>
-                          <span className="text-[11px] text-gray-400">{formatTime(n.createdAt)}</span>
+                          <span className="text-[11px] text-muted-foreground">{n.typeLabel}</span>
+                          <span className="text-[11px] text-muted-foreground">{formatTime(n.createdAt)}</span>
                         </div>
                       </div>
 
@@ -425,7 +425,7 @@ export default function Notifications() {
                         {!n.read && (
                           <button
                             onClick={() => markRead(n._id)}
-                            className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-500 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-blue-50 text-muted-foreground hover:text-blue-500 transition-colors"
                             title="标记已读"
                           >
                             <Eye className="w-4 h-4" />
@@ -433,14 +433,14 @@ export default function Notifications() {
                         )}
                         <button
                           onClick={() => archiveNotification(n._id)}
-                          className="p-1.5 rounded-lg hover:bg-amber-50 text-gray-400 hover:text-amber-500 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-amber-50 text-muted-foreground hover:text-amber-500 transition-colors"
                           title="归档"
                         >
                           <Archive className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => deleteNotification(n._id)}
-                          className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-colors"
                           title="删除"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -453,22 +453,22 @@ export default function Notifications() {
 
               {/* 分页 */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-5 py-3 border-t bg-gray-50/50">
-                  <span className="text-sm text-gray-500">
+                <div className="flex items-center justify-between px-5 py-3 border-t bg-secondary/50/50">
+                  <span className="text-sm text-muted-foreground">
                     第 {page}/{totalPages} 页，共 {total} 条
                   </span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-30 transition-colors"
+                      className="p-1.5 rounded hover:bg-secondary disabled:opacity-30 transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-30 transition-colors"
+                      className="p-1.5 rounded hover:bg-secondary disabled:opacity-30 transition-colors"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -485,11 +485,11 @@ export default function Notifications() {
             <div className="bg-white rounded-xl shadow-sm border p-6 space-y-5">
               <div className="flex items-center gap-2 mb-2">
                 <Megaphone className="w-5 h-5 text-indigo-600" />
-                <h2 className="text-lg font-bold text-gray-800">发送系统公告</h2>
+                <h2 className="text-lg font-bold text-foreground">发送系统公告</h2>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">公告标题 *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">公告标题 *</label>
                 <input
                   type="text"
                   value={sendForm.title}
@@ -500,7 +500,7 @@ export default function Notifications() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">公告内容</label>
+                <label className="block text-sm font-medium text-foreground mb-1">公告内容</label>
                 <textarea
                   value={sendForm.content}
                   onChange={e => setSendForm(prev => ({ ...prev, content: e.target.value }))}
@@ -512,7 +512,7 @@ export default function Notifications() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">接收角色</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">接收角色</label>
                   <select
                     value={sendForm.recipientRole}
                     onChange={e => setSendForm(prev => ({ ...prev, recipientRole: e.target.value }))}
@@ -526,7 +526,7 @@ export default function Notifications() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">优先级</label>
                   <select
                     value={sendForm.priority}
                     onChange={e => setSendForm(prev => ({ ...prev, priority: e.target.value }))}
@@ -542,7 +542,7 @@ export default function Notifications() {
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   onClick={() => setSendForm({ title: '', content: '', recipientRole: 'all', priority: 'normal' })}
-                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg transition-colors"
                 >
                   重置
                 </button>
@@ -577,10 +577,10 @@ export default function Notifications() {
                 <div key={i} className="bg-white rounded-xl shadow-sm border p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">{card.label}</p>
-                      <p className="text-2xl font-bold text-gray-800 mt-1">{card.value}</p>
+                      <p className="text-sm text-muted-foreground">{card.label}</p>
+                      <p className="text-2xl font-bold text-foreground mt-1">{card.value}</p>
                     </div>
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${COLOR_MAP[card.color] || 'bg-gray-50'}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${COLOR_MAP[card.color] || 'bg-secondary/50'}`}>
                       <card.icon className="w-5 h-5" />
                     </div>
                   </div>
@@ -590,12 +590,12 @@ export default function Notifications() {
 
             {/* 按分类统计 */}
             <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-base font-bold text-gray-800 mb-4">按分类统计</h3>
+              <h3 className="text-base font-bold text-foreground mb-4">按分类统计</h3>
               <div className="grid grid-cols-4 gap-4">
                 {Object.entries(CATEGORY_LABELS).map(([key, info]) => {
                   const catStats = stats?.byCategory?.[key];
                   return (
-                    <div key={key} className={`rounded-lg border p-4 ${COLOR_MAP[info.color] || 'bg-gray-50'}`}>
+                    <div key={key} className={`rounded-lg border p-4 ${COLOR_MAP[info.color] || 'bg-secondary/50'}`}>
                       <div className="flex items-center gap-2 mb-2">
                         <info.icon className="w-4 h-4" />
                         <span className="text-sm font-medium">{info.label}</span>
@@ -614,10 +614,10 @@ export default function Notifications() {
 
             {/* 按优先级统计 */}
             <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-base font-bold text-gray-800 mb-4">按优先级统计</h3>
+              <h3 className="text-base font-bold text-foreground mb-4">按优先级统计</h3>
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { key: 'normal', label: '普通', color: 'bg-gray-100 text-gray-600' },
+                  { key: 'normal', label: '普通', color: 'bg-secondary text-muted-foreground' },
                   { key: 'important', label: '重要', color: 'bg-amber-100 text-amber-700' },
                   { key: 'urgent', label: '紧急', color: 'bg-red-100 text-red-700' },
                 ].map(p => (

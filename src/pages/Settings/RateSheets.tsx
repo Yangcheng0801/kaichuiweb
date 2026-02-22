@@ -193,9 +193,9 @@ export default function RateSheets() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 bg-gray-50 border-b border-gray-200 rounded-tl-lg" />
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground bg-secondary/50 border-b border-border rounded-tl-lg" />
               {timeSlots.map(ts => (
-                <th key={ts.key} className="px-4 py-3 text-center text-xs font-semibold text-gray-500 bg-gray-50 border-b border-gray-200">
+                <th key={ts.key} className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground bg-secondary/50 border-b border-border">
                   <div className="flex items-center justify-center gap-1.5">
                     {TIME_SLOT_ICONS[ts.key]}{ts.label}
                   </div>
@@ -205,23 +205,23 @@ export default function RateSheets() {
           </thead>
           <tbody>
             {dayTypes.map(dt => (
-              <tr key={dt.key} className="hover:bg-gray-50/50">
-                <td className="px-4 py-3 text-sm font-medium text-gray-700 border-b border-gray-100 whitespace-nowrap">
+              <tr key={dt.key} className="hover:bg-secondary/50/50">
+                <td className="px-4 py-3 text-sm font-medium text-foreground border-b border-border whitespace-nowrap">
                   <div className="flex items-center gap-1.5">{DAY_TYPE_ICONS[dt.key]}{dt.label}</div>
                 </td>
                 {timeSlots.map(ts => {
                   const rule = matrix.matrix[dt.key]?.[ts.key]
                   return (
-                    <td key={ts.key} className="px-2 py-2 border-b border-gray-100">
+                    <td key={ts.key} className="px-2 py-2 border-b border-border">
                       {rule ? (
                         <button onClick={() => openEdit(rule)}
-                          className="w-full text-left p-3 rounded-xl bg-emerald-50 border border-emerald-100 hover:border-emerald-300 hover:bg-emerald-100 transition-all group cursor-pointer">
+                          className="w-full text-left p-3 rounded-xl bg-success/10 border border-success/10 hover:border-success/30 hover:bg-success/10 transition-all group cursor-pointer">
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[10px] font-medium text-emerald-600">{rule.ruleName}</span>
-                            <Edit3 size={10} className="text-emerald-300 group-hover:text-emerald-600 transition-colors" />
+                            <span className="text-[10px] font-medium text-success">{rule.ruleName}</span>
+                            <Edit3 size={10} className="text-success/70 group-hover:text-success transition-colors" />
                           </div>
-                          <div className="text-lg font-bold text-gray-900">¥{extractPrices(rule).walkin || rule.priceWalkin || 0}</div>
-                          <div className="text-[10px] text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
+                          <div className="text-lg font-bold text-foreground">¥{extractPrices(rule).walkin || rule.priceWalkin || 0}</div>
+                          <div className="text-[10px] text-muted-foreground mt-0.5 flex flex-wrap gap-x-2">
                             {activeIdentities.slice(1, 4).map(id => (
                               <span key={id.code}>{id.name}¥{extractPrices(rule)[id.code] || 0}</span>
                             ))}
@@ -238,7 +238,7 @@ export default function RateSheets() {
                         </button>
                       ) : (
                         <button onClick={() => openEdit(null, dt.key, ts.key)}
-                          className="w-full p-3 rounded-xl border-2 border-dashed border-gray-200 hover:border-emerald-400 text-gray-300 hover:text-emerald-600 transition-all text-center text-xs">
+                          className="w-full p-3 rounded-xl border-2 border-dashed border-border hover:border-success text-muted-foreground hover:text-success transition-all text-center text-xs">
                           + 添加价格
                         </button>
                       )}
@@ -265,12 +265,12 @@ export default function RateSheets() {
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
           {/* 标题 */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <DollarSign size={18} className="text-emerald-600" />
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
+              <DollarSign size={18} className="text-success" />
               {editRule ? '编辑价格规则' : '新建价格规则'}
             </h2>
-            <button onClick={closeEdit} className="text-gray-400 hover:text-gray-700"><X size={20} /></button>
+            <button onClick={closeEdit} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
           </div>
 
           {/* Tab 切换 */}
@@ -283,8 +283,8 @@ export default function RateSheets() {
               <button key={tab.key} onClick={() => setActiveEditTab(tab.key)}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-t-lg text-sm font-medium transition-all border-b-2 ${
                   activeEditTab === tab.key
-                    ? 'border-emerald-600 text-emerald-700 bg-emerald-50'
-                    : 'border-transparent text-gray-400 hover:text-gray-700'
+                    ? 'border-success text-success bg-success/10'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}>
                 {tab.icon}{tab.label}
               </button>
@@ -298,14 +298,14 @@ export default function RateSheets() {
             {activeEditTab === 'standard' && (
               <>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">规则名称</label>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">规则名称</label>
                   <input value={editForm.ruleName || ''} onChange={e => setEditForm((p: any) => ({ ...p, ruleName: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="如：平日早场价格" />
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder="如：平日早场价格" />
                 </div>
 
                 {/* 各身份果岭费 */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-2">各身份果岭费（元/人·18洞）</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-2">各身份果岭费（元/人·18洞）</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {activeIdentities.map(id => (
                       <div key={id.code}>
@@ -316,7 +316,7 @@ export default function RateSheets() {
                         <input type="number" value={prices[id.code] ?? ''} onChange={e => {
                           const val = Number(e.target.value) || 0
                           setEditForm((p: any) => ({ ...p, prices: { ...p.prices, [id.code]: val } }))
-                        }} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                        }} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                       </div>
                     ))}
                   </div>
@@ -324,13 +324,13 @@ export default function RateSheets() {
 
                 {/* 附加费 */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-2">附加费标准</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-2">附加费标准</label>
                   <div className="grid grid-cols-3 gap-3">
                     {[{ key: 'caddyFee', label: '球童费' }, { key: 'cartFee', label: '球车费' }, { key: 'insuranceFee', label: '保险费' }].map(f => (
                       <div key={f.key}>
-                        <label className="block text-xs text-gray-500 mb-1">{f.label}</label>
+                        <label className="block text-xs text-muted-foreground mb-1">{f.label}</label>
                         <input type="number" value={editForm[f.key] || ''} onChange={e => setEditForm((p: any) => ({ ...p, [f.key]: Number(e.target.value) || 0 }))}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                          className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                       </div>
                     ))}
                   </div>
@@ -339,19 +339,19 @@ export default function RateSheets() {
                 {/* 有效期 + 优先级 */}
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">生效日期</label>
+                    <label className="block text-xs text-muted-foreground mb-1">生效日期</label>
                     <input type="date" value={editForm.validFrom || ''} onChange={e => setEditForm((p: any) => ({ ...p, validFrom: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                      className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">失效日期</label>
+                    <label className="block text-xs text-muted-foreground mb-1">失效日期</label>
                     <input type="date" value={editForm.validTo || ''} onChange={e => setEditForm((p: any) => ({ ...p, validTo: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                      className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">优先级</label>
+                    <label className="block text-xs text-muted-foreground mb-1">优先级</label>
                     <input type="number" value={editForm.priority || ''} onChange={e => setEditForm((p: any) => ({ ...p, priority: Number(e.target.value) || 100 }))}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                      className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                   </div>
                 </div>
               </>
@@ -364,7 +364,7 @@ export default function RateSheets() {
                   <strong>加打（加9洞）</strong>：球员完赛后追加 9 洞的费用。通常为标准 18 洞价格的 40%~60%。如不设置则自动按标准价 50% 估算。
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-2">各身份加打价格（元/人·9洞）</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-2">各身份加打价格（元/人·9洞）</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {activeIdentities.map(id => {
                       const standardPrice = prices[id.code] || 0
@@ -375,7 +375,7 @@ export default function RateSheets() {
                           <label className="block text-xs font-medium mb-1 flex items-center gap-1.5">
                             <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: id.color }} />
                             {id.name}
-                            {estimated && <span className="text-[9px] text-gray-400">（默认50%≈¥{Math.round(standardPrice * 0.5)}）</span>}
+                            {estimated && <span className="text-[9px] text-muted-foreground">（默认50%≈¥{Math.round(standardPrice * 0.5)}）</span>}
                           </label>
                           <input type="number" value={addOnPrices[id.code] ?? ''} onChange={e => {
                             const val = e.target.value === '' ? undefined : Number(e.target.value) || 0
@@ -386,7 +386,7 @@ export default function RateSheets() {
                               return { ...p, addOnPrices: next }
                             })
                           }} placeholder={`≈${Math.round(standardPrice * 0.5)}`}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                            className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
                         </div>
                       )
                     })}
@@ -408,7 +408,7 @@ export default function RateSheets() {
                     一键填充（40%）
                   </button>
                   <button onClick={() => setEditForm((p: any) => ({ ...p, addOnPrices: {} }))}
-                    className="px-3 py-1.5 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">
+                    className="px-3 py-1.5 text-xs bg-secondary text-muted-foreground rounded-lg hover:bg-secondary">
                     清空（使用默认估算）
                   </button>
                 </div>
@@ -423,17 +423,17 @@ export default function RateSheets() {
                 </div>
                 {/* 策略选择 */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-gray-500 mb-1">减打计费策略</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">减打计费策略</label>
                   {REDUCED_PLAY_TYPES.map(t => (
                     <label key={t.key} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                      rpp.type === t.key ? 'border-amber-300 bg-amber-50' : 'border-gray-200 hover:bg-gray-50'
+                      rpp.type === t.key ? 'border-amber-300 bg-amber-50' : 'border-border hover:bg-secondary/50'
                     }`}>
                       <input type="radio" name="reducedType" value={t.key} checked={rpp.type === t.key}
                         onChange={() => setEditForm((p: any) => ({ ...p, reducedPlayPolicy: { ...p.reducedPlayPolicy, type: t.key } }))}
                         className="mt-0.5 text-amber-600 focus:ring-amber-400" />
                       <div>
-                        <div className="text-sm font-medium text-gray-800">{t.label}</div>
-                        <div className="text-xs text-gray-500">{t.description}</div>
+                        <div className="text-sm font-medium text-foreground">{t.label}</div>
+                        <div className="text-xs text-muted-foreground">{t.description}</div>
                       </div>
                     </label>
                   ))}
@@ -442,18 +442,18 @@ export default function RateSheets() {
                 {/* 比例收费率 */}
                 {rpp.type === 'proportional' && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">最低收费比例（0.4 = 40%）</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">最低收费比例（0.4 = 40%）</label>
                     <input type="number" step="0.05" min="0" max="1" value={rpp.rate ?? 0.6}
                       onChange={e => setEditForm((p: any) => ({ ...p, reducedPlayPolicy: { ...p.reducedPlayPolicy, rate: Number(e.target.value) || 0.6 } }))}
-                      className="w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
-                    <p className="text-xs text-gray-400 mt-1">例：球员打 9/18 洞 → 实际比例 50%，不低于设定的最低比例</p>
+                      className="w-32 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                    <p className="text-xs text-muted-foreground mt-1">例：球员打 9/18 洞 → 实际比例 50%，不低于设定的最低比例</p>
                   </div>
                 )}
 
                 {/* 固定减打价 */}
                 {rpp.type === 'fixed_rate' && (
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 mb-2">各身份固定减打价（元/人）</label>
+                    <label className="block text-xs font-semibold text-muted-foreground mb-2">各身份固定减打价（元/人）</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {activeIdentities.map(id => (
                         <div key={id.code}>
@@ -470,7 +470,7 @@ export default function RateSheets() {
                               },
                             }))
                           }} placeholder={`≈¥${Math.round((prices[id.code] || 0) * 0.6)}`}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                            className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
                         </div>
                       ))}
                     </div>
@@ -488,13 +488,13 @@ export default function RateSheets() {
           </div>
 
           {/* 底部 */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-border">
             {editRule?._id ? (
               <button onClick={() => { handleDelete(editRule._id); closeEdit() }} className="text-xs text-red-400 hover:text-red-600">删除此规则</button>
             ) : <span />}
             <div className="flex gap-3">
-              <button onClick={closeEdit} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">取消</button>
-              <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 disabled:opacity-50 font-medium">
+              <button onClick={closeEdit} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">取消</button>
+              <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 font-medium">
                 {saving ? '保存中...' : '保存'}
               </button>
             </div>
@@ -509,14 +509,14 @@ export default function RateSheets() {
       {/* 标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">价格矩阵</h2>
-          <p className="text-sm text-gray-500 mt-0.5">管理各日期类型和时段下的果岭费、加打价格及减打策略</p>
+          <h2 className="text-lg font-semibold text-foreground">价格矩阵</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">管理各日期类型和时段下的果岭费、加打价格及减打策略</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={loadData} className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50">
+          <button onClick={loadData} className="flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-secondary/50">
             <RefreshCw size={14} /> 刷新
           </button>
-          <button onClick={() => setShowBatchForm(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium">
+          <button onClick={() => setShowBatchForm(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-success text-white rounded-lg hover:bg-success/90 font-medium">
             <Zap size={14} /> 一键生成
           </button>
         </div>
@@ -525,9 +525,9 @@ export default function RateSheets() {
       {/* 身份类型提示 */}
       {activeIdentities.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs text-gray-400">当前启用身份：</span>
+          <span className="text-xs text-muted-foreground">当前启用身份：</span>
           {activeIdentities.map(id => (
-            <span key={id.code} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+            <span key={id.code} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: id.color }} />
               {id.name}
             </span>
@@ -537,7 +537,7 @@ export default function RateSheets() {
 
       {/* 矩阵 */}
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-gray-400">加载中...</div>
+        <div className="flex items-center justify-center py-20 text-muted-foreground">加载中...</div>
       ) : (
         renderMatrix()
       )}
@@ -549,42 +549,42 @@ export default function RateSheets() {
       {showBatchForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">一键生成价格矩阵</h2>
-              <button onClick={() => setShowBatchForm(false)} className="text-gray-400 hover:text-gray-700"><X size={20} /></button>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <h2 className="font-semibold text-foreground">一键生成价格矩阵</h2>
+              <button onClick={() => setShowBatchForm(false)} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-              <p className="text-xs text-gray-500">以散客平日早场价为基准，自动生成 9 条价格规则，<strong>包含全部身份定价、加打价格和减打策略</strong>。</p>
+              <p className="text-xs text-muted-foreground">以散客平日早场价为基准，自动生成 9 条价格规则，<strong>包含全部身份定价、加打价格和减打策略</strong>。</p>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">基准价格（散客·平日·早场）</label>
-                <input type="number" value={batchParams.basePrice} onChange={e => setBatchParams(p => ({ ...p, basePrice: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                <label className="block text-xs font-medium text-muted-foreground mb-1">基准价格（散客·平日·早场）</label>
+                <input type="number" value={batchParams.basePrice} onChange={e => setBatchParams(p => ({ ...p, basePrice: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
               <div className="grid grid-cols-3 gap-3">
-                <div><label className="block text-xs text-gray-500 mb-1">周末系数</label><input type="number" step="0.1" value={batchParams.weekendRate} onChange={e => setBatchParams(p => ({ ...p, weekendRate: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
-                <div><label className="block text-xs text-gray-500 mb-1">假日系数</label><input type="number" step="0.1" value={batchParams.holidayRate} onChange={e => setBatchParams(p => ({ ...p, holidayRate: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
-                <div><label className="block text-xs text-gray-500 mb-1">嘉宾折扣</label><input type="number" step="0.05" value={batchParams.guestDiscount} onChange={e => setBatchParams(p => ({ ...p, guestDiscount: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+                <div><label className="block text-xs text-muted-foreground mb-1">周末系数</label><input type="number" step="0.1" value={batchParams.weekendRate} onChange={e => setBatchParams(p => ({ ...p, weekendRate: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
+                <div><label className="block text-xs text-muted-foreground mb-1">假日系数</label><input type="number" step="0.1" value={batchParams.holidayRate} onChange={e => setBatchParams(p => ({ ...p, holidayRate: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
+                <div><label className="block text-xs text-muted-foreground mb-1">嘉宾折扣</label><input type="number" step="0.05" value={batchParams.guestDiscount} onChange={e => setBatchParams(p => ({ ...p, guestDiscount: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
               </div>
               <div className="grid grid-cols-3 gap-3">
-                <div><label className="block text-xs text-gray-500 mb-1">球童费</label><input type="number" value={batchParams.caddyFee} onChange={e => setBatchParams(p => ({ ...p, caddyFee: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
-                <div><label className="block text-xs text-gray-500 mb-1">球车费</label><input type="number" value={batchParams.cartFee} onChange={e => setBatchParams(p => ({ ...p, cartFee: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
-                <div><label className="block text-xs text-gray-500 mb-1">保险费</label><input type="number" value={batchParams.insuranceFee} onChange={e => setBatchParams(p => ({ ...p, insuranceFee: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" /></div>
+                <div><label className="block text-xs text-muted-foreground mb-1">球童费</label><input type="number" value={batchParams.caddyFee} onChange={e => setBatchParams(p => ({ ...p, caddyFee: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
+                <div><label className="block text-xs text-muted-foreground mb-1">球车费</label><input type="number" value={batchParams.cartFee} onChange={e => setBatchParams(p => ({ ...p, cartFee: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
+                <div><label className="block text-xs text-muted-foreground mb-1">保险费</label><input type="number" value={batchParams.insuranceFee} onChange={e => setBatchParams(p => ({ ...p, insuranceFee: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
               </div>
-              <div className="border-t border-gray-100 pt-3 grid grid-cols-2 gap-3">
+              <div className="border-t border-border pt-3 grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">加打系数</label>
-                  <input type="number" step="0.05" value={batchParams.addOnRate} onChange={e => setBatchParams(p => ({ ...p, addOnRate: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                  <p className="text-[10px] text-gray-400 mt-0.5">加打价 = 标准价 × 系数</p>
+                  <label className="block text-xs text-muted-foreground mb-1">加打系数</label>
+                  <input type="number" step="0.05" value={batchParams.addOnRate} onChange={e => setBatchParams(p => ({ ...p, addOnRate: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <p className="text-[10px] text-muted-foreground mt-0.5">加打价 = 标准价 × 系数</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">减打比例</label>
-                  <input type="number" step="0.05" value={batchParams.reducedPlayRate} onChange={e => setBatchParams(p => ({ ...p, reducedPlayRate: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                  <p className="text-[10px] text-gray-400 mt-0.5">最低收费 = 标准价 × 比例</p>
+                  <label className="block text-xs text-muted-foreground mb-1">减打比例</label>
+                  <input type="number" step="0.05" value={batchParams.reducedPlayRate} onChange={e => setBatchParams(p => ({ ...p, reducedPlayRate: Number(e.target.value) }))} className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <p className="text-[10px] text-muted-foreground mt-0.5">最低收费 = 标准价 × 比例</p>
                 </div>
               </div>
             </div>
-            <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
-              <button onClick={() => setShowBatchForm(false)} className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50">取消</button>
-              <button onClick={handleBatch} disabled={batchLoading} className="flex-1 px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 font-medium disabled:opacity-50">
+            <div className="flex gap-3 px-6 py-4 border-t border-border">
+              <button onClick={() => setShowBatchForm(false)} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
+              <button onClick={handleBatch} disabled={batchLoading} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
                 {batchLoading ? '生成中...' : '确认生成'}
               </button>
             </div>

@@ -154,13 +154,13 @@ export default function RolesManager() {
     <div className="space-y-6">
       {/* 子 Tabs */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
+        <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
           <button onClick={() => setActiveTab('roles')}
-            className={`px-3 py-1.5 text-xs rounded-md ${activeTab === 'roles' ? 'bg-white shadow text-indigo-600 font-medium' : 'text-gray-500'}`}>
+            className={`px-3 py-1.5 text-xs rounded-md ${activeTab === 'roles' ? 'bg-white shadow text-indigo-600 font-medium' : 'text-muted-foreground'}`}>
             <Shield size={14} className="inline mr-1" /> 角色管理
           </button>
           <button onClick={() => setActiveTab('audit')}
-            className={`px-3 py-1.5 text-xs rounded-md ${activeTab === 'audit' ? 'bg-white shadow text-indigo-600 font-medium' : 'text-gray-500'}`}>
+            className={`px-3 py-1.5 text-xs rounded-md ${activeTab === 'audit' ? 'bg-white shadow text-indigo-600 font-medium' : 'text-muted-foreground'}`}>
             <ScrollText size={14} className="inline mr-1" /> 审计日志
           </button>
         </div>
@@ -171,7 +171,7 @@ export default function RolesManager() {
                 <Zap size={14} /> 一键初始化默认角色
               </button>
             )}
-            <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs hover:bg-emerald-700">
+            <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1.5 px-3 py-1.5 bg-success text-white rounded-lg text-xs hover:bg-success/90">
               <Plus size={14} /> 新增角色
             </button>
           </div>
@@ -183,7 +183,7 @@ export default function RolesManager() {
         <div className="flex gap-6">
           {/* 左侧：角色列表 */}
           <div className="w-64 shrink-0 space-y-2">
-            {loading && <div className="text-center py-10 text-gray-400 text-sm">加载中...</div>}
+            {loading && <div className="text-center py-10 text-muted-foreground text-sm">加载中...</div>}
 
             {/* 创建表单 */}
             {showCreate && (
@@ -196,7 +196,7 @@ export default function RolesManager() {
                   placeholder="描述（可选）" className="w-full border rounded px-2 py-1 text-xs" />
                 <div className="flex gap-2">
                   <button onClick={handleCreate} className="flex-1 bg-indigo-600 text-white rounded text-xs py-1 hover:bg-indigo-700">创建</button>
-                  <button onClick={() => setShowCreate(false)} className="px-3 bg-gray-200 rounded text-xs py-1">取消</button>
+                  <button onClick={() => setShowCreate(false)} className="px-3 bg-secondary rounded text-xs py-1">取消</button>
                 </div>
               </div>
             )}
@@ -204,11 +204,11 @@ export default function RolesManager() {
             {roles.map(role => (
               <div key={role._id}
                 onClick={() => setEditingRole({ ...role })}
-                className={`rounded-xl p-3 cursor-pointer transition-all ${editingRole?._id === role._id ? 'bg-indigo-50 border-indigo-300 border shadow-sm' : 'bg-white border border-gray-100 hover:border-gray-200'}`}>
+                className={`rounded-xl p-3 cursor-pointer transition-all ${editingRole?._id === role._id ? 'bg-indigo-50 border-indigo-300 border shadow-sm' : 'bg-white border border-border hover:border-border'}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {role.isSystem && <Lock size={12} className="text-gray-400" />}
-                    <span className="text-sm font-medium text-gray-900">{role.name}</span>
+                    {role.isSystem && <Lock size={12} className="text-muted-foreground" />}
+                    <span className="text-sm font-medium text-foreground">{role.name}</span>
                   </div>
                   {!role.isSystem && (
                     <button onClick={e => { e.stopPropagation(); handleDelete(role._id) }}
@@ -217,8 +217,8 @@ export default function RolesManager() {
                     </button>
                   )}
                 </div>
-                <div className="text-xs text-gray-400 mt-1">{role.description}</div>
-                <div className="text-[10px] text-gray-300 mt-0.5 font-mono">{role.code}</div>
+                <div className="text-xs text-muted-foreground mt-1">{role.description}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">{role.code}</div>
               </div>
             ))}
           </div>
@@ -226,18 +226,18 @@ export default function RolesManager() {
           {/* 右侧：权限矩阵编辑器 */}
           <div className="flex-1 min-w-0">
             {!editingRole ? (
-              <div className="bg-gray-50 rounded-xl p-10 text-center text-gray-400">
+              <div className="bg-secondary/50 rounded-xl p-10 text-center text-muted-foreground">
                 <Shield size={48} className="mx-auto mb-3 opacity-30" />
                 <p className="text-sm">选择左侧角色以编辑权限</p>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b">
+              <div className="bg-white rounded-xl border border-border overflow-hidden">
+                <div className="bg-secondary/50 px-4 py-3 flex items-center justify-between border-b">
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900">
+                    <h3 className="text-sm font-semibold text-foreground">
                       {editingRole.name} - 权限矩阵
                     </h3>
-                    <p className="text-xs text-gray-400">{editingRole.description}</p>
+                    <p className="text-xs text-muted-foreground">{editingRole.description}</p>
                   </div>
                   <button onClick={handleSavePermissions}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs hover:bg-indigo-700">
@@ -249,12 +249,12 @@ export default function RolesManager() {
                 <div className="overflow-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-gray-50">
-                        <th className="text-left px-4 py-2 text-gray-500 font-medium w-40">模块</th>
+                      <tr className="border-b bg-secondary/50">
+                        <th className="text-left px-4 py-2 text-muted-foreground font-medium w-40">模块</th>
                         {ACTIONS.map(a => {
                           const info = ACTION_LABELS[a]
                           return (
-                            <th key={a} className="text-center px-2 py-2 text-gray-500 font-medium w-20">
+                            <th key={a} className="text-center px-2 py-2 text-muted-foreground font-medium w-20">
                               <div className="flex flex-col items-center gap-0.5">
                                 <info.icon size={14} />
                                 <span className="text-[10px]">{info.label}</span>
@@ -262,7 +262,7 @@ export default function RolesManager() {
                             </th>
                           )
                         })}
-                        <th className="text-center px-2 py-2 text-gray-500 font-medium w-16">全选</th>
+                        <th className="text-center px-2 py-2 text-muted-foreground font-medium w-16">全选</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -270,14 +270,14 @@ export default function RolesManager() {
                         const allOn = ACTIONS.every(a => editingRole.permissions[mod]?.[a])
                         const someOn = ACTIONS.some(a => editingRole.permissions[mod]?.[a])
                         return (
-                          <tr key={mod} className="border-b border-gray-50 hover:bg-gray-25">
-                            <td className="px-4 py-2.5 text-gray-700 font-medium">{MODULE_LABELS[mod]}</td>
+                          <tr key={mod} className="border-b border-border/50 hover:bg-secondary/50">
+                            <td className="px-4 py-2.5 text-foreground font-medium">{MODULE_LABELS[mod]}</td>
                             {ACTIONS.map(a => {
                               const on = editingRole.permissions[mod]?.[a]
                               return (
                                 <td key={a} className="text-center px-2 py-2.5">
                                   <button onClick={() => togglePerm(mod, a)}
-                                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${on ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-300 hover:bg-gray-200'}`}>
+                                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${on ? 'bg-indigo-100 text-indigo-600' : 'bg-secondary text-muted-foreground hover:bg-secondary'}`}>
                                     {on ? <Check size={14} /> : <X size={12} />}
                                   </button>
                                 </td>
@@ -285,7 +285,7 @@ export default function RolesManager() {
                             })}
                             <td className="text-center px-2 py-2.5">
                               <button onClick={() => toggleModule(mod)}
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${allOn ? 'bg-green-100 text-green-600' : someOn ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-300 hover:bg-gray-200'}`}>
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${allOn ? 'bg-green-100 text-green-600' : someOn ? 'bg-yellow-100 text-yellow-600' : 'bg-secondary text-muted-foreground hover:bg-secondary'}`}>
                                 <Check size={14} />
                               </button>
                             </td>
@@ -313,30 +313,30 @@ export default function RolesManager() {
             </select>
             <input type="date" value={auditFilter.startDate} onChange={e => setAuditFilter(p => ({ ...p, startDate: e.target.value }))}
               className="border rounded-lg px-3 py-1.5 text-sm" />
-            <button onClick={loadAuditLogs} className="p-2 hover:bg-gray-100 rounded-lg">
+            <button onClick={loadAuditLogs} className="p-2 hover:bg-secondary rounded-lg">
               <RefreshCw size={14} className={auditLoading ? 'animate-spin' : ''} />
             </button>
           </div>
 
           {/* 日志列表 */}
-          {auditLoading && <div className="text-center py-10 text-gray-400 text-sm">加载中...</div>}
-          {!auditLoading && auditLogs.length === 0 && <div className="text-center py-10 text-gray-400 text-sm">暂无审计日志</div>}
+          {auditLoading && <div className="text-center py-10 text-muted-foreground text-sm">加载中...</div>}
+          {!auditLoading && auditLogs.length === 0 && <div className="text-center py-10 text-muted-foreground text-sm">暂无审计日志</div>}
 
           <div className="space-y-2">
             {auditLogs.map((log: any) => (
-              <div key={log._id} className="bg-white rounded-xl p-3 border border-gray-100 flex items-start gap-3">
+              <div key={log._id} className="bg-white rounded-xl p-3 border border-border flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0 mt-0.5">
                   <ScrollText size={14} className="text-indigo-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-900 font-medium truncate">{log.description}</div>
-                    <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
+                    <div className="text-sm text-foreground font-medium truncate">{log.description}</div>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
                       {log.createdAt ? new Date(log.createdAt).toLocaleString('zh-CN') : '-'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                    <span className="bg-gray-100 px-1.5 py-0.5 rounded">{MODULE_LABELS[log.module] || log.module}</span>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                    <span className="bg-secondary px-1.5 py-0.5 rounded">{MODULE_LABELS[log.module] || log.module}</span>
                     <span>{log.action}</span>
                     <span>{log.operatorName || '系统'}</span>
                     {log.ip && <span className="font-mono">{log.ip}</span>}

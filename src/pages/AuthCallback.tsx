@@ -30,8 +30,8 @@ export default function AuthCallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-slate-50 to-slate-200">
       <div className="bg-white/95 px-12 py-10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] text-center">
-        <div className="w-10 h-10 mx-auto mb-5 rounded-full border-[3px] border-emerald-500/20 border-t-emerald-500 animate-spin" />
-        <p className="m-0 text-[15px] text-gray-500">登录成功，正在跳转到首页...</p>
+        <div className="w-10 h-10 mx-auto mb-5 rounded-full border-[3px] border-success/20 border-t-success animate-spin" />
+        <p className="m-0 text-[15px] text-muted-foreground">登录成功，正在跳转到首页...</p>
       </div>
     </div>
   )

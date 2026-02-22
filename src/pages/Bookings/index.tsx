@@ -30,29 +30,29 @@ export default function Bookings() {
   return (
     <div className="min-h-screen bg-[#f4f7fb] flex flex-col">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
+      <header className="sticky top-0 z-10 bg-white border-b border-border px-6 h-[60px] flex items-center gap-4 shadow-sm flex-shrink-0">
         <button
           onClick={() => navigate('/home')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft size={16} />
           返回
         </button>
-        <div className="h-4 w-px bg-gray-200" />
-        <h1 className="text-base font-semibold text-gray-900">预订管理</h1>
+        <div className="h-4 w-px bg-secondary" />
+        <h1 className="text-base font-semibold text-foreground">预订管理</h1>
       </header>
 
       <div className="flex-1 flex flex-col px-6 py-6 gap-4">
         {/* 视图切换 Tabs */}
-        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit">
+        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-border w-fit">
           {VIEWS.map(v => (
             <button
               key={v.key}
               onClick={() => setActiveView(v.key)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeView === v.key
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'bg-success text-white shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             >
               {v.icon}
@@ -62,7 +62,7 @@ export default function Bookings() {
         </div>
 
         {/* 内容区：撐满剩余高度 */}
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-border p-6 sm:p-8">
           {activeView === 'teesheet' && (
             <TeeSheet
               key={refreshKey}
@@ -100,9 +100,9 @@ import { api } from '@/utils/api'
 
 const STATUS_CFG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending:    { label: '待确认', color: 'text-amber-700',   bg: 'bg-amber-50 border-amber-200',   dot: 'bg-amber-400' },
-  confirmed:  { label: '已确认', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200', dot: 'bg-emerald-400' },
+  confirmed:  { label: '已确认', color: 'text-success', bg: 'bg-success/10 border-success/20', dot: 'bg-success' },
   checked_in: { label: '已签到', color: 'text-blue-700',    bg: 'bg-blue-50 border-blue-200',      dot: 'bg-blue-400' },
-  completed:  { label: '已完赛', color: 'text-gray-500',    bg: 'bg-gray-50 border-gray-200',      dot: 'bg-gray-400' },
+  completed:  { label: '已完赛', color: 'text-muted-foreground',    bg: 'bg-secondary/50 border-border',      dot: 'bg-muted' },
   cancelled:  { label: '已取消', color: 'text-red-400',     bg: 'bg-red-50 border-red-200',        dot: 'bg-red-300' },
 }
 
@@ -194,32 +194,32 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
     <div className="space-y-4">
       {/* ── 顶部：日期 + 搜索 + 新增 ── */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 border border-gray-200">
+        <div className="flex items-center gap-1 bg-secondary/50 rounded-xl p-1 border border-border">
           <button onClick={() => setDate(d => shiftDate(d, -1))} className="p-1.5 rounded-lg hover:bg-white transition-colors">
-            <ChevronLeft size={16} className="text-gray-500" />
+            <ChevronLeft size={16} className="text-muted-foreground" />
           </button>
           <input type="date" value={date} onChange={e => setDate(e.target.value)}
-            className="bg-transparent text-sm font-medium text-gray-800 px-2 py-1 w-[140px] outline-none" />
+            className="bg-transparent text-sm font-medium text-foreground px-2 py-1 w-[140px] outline-none" />
           <button onClick={() => setDate(d => shiftDate(d, 1))} className="p-1.5 rounded-lg hover:bg-white transition-colors">
-            <ChevronRight size={16} className="text-gray-500" />
+            <ChevronRight size={16} className="text-muted-foreground" />
           </button>
           {date !== today && (
-            <button onClick={() => setDate(today)} className="text-xs text-emerald-600 font-medium px-2 py-1 hover:bg-emerald-50 rounded-lg transition-colors">
+            <button onClick={() => setDate(today)} className="text-xs text-success font-medium px-2 py-1 hover:bg-success/10 rounded-lg transition-colors">
               今天
             </button>
           )}
         </div>
 
         <div className="relative flex-1 min-w-[180px] max-w-xs">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={searchText} onChange={e => handleSearch(e.target.value)}
             placeholder="搜索球员/手机/订单号"
-            className="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-100 transition-all" />
+            className="w-full pl-9 pr-3 py-2 text-sm bg-secondary/50 border border-border rounded-xl outline-none focus:border-success focus:ring-1 focus:ring-ring/10 transition-all" />
         </div>
 
         <div className="ml-auto">
           <button onClick={() => onNewBooking(date)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+            className="flex items-center gap-1.5 px-4 py-2 bg-success text-white text-sm font-medium rounded-xl hover:bg-success/90 transition-colors shadow-sm">
             <Plus size={15} /> 新增预订
           </button>
         </div>
@@ -227,10 +227,10 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
 
       {/* ── 日期标题 + 汇总 ── */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">{fmtDate(date)}</div>
-        <div className="flex items-center gap-4 text-xs text-gray-400">
-          <span><strong className="text-gray-700 text-sm">{list.length}</strong> 组</span>
-          <span><strong className="text-gray-700 text-sm">{totalPlayers}</strong> 人</span>
+        <div className="text-sm text-muted-foreground">{fmtDate(date)}</div>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span><strong className="text-foreground text-sm">{list.length}</strong> 组</span>
+          <span><strong className="text-foreground text-sm">{totalPlayers}</strong> 人</span>
         </div>
       </div>
 
@@ -243,13 +243,13 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
             <button key={tab.value} onClick={() => setStatus(tab.value)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 active
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  ? 'bg-success text-white border-success shadow-sm'
+                  : 'bg-white text-muted-foreground border-border hover:border-border hover:bg-secondary/50'
               }`}>
               <tab.icon size={13} />
               {tab.label}
               <span className={`ml-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                active ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
+                active ? 'bg-white/20 text-white' : 'bg-secondary text-muted-foreground'
               }`}>{cnt}</span>
             </button>
           )
@@ -258,9 +258,9 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
 
       {/* ── 预订列表（按时段分组） ── */}
       {loading ? (
-        <div className="text-center py-16 text-gray-400 text-sm">加载中...</div>
+        <div className="text-center py-16 text-muted-foreground text-sm">加载中...</div>
       ) : filteredList.length === 0 ? (
-        <div className="text-center py-16 text-gray-300">
+        <div className="text-center py-16 text-muted-foreground">
           <div className="text-4xl mb-3">⛳</div>
           <p className="text-sm">{keyword ? '未找到匹配的预订' : '当日暂无预订'}</p>
         </div>
@@ -269,9 +269,9 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
           {timeSlots.map(time => (
             <div key={time}>
               <div className="flex items-center gap-2 mb-2">
-                <div className="text-base font-bold text-emerald-600">{time}</div>
-                <div className="flex-1 h-px bg-gray-100" />
-                <div className="text-xs text-gray-400">{grouped[time].length} 组</div>
+                <div className="text-base font-bold text-success">{time}</div>
+                <div className="flex-1 h-px bg-secondary" />
+                <div className="text-xs text-muted-foreground">{grouped[time].length} 组</div>
               </div>
 
               <div className="space-y-2">
@@ -289,13 +289,13 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
                     <div key={b._id}
                       onClick={() => setDetailId(detailId === b._id ? null : b._id)}
                       className={`rounded-xl border px-4 py-3 cursor-pointer transition-all hover:shadow-sm ${
-                        detailId === b._id ? 'border-emerald-300 bg-emerald-50/30 shadow-sm' : 'border-gray-150 bg-white hover:border-gray-250'
+                        detailId === b._id ? 'border-success/30 bg-success/10/30 shadow-sm' : 'border-border bg-white hover:border-border'
                       }`}>
                       <div className="flex items-start justify-between gap-3">
                         {/* 左侧信息 */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-mono text-gray-400">{b.orderNo || ''}</span>
+                            <span className="text-xs font-mono text-muted-foreground">{b.orderNo || ''}</span>
                             <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${sc.bg} ${sc.color}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
                               {sc.label}
@@ -306,12 +306,12 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
                           </div>
 
                           <div className="mt-1.5 flex items-center gap-2 text-sm">
-                            <span className="font-semibold text-gray-800">{b.courseName || '未指定球场'}</span>
-                            <span className="text-gray-300">·</span>
-                            <span className="text-gray-600">{playerCount}人</span>
+                            <span className="font-semibold text-foreground">{b.courseName || '未指定球场'}</span>
+                            <span className="text-muted-foreground">·</span>
+                            <span className="text-muted-foreground">{playerCount}人</span>
                           </div>
 
-                          <div className="mt-1 text-xs text-gray-400 truncate">
+                          <div className="mt-1 text-xs text-muted-foreground truncate">
                             {playerNames || '暂无球员信息'}
                           </div>
                         </div>
@@ -320,18 +320,18 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
                         <div className="flex-shrink-0 text-right space-y-1.5">
                           {totalFee > 0 && (
                             <div>
-                              <div className="text-sm font-bold text-gray-800">¥{totalFee.toLocaleString()}</div>
+                              <div className="text-sm font-bold text-foreground">¥{totalFee.toLocaleString()}</div>
                               {pending > 0 ? (
                                 <div className="text-[11px] text-amber-600 font-medium">待收 ¥{pending.toLocaleString()}</div>
                               ) : totalFee > 0 ? (
-                                <div className="text-[11px] text-emerald-500 font-medium">已付清</div>
+                                <div className="text-[11px] text-success font-medium">已付清</div>
                               ) : null}
                             </div>
                           )}
                           <div className="flex gap-1 justify-end">
                             {b.status === 'pending' && (
                               <button onClick={e => { e.stopPropagation(); handleAction(b._id, 'confirm') }}
-                                className="text-[11px] px-2.5 py-1 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium">
+                                className="text-[11px] px-2.5 py-1 bg-success text-white rounded-lg hover:bg-success/90 transition-colors font-medium">
                                 确认
                               </button>
                             )}
@@ -347,31 +347,31 @@ function BookingList({ onNewBooking }: { onNewBooking: (date: string) => void })
 
                       {/* 展开详情 */}
                       {detailId === b._id && (
-                        <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div className="mt-3 pt-3 border-t border-border grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                           {b.caddyName && (
-                            <div><span className="text-gray-400">球童</span><div className="font-medium text-gray-700 mt-0.5">{b.caddyName}</div></div>
+                            <div><span className="text-muted-foreground">球童</span><div className="font-medium text-foreground mt-0.5">{b.caddyName}</div></div>
                           )}
                           {(res.cartNo || b.cartNo) && (
-                            <div><span className="text-gray-400">球车</span><div className="font-medium text-gray-700 mt-0.5">{res.cartNo || b.cartNo}</div></div>
+                            <div><span className="text-muted-foreground">球车</span><div className="font-medium text-foreground mt-0.5">{res.cartNo || b.cartNo}</div></div>
                           )}
                           {res.lockers?.length > 0 && (
-                            <div><span className="text-gray-400">更衣柜</span><div className="font-medium text-gray-700 mt-0.5">{res.lockers.map((l: any) => l.lockerNo).join(', ')}</div></div>
+                            <div><span className="text-muted-foreground">更衣柜</span><div className="font-medium text-foreground mt-0.5">{res.lockers.map((l: any) => l.lockerNo).join(', ')}</div></div>
                           )}
                           {b.stayType && b.stayType !== 'day' && (
-                            <div><span className="text-gray-400">住宿</span><div className="font-medium text-gray-700 mt-0.5">{b.stayType === 'overnight_1' ? '一晚' : b.stayType === 'overnight_2' ? '两晚' : b.stayType}</div></div>
+                            <div><span className="text-muted-foreground">住宿</span><div className="font-medium text-foreground mt-0.5">{b.stayType === 'overnight_1' ? '一晚' : b.stayType === 'overnight_2' ? '两晚' : b.stayType}</div></div>
                           )}
                           {b.note && (
-                            <div className="col-span-2 sm:col-span-4"><span className="text-gray-400">备注</span><div className="font-medium text-gray-700 mt-0.5">{b.note}</div></div>
+                            <div className="col-span-2 sm:col-span-4"><span className="text-muted-foreground">备注</span><div className="font-medium text-foreground mt-0.5">{b.note}</div></div>
                           )}
                           {b.players?.length > 0 && (
                             <div className="col-span-2 sm:col-span-4">
-                              <span className="text-gray-400">球员明细</span>
+                              <span className="text-muted-foreground">球员明细</span>
                               <div className="mt-1 flex flex-wrap gap-1.5">
                                 {b.players.map((p: any, i: number) => (
-                                  <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-gray-50 rounded-lg border border-gray-100">
-                                    <span className="font-medium text-gray-700">{p.name}</span>
-                                    {p.memberLevelName && <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1 rounded">{p.memberLevelName}</span>}
-                                    {p.phone && <span className="text-gray-400">{p.phone}</span>}
+                                  <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-secondary/50 rounded-lg border border-border">
+                                    <span className="font-medium text-foreground">{p.name}</span>
+                                    {p.memberLevelName && <span className="text-[10px] text-success bg-success/10 px-1 rounded">{p.memberLevelName}</span>}
+                                    {p.phone && <span className="text-muted-foreground">{p.phone}</span>}
                                   </span>
                                 ))}
                               </div>

@@ -164,7 +164,7 @@ export default function Login() {
             <h1 className="text-[26px] max-sm:text-[22px] font-bold tracking-wide m-0 mb-1 text-primary-deep">
               开锤后台管理系统
             </h1>
-            <p className="text-sm font-medium tracking-wide m-0 text-gray-500">微信扫码，安全快捷</p>
+            <p className="text-sm font-medium tracking-wide m-0 text-muted-foreground">微信扫码，安全快捷</p>
           </div>
 
           {/* ── 二维码区 ── */}
@@ -184,7 +184,7 @@ export default function Login() {
               className={cn(
                 'mx-auto mb-2 rounded-xl border flex items-center justify-center relative overflow-hidden',
                 'transition-all duration-300',
-                'bg-gray-50 border-gray-200 hover:border-primary hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:bg-white',
+                'bg-secondary/50 border-border hover:border-primary hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:bg-white',
                 scanned && 'animate-scanned-pulse motion-reduce:animate-none',
                 qrLoadFailed
                   ? 'w-[120px] min-w-[120px] h-[120px] min-h-[120px]'
@@ -192,7 +192,7 @@ export default function Login() {
               )}
             >
               {loading && (
-                <div className="flex flex-col items-center gap-3 text-sm text-gray-500 animate-in fade-in duration-400" role="status">
+                <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground animate-in fade-in duration-400" role="status">
                   <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
                   <p>正在生成二维码...</p>
                 </div>
@@ -200,7 +200,7 @@ export default function Login() {
             </div>
 
             {/* 状态文字 */}
-            <p className={cn('inline-flex items-center justify-center gap-1.5 text-base mb-2', scanned ? 'font-semibold text-primary' : 'font-medium text-gray-800')}>
+            <p className={cn('inline-flex items-center justify-center gap-1.5 text-base mb-2', scanned ? 'font-semibold text-primary' : 'font-medium text-foreground')}>
               {scanned && (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-[18px] h-[18px] text-primary" aria-hidden="true">
                   <path d="M20 6L9 17l-5-5" />
@@ -210,7 +210,7 @@ export default function Login() {
             </p>
 
             {scanned && !loginDone && (
-              <p className="text-[13px] -mt-1 mb-2 font-normal text-gray-500">请在手机上点击「确认登录」完成登录</p>
+              <p className="text-[13px] -mt-1 mb-2 font-normal text-muted-foreground">请在手机上点击「确认登录」完成登录</p>
             )}
             {loginDone && (
               <p className="text-[13px] -mt-1 mb-2 font-normal text-primary">正在跳转到首页...</p>
@@ -243,7 +243,7 @@ export default function Login() {
           </div>
 
           {/* ── 底部 ── */}
-          <div className="text-center mt-auto pt-4 text-sm relative z-[1] text-gray-500">
+          <div className="text-center mt-auto pt-4 text-sm relative z-[1] text-muted-foreground">
             <a
               href="#"
               className="text-primary no-underline transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(16,185,129,0.2)] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
@@ -252,7 +252,7 @@ export default function Login() {
             >
               联系管理员
             </a>
-            <div className="w-20 h-px mx-auto mt-3 bg-gray-400/30" aria-hidden="true" />
+            <div className="w-20 h-px mx-auto mt-3 bg-border/30" aria-hidden="true" />
             <p className="text-xs mt-3 opacity-90">采用微信官方安全登录</p>
             <p className="mt-2 text-xs">
               网站备案号：

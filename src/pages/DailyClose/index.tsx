@@ -115,18 +115,18 @@ export default function DailyClose() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-secondary/50 flex flex-col">
       {/* Header */}
       <header className="bg-white border-b px-6 py-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={() => window.history.back()} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button onClick={() => window.history.back()} className="p-2 hover:bg-secondary rounded-lg">
             <ChevronLeft size={20} />
           </button>
           <Moon size={24} className="text-indigo-600" />
-          <h1 className="text-xl font-bold text-gray-900">日结 / 夜审</h1>
+          <h1 className="text-xl font-bold text-foreground">日结 / 夜审</h1>
         </div>
         <button onClick={() => activeTab === 'execute' ? loadPreview() : loadHistory()}
-          className="p-2 hover:bg-gray-100 rounded-lg" title="刷新">
+          className="p-2 hover:bg-secondary rounded-lg" title="刷新">
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
         </button>
       </header>
@@ -136,7 +136,7 @@ export default function DailyClose() {
         <div className="flex gap-0">
           {TABS.map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-4 py-3 text-sm border-b-2 transition-all ${activeTab === tab.key ? 'border-indigo-600 text-indigo-600 font-medium' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+              className={`flex items-center gap-1.5 px-4 py-3 text-sm border-b-2 transition-all ${activeTab === tab.key ? 'border-indigo-600 text-indigo-600 font-medium' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
               <tab.icon size={16} /> {tab.label}
             </button>
           ))}
@@ -168,8 +168,8 @@ export default function DailyClose() {
 function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, setCashDeclared,
   notes, setNotes, onAutoNoShow, noShowProcessing, onExecute, closing, onRefresh }: any) {
 
-  if (loading) return <div className="text-center py-20 text-gray-400">加载预检数据...</div>
-  if (!data) return <div className="text-center py-20 text-gray-400">暂无数据</div>
+  if (loading) return <div className="text-center py-20 text-muted-foreground">加载预检数据...</div>
+  if (!data) return <div className="text-center py-20 text-muted-foreground">暂无数据</div>
 
   const warnings: string[] = []
   if (data.openFolios?.count > 0) warnings.push(`${data.openFolios.count} 张未结算账单（¥${data.openFolios.balance}）`)
@@ -181,7 +181,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
       {/* 日期选择 */}
       <div className="bg-white rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-700">日结日期</h3>
+          <h3 className="text-sm font-semibold text-foreground">日结日期</h3>
           <input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)}
             className="border rounded-lg px-3 py-1.5 text-sm" />
         </div>
@@ -207,7 +207,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
       {data.noShowCandidates?.length > 0 && (
         <div className="bg-white rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Ban size={16} className="text-orange-500" /> 自动 No-Show
             </h3>
             <button onClick={onAutoNoShow} disabled={noShowProcessing}
@@ -217,11 +217,11 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
           </div>
           <div className="space-y-1 max-h-40 overflow-auto">
             {data.noShowCandidates.map((b: any) => (
-              <div key={b._id} className="flex items-center justify-between text-sm py-1 border-b border-gray-50">
-                <span className="text-gray-500">{b.orderNo}</span>
-                <span className="text-gray-700">{b.playerName}</span>
-                <span className="text-gray-400">{b.teeTime}</span>
-                <span className="text-gray-400">{b.playerCount}人</span>
+              <div key={b._id} className="flex items-center justify-between text-sm py-1 border-b border-border/50">
+                <span className="text-muted-foreground">{b.orderNo}</span>
+                <span className="text-foreground">{b.playerName}</span>
+                <span className="text-muted-foreground">{b.teeTime}</span>
+                <span className="text-muted-foreground">{b.playerCount}人</span>
               </div>
             ))}
           </div>
@@ -230,59 +230,59 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
 
       {/* 收款汇总 */}
       <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
           <DollarSign size={16} className="text-green-600" /> 当日收款汇总
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
           {Object.entries(data.paymentSummary || {}).map(([method, amount]: any) => (
-            <div key={method} className="bg-gray-50 rounded-lg p-3">
-              <div className="text-xs text-gray-500">{METHOD_MAP[method] || method}</div>
-              <div className="text-lg font-bold text-gray-900">¥{Number(amount).toLocaleString()}</div>
+            <div key={method} className="bg-secondary/50 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground">{METHOD_MAP[method] || method}</div>
+              <div className="text-lg font-bold text-foreground">¥{Number(amount).toLocaleString()}</div>
             </div>
           ))}
         </div>
         <div className="flex items-center justify-between border-t pt-3">
-          <span className="text-sm font-medium text-gray-700">收款合计</span>
+          <span className="text-sm font-medium text-foreground">收款合计</span>
           <span className="text-xl font-bold text-green-600">¥{Number(data.totalCollected || 0).toLocaleString()}</span>
         </div>
       </div>
 
       {/* 消费汇总 */}
       <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
           <CreditCard size={16} className="text-blue-600" /> 当日消费汇总
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
           {Object.entries(data.chargeSummary || {}).map(([cat, amount]: any) => (
-            <div key={cat} className="bg-gray-50 rounded-lg p-3">
-              <div className="text-xs text-gray-500">{CAT_MAP[cat] || cat}</div>
-              <div className="text-lg font-bold text-gray-900">¥{Number(amount).toLocaleString()}</div>
+            <div key={cat} className="bg-secondary/50 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground">{CAT_MAP[cat] || cat}</div>
+              <div className="text-lg font-bold text-foreground">¥{Number(amount).toLocaleString()}</div>
             </div>
           ))}
         </div>
         <div className="flex items-center justify-between border-t pt-3">
-          <span className="text-sm font-medium text-gray-700">消费合计</span>
+          <span className="text-sm font-medium text-foreground">消费合计</span>
           <span className="text-xl font-bold text-blue-600">¥{Number(data.totalCharged || 0).toLocaleString()}</span>
         </div>
       </div>
 
       {/* 预订统计 */}
       <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
           <Users size={16} className="text-purple-600" /> 预订统计
         </h3>
         <div className="grid grid-cols-3 md:grid-cols-7 gap-2 text-center">
           {[
-            { k: 'total', l: '总预订', c: 'text-gray-900' },
+            { k: 'total', l: '总预订', c: 'text-foreground' },
             { k: 'confirmed', l: '已确认', c: 'text-blue-600' },
-            { k: 'checkedIn', l: '已签到', c: 'text-emerald-600' },
+            { k: 'checkedIn', l: '已签到', c: 'text-success' },
             { k: 'playing', l: '打球中', c: 'text-green-600' },
-            { k: 'completed', l: '已完赛', c: 'text-gray-600' },
+            { k: 'completed', l: '已完赛', c: 'text-muted-foreground' },
             { k: 'cancelled', l: '已取消', c: 'text-red-600' },
             { k: 'noShow', l: 'No-Show', c: 'text-orange-600' },
           ].map(s => (
-            <div key={s.k} className="bg-gray-50 rounded-lg p-2">
-              <div className="text-xs text-gray-500">{s.l}</div>
+            <div key={s.k} className="bg-secondary/50 rounded-lg p-2">
+              <div className="text-xs text-muted-foreground">{s.l}</div>
               <div className={`text-lg font-bold ${s.c}`}>{data.bookingStats?.[s.k] || 0}</div>
             </div>
           ))}
@@ -291,9 +291,9 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
 
       {/* 交班信息 */}
       <div className="bg-white rounded-xl p-5 shadow-sm space-y-4">
-        <h3 className="text-sm font-semibold text-gray-700">交班信息</h3>
+        <h3 className="text-sm font-semibold text-foreground">交班信息</h3>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">实点现金金额</label>
+          <label className="block text-xs text-muted-foreground mb-1">实点现金金额</label>
           <input type="number" value={cashDeclared} onChange={e => setCashDeclared(e.target.value)}
             placeholder="输入实际清点现金金额" className="w-full border rounded-lg px-3 py-2 text-sm" />
           {cashDeclared && data.paymentSummary?.cash !== undefined && (
@@ -304,7 +304,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
           )}
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">备注</label>
+          <label className="block text-xs text-muted-foreground mb-1">备注</label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)}
             placeholder="日结备注（可选）" className="w-full border rounded-lg px-3 py-2 text-sm h-20 resize-none" />
         </div>
@@ -325,7 +325,7 @@ function ExecutePanel({ data, loading, targetDate, setTargetDate, cashDeclared, 
 /* ======================== 日结报告面板 ======================== */
 function ReportPanel({ data }: { data: any }) {
   if (!data) return (
-    <div className="text-center py-20 text-gray-400">
+    <div className="text-center py-20 text-muted-foreground">
       <FileText size={48} className="mx-auto mb-3 opacity-30" />
       <p>请先执行日结或从历史查询中选择报告</p>
     </div>
@@ -354,34 +354,34 @@ function ReportPanel({ data }: { data: any }) {
       {/* KPI 行 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl p-4 shadow-sm text-center">
-          <div className="text-xs text-gray-500">总预订</div>
-          <div className="text-2xl font-bold text-gray-900">{data.bookingStats?.total || 0}</div>
+          <div className="text-xs text-muted-foreground">总预订</div>
+          <div className="text-2xl font-bold text-foreground">{data.bookingStats?.total || 0}</div>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm text-center">
-          <div className="text-xs text-gray-500">完赛</div>
+          <div className="text-xs text-muted-foreground">完赛</div>
           <div className="text-2xl font-bold text-green-600">{data.bookingStats?.completed || 0}</div>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm text-center">
-          <div className="text-xs text-gray-500">交易笔数</div>
+          <div className="text-xs text-muted-foreground">交易笔数</div>
           <div className="text-2xl font-bold text-blue-600">{data.transactionCount || 0}</div>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm text-center">
-          <div className="text-xs text-gray-500">总消费额</div>
+          <div className="text-xs text-muted-foreground">总消费额</div>
           <div className="text-2xl font-bold text-amber-600">¥{Number(data.totalCharged || 0).toLocaleString()}</div>
         </div>
       </div>
 
       {/* 收款明细 */}
       <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">收款明细</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-3">收款明细</h3>
         <table className="w-full text-sm">
-          <thead><tr className="border-b text-gray-500 text-left">
+          <thead><tr className="border-b text-muted-foreground text-left">
             <th className="py-2">收款方式</th><th className="py-2 text-right">金额</th>
           </tr></thead>
           <tbody>
             {Object.entries(data.paymentSummary || {}).map(([k, v]: any) => (
-              <tr key={k} className="border-b border-gray-50">
-                <td className="py-2 text-gray-700">{METHOD_MAP[k] || k}</td>
+              <tr key={k} className="border-b border-border/50">
+                <td className="py-2 text-foreground">{METHOD_MAP[k] || k}</td>
                 <td className="py-2 text-right font-medium">¥{Number(v).toLocaleString()}</td>
               </tr>
             ))}
@@ -400,15 +400,15 @@ function ReportPanel({ data }: { data: any }) {
 
       {/* 消费分类 */}
       <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">消费分类</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-3">消费分类</h3>
         <table className="w-full text-sm">
-          <thead><tr className="border-b text-gray-500 text-left">
+          <thead><tr className="border-b text-muted-foreground text-left">
             <th className="py-2">类别</th><th className="py-2 text-right">金额</th>
           </tr></thead>
           <tbody>
             {Object.entries(data.chargeSummary || {}).map(([k, v]: any) => (
-              <tr key={k} className="border-b border-gray-50">
-                <td className="py-2 text-gray-700">{CAT_MAP[k] || k}</td>
+              <tr key={k} className="border-b border-border/50">
+                <td className="py-2 text-foreground">{CAT_MAP[k] || k}</td>
                 <td className="py-2 text-right font-medium">¥{Number(v).toLocaleString()}</td>
               </tr>
             ))}
@@ -430,8 +430,8 @@ function ReportPanel({ data }: { data: any }) {
 
       {data.notes && (
         <div className="bg-white rounded-xl p-5 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">备注</h3>
-          <p className="text-sm text-gray-600">{data.notes}</p>
+          <h3 className="text-sm font-semibold text-foreground mb-2">备注</h3>
+          <p className="text-sm text-muted-foreground">{data.notes}</p>
         </div>
       )}
     </div>
@@ -449,7 +449,7 @@ function HistoryPanel({ list, search, setSearch, onView }: any) {
       {/* 搜索 */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="搜索日期或操作人..." className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm" />
         </div>
@@ -457,7 +457,7 @@ function HistoryPanel({ list, search, setSearch, onView }: any) {
 
       {/* 列表 */}
       {filtered.length === 0 && (
-        <div className="text-center py-20 text-gray-400">暂无日结记录</div>
+        <div className="text-center py-20 text-muted-foreground">暂无日结记录</div>
       )}
 
       <div className="space-y-3">
@@ -470,8 +470,8 @@ function HistoryPanel({ list, search, setSearch, onView }: any) {
                   <FileText size={18} className="text-indigo-600" />
                 </div>
                 <div>
-                  <div className="font-medium text-gray-900">{report.date}</div>
-                  <div className="text-xs text-gray-400">
+                  <div className="font-medium text-foreground">{report.date}</div>
+                  <div className="text-xs text-muted-foreground">
                     {report.operatorName || '系统'} | {report.closedAt ? new Date(report.closedAt).toLocaleTimeString('zh-CN') : '-'}
                   </div>
                 </div>
@@ -479,9 +479,9 @@ function HistoryPanel({ list, search, setSearch, onView }: any) {
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <div className="text-sm font-bold text-green-600">¥{Number(report.totalCollected || 0).toLocaleString()}</div>
-                  <div className="text-xs text-gray-400">{report.transactionCount || 0} 笔</div>
+                  <div className="text-xs text-muted-foreground">{report.transactionCount || 0} 笔</div>
                 </div>
-                <ArrowRight size={16} className="text-gray-400" />
+                <ArrowRight size={16} className="text-muted-foreground" />
               </div>
             </div>
           </div>

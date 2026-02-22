@@ -70,7 +70,7 @@ export default function ClubInfo() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
+      <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">
         加载中...
       </div>
     )
@@ -80,10 +80,10 @@ export default function ClubInfo() {
     <div className="max-w-2xl space-y-6">
       {/* 基础信息 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">基础信息</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">基础信息</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               球会名称 <span className="text-red-500">*</span>
             </label>
             <input
@@ -91,67 +91,67 @@ export default function ClubInfo() {
               value={form.name}
               onChange={e => set('name', e.target.value)}
               placeholder="例：开锤高尔夫球会"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">球会简称</label>
+            <label className="block text-sm font-medium text-foreground mb-1">球会简称</label>
             <input
               type="text"
               value={form.shortName}
               onChange={e => set('shortName', e.target.value)}
               placeholder="例：开锤"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+            <label className="block text-sm font-medium text-foreground mb-1">联系电话</label>
             <input
               type="tel"
               value={form.phone}
               onChange={e => set('phone', e.target.value)}
               placeholder="例：010-12345678"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">电子邮箱</label>
+            <label className="block text-sm font-medium text-foreground mb-1">电子邮箱</label>
             <input
               type="email"
               value={form.email}
               onChange={e => set('email', e.target.value)}
               placeholder="例：admin@example.com"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">详细地址</label>
+            <label className="block text-sm font-medium text-foreground mb-1">详细地址</label>
             <input
               type="text"
               value={form.address}
               onChange={e => set('address', e.target.value)}
               placeholder="例：北京市朝阳区某某路1号"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">官网地址</label>
+            <label className="block text-sm font-medium text-foreground mb-1">官网地址</label>
             <input
               type="url"
               value={form.website}
               onChange={e => set('website', e.target.value)}
               placeholder="例：https://www.example.com"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">球会简介</label>
+            <label className="block text-sm font-medium text-foreground mb-1">球会简介</label>
             <textarea
               rows={3}
               value={form.description}
               onChange={e => set('description', e.target.value)}
               placeholder="简要介绍球会特色、服务等..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
             />
           </div>
         </div>
@@ -159,14 +159,14 @@ export default function ClubInfo() {
 
       {/* 区域与货币 */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">区域与货币</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">区域与货币</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">时区</label>
+            <label className="block text-sm font-medium text-foreground mb-1">时区</label>
             <select
               value={form.timezone}
               onChange={e => set('timezone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent bg-white"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-white"
             >
               {TIMEZONES.map(tz => (
                 <option key={tz.value} value={tz.value}>{tz.label}</option>
@@ -174,11 +174,11 @@ export default function ClubInfo() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">货币</label>
+            <label className="block text-sm font-medium text-foreground mb-1">货币</label>
             <select
               value={form.currency}
               onChange={e => set('currency', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent bg-white"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-white"
             >
               {CURRENCIES.map(c => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -193,7 +193,7 @@ export default function ClubInfo() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2.5 bg-success text-white rounded-lg text-sm font-medium hover:bg-success/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? '保存中...' : '保存设置'}
         </button>

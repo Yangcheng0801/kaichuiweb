@@ -25,7 +25,7 @@ const ICON_MAP: Record<string, any> = {
 };
 
 const COLOR_MAP: Record<string, string> = {
-  emerald: 'text-emerald-500 bg-emerald-50',
+  emerald: 'text-success bg-success/10',
   red: 'text-red-500 bg-red-50',
   blue: 'text-blue-500 bg-blue-50',
   amber: 'text-amber-500 bg-amber-50',
@@ -35,7 +35,7 @@ const COLOR_MAP: Record<string, string> = {
   indigo: 'text-indigo-500 bg-indigo-50',
   yellow: 'text-yellow-500 bg-yellow-50',
   cyan: 'text-cyan-500 bg-cyan-50',
-  gray: 'text-gray-500 bg-gray-50',
+  gray: 'text-muted-foreground bg-secondary/50',
 };
 
 interface Notification {
@@ -188,7 +188,7 @@ export default function NotificationCenter({
   /* ─── 渲染图标 ──────────────────────────────────────────────── */
   const renderIcon = (icon: string, color: string) => {
     const Icon = ICON_MAP[icon] || Bell;
-    const colors = COLOR_MAP[color] || 'text-gray-500 bg-gray-50';
+    const colors = COLOR_MAP[color] || 'text-muted-foreground bg-secondary/50';
     return (
       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${colors}`}>
         <Icon className="w-4 h-4" />
@@ -201,10 +201,10 @@ export default function NotificationCenter({
       {/* 铃铛按钮 */}
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
         title="通知中心"
       >
-        <Bell className="w-5 h-5 text-gray-600" />
+        <Bell className="w-5 h-5 text-muted-foreground" />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -214,12 +214,12 @@ export default function NotificationCenter({
 
       {/* 下拉面板 */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-border z-50 overflow-hidden">
           {/* 头部 */}
-          <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50/50">
+          <div className="flex items-center justify-between px-4 py-3 border-b bg-secondary/50/50">
             <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-gray-600" />
-              <span className="font-semibold text-gray-800">通知中心</span>
+              <Bell className="w-4 h-4 text-muted-foreground" />
+              <span className="font-semibold text-foreground">通知中心</span>
               {unreadCount > 0 && (
                 <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                   {unreadCount}
@@ -238,9 +238,9 @@ export default function NotificationCenter({
               )}
               <button
                 onClick={() => setOpen(false)}
-                className="p-1 rounded hover:bg-gray-200 transition-colors"
+                className="p-1 rounded hover:bg-secondary transition-colors"
               >
-                <X className="w-4 h-4 text-gray-400" />
+                <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
           </div>
@@ -248,25 +248,25 @@ export default function NotificationCenter({
           {/* 列表 */}
           <div className="max-h-[400px] overflow-y-auto">
             {loading && notifications.length === 0 ? (
-              <div className="py-12 text-center text-gray-400 text-sm">加载中...</div>
+              <div className="py-12 text-center text-muted-foreground text-sm">加载中...</div>
             ) : notifications.length === 0 ? (
               <div className="py-12 text-center">
-                <Bell className="w-10 h-10 text-gray-200 mx-auto mb-2" />
-                <p className="text-gray-400 text-sm">暂无通知</p>
+                <Bell className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground text-sm">暂无通知</p>
               </div>
             ) : (
               notifications.map(n => (
                 <div
                   key={n._id}
                   onClick={() => handleClick(n)}
-                  className={`flex items-start gap-3 px-4 py-3 cursor-pointer border-b border-gray-50 hover:bg-gray-50 transition-colors ${
+                  className={`flex items-start gap-3 px-4 py-3 cursor-pointer border-b border-border/50 hover:bg-secondary/50 transition-colors ${
                     !n.read ? 'bg-blue-50/30' : ''
                   }`}
                 >
                   {renderIcon(n.icon, n.color)}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium truncate ${!n.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                      <span className={`text-sm font-medium truncate ${!n.read ? 'text-foreground' : 'text-muted-foreground'}`}>
                         {n.title}
                       </span>
                       {n.priority === 'urgent' && (
@@ -277,12 +277,12 @@ export default function NotificationCenter({
                       )}
                     </div>
                     {n.content && (
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">{n.content}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{n.content}</p>
                     )}
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] text-gray-400">{n.typeLabel}</span>
-                      <span className="text-[10px] text-gray-300">·</span>
-                      <span className="text-[10px] text-gray-400">{formatTime(n.createdAt)}</span>
+                      <span className="text-[10px] text-muted-foreground">{n.typeLabel}</span>
+                      <span className="text-[10px] text-muted-foreground">·</span>
+                      <span className="text-[10px] text-muted-foreground">{formatTime(n.createdAt)}</span>
                     </div>
                   </div>
                   {!n.read && (
@@ -294,7 +294,7 @@ export default function NotificationCenter({
           </div>
 
           {/* 底部 */}
-          <div className="border-t px-4 py-2.5 bg-gray-50/50">
+          <div className="border-t px-4 py-2.5 bg-secondary/50/50">
             <button
               onClick={() => { setOpen(false); navigate('/notifications'); }}
               className="w-full flex items-center justify-center gap-1 text-sm text-blue-600 hover:text-blue-800 py-1 rounded hover:bg-blue-50 transition-colors"

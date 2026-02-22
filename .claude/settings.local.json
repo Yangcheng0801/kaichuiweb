@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(pnpm add @radix-ui/react-label)",
+      "Bash(pnpm add @radix-ui/react-select @radix-ui/react-tabs)",
+      "Bash(pnpm add @radix-ui/react-switch @radix-ui/react-checkbox @radix-ui/react-tooltip)",
+      "Bash(test -f \"C:\\\\Users\\\\95962\\\\Desktop\\\\开锤\\\\kaichuiweb\\\\src\\\\contexts\\\\ThemeContext.tsx\")",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/bg-emerald-50/bg-success\\\\/10/g' {} ;)",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/bg-emerald-500/bg-success/g' {} ;)",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/text-emerald-700/text-success/g' {} ;)",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/to-emerald-600/to-success/g' {} ;)",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/border-emerald-200/border-success\\\\/20/g' {} ;)",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/border-emerald-300/border-success\\\\/30/g' {} ;)",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/border-emerald-500/border-success/g' {} ;)",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/text-emerald-800/text-success/g' {} ;)",
+      "Bash(find src/pages -name \"*.tsx\" -type f -exec sed -i 's/focus:ring-emerald-400/focus:ring-ring/g' {} ;)",
+      "Bash(find src -name \"*.tsx\" -type f -exec sed -i 's/text-gray-900/text-foreground/g' {} ;)",
+      "Bash(xargs sed -i 's/hover:text-gray-900/hover:text-foreground/g')",
+      "Bash(xargs sed -i 's/hover:text-gray-700/hover:text-foreground/g')",
+      "Bash(xargs sed -i 's/border-gray-50/border-border\\\\/50/g')",
+      "Bash(xargs sed -i 's/border-gray-150/border-border/g')"
+    ]
+  }
+}

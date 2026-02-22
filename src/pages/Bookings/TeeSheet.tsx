@@ -80,9 +80,9 @@ const PAY_METHODS = [
 
 const STATUS_MAP: Record<string, { label: string; dot: string; card: string; text: string }> = {
   pending:    { label: '待确认', dot: 'bg-yellow-400',  card: 'border-yellow-200 bg-yellow-50',  text: 'text-yellow-700' },
-  confirmed:  { label: '已确认', dot: 'bg-emerald-400', card: 'border-emerald-200 bg-emerald-50', text: 'text-emerald-700' },
+  confirmed:  { label: '已确认', dot: 'bg-success', card: 'border-success/20 bg-success/10', text: 'text-success' },
   checked_in: { label: '已签到', dot: 'bg-blue-400',    card: 'border-blue-200 bg-blue-50',       text: 'text-blue-700'    },
-  completed:  { label: '已完赛', dot: 'bg-gray-300',    card: 'border-gray-200 bg-gray-50',       text: 'text-gray-500'    },
+  completed:  { label: '已完赛', dot: 'bg-secondary',    card: 'border-border bg-secondary/50',       text: 'text-muted-foreground'    },
   cancelled:  { label: '已取消', dot: 'bg-red-300',     card: 'border-red-200 bg-red-50',         text: 'text-red-400'     },
 }
 
@@ -276,14 +276,14 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <div>
-            <h2 className="font-semibold text-gray-900 text-lg">办理签到</h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <h2 className="font-semibold text-foreground text-lg">办理签到</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               {booking.teeTime} · {booking.courseName} {booking.orderNo && `· ${booking.orderNo}`}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -296,22 +296,22 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             <div className="flex items-center gap-2 flex-wrap">
               {booking.players?.map((p, i) => (
                 <span key={i} className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
-                  p.type === 'guest' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'
+                  p.type === 'guest' ? 'bg-purple-100 text-purple-700' : 'bg-success/10 text-success'
                 }`}>
                   {p.name}{p.type === 'guest' ? '（嘉宾）' : '（会员）'}
                 </span>
               ))}
-              <span className="text-xs text-gray-400 ml-auto">{booking.playerCount}人</span>
+              <span className="text-xs text-muted-foreground ml-auto">{booking.playerCount}人</span>
             </div>
             {playerInfo && (
-              <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+              <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                 {(playerInfo as any).playerNo && <span>球员号：{(playerInfo as any).playerNo}</span>}
                 {(playerInfo as any).phone && <span>手机：{(playerInfo as any).phone}</span>}
               </div>
             )}
             {/* 预订偏好标签 */}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${needCaddy ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${needCaddy ? 'bg-success/10 text-success' : 'bg-secondary text-muted-foreground'}`}>
                 {needCaddy ? '需要球童' : '无需球童'}
               </span>
               {(booking as any).caddyDesignation?.type === 'designated' && (booking as any).caddyDesignation?.caddyNo && (
@@ -319,16 +319,16 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                   点号：{(booking as any).caddyDesignation.caddyNo}号 {(booking as any).caddyDesignation.caddyName}
                 </span>
               )}
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${needCart ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${needCart ? 'bg-success/10 text-success' : 'bg-secondary text-muted-foreground'}`}>
                 {needCart ? '需要球车' : '无需球车'}
               </span>
-              <span className="text-[10px] text-gray-300 ml-1">（由出发台调度）</span>
+              <span className="text-[10px] text-muted-foreground ml-1">（由出发台调度）</span>
             </div>
           </div>
 
           {/* 2. 消费凭证（4 种模式） */}
           <section>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
               <CreditCard size={14} /> 消费凭证
             </h3>
             <div className="grid grid-cols-4 gap-1.5">
@@ -342,7 +342,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                   className={`py-2 text-[11px] rounded-lg border transition-all flex flex-col items-center gap-1 ${
                     consumeMode === opt.key
                       ? `${opt.active} font-medium`
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                      : 'border-border text-muted-foreground hover:bg-secondary/50'
                   }`}>
                   {opt.icon}
                   {opt.label}
@@ -354,26 +354,26 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             {consumeMode === 'qr_scan' && (
               <div className="mt-2.5">
                 <div className="relative">
-                  <QrCode size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
+                  <QrCode size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input value={qrInput} onChange={e => handleQrSearch(e.target.value)}
                     placeholder="扫描/输入消费二维码或球员号..."
-                    className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                  {qrSearching && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-300 animate-pulse">识别中...</span>}
+                    className="w-full pl-9 pr-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                  {qrSearching && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">识别中...</span>}
                 </div>
                 {qrPlayer && (
-                  <div className="mt-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-200 text-emerald-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  <div className="mt-2 p-2.5 bg-success/10 border border-success/20 rounded-lg flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-success/20 text-success text-xs font-bold flex items-center justify-center flex-shrink-0">
                       {qrPlayer.name?.[0]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-emerald-800">{qrPlayer.name}</p>
-                      <p className="text-[10px] text-emerald-600">
+                      <p className="text-sm font-medium text-success">{qrPlayer.name}</p>
+                      <p className="text-[10px] text-success">
                         #{qrPlayer.playerNo}
                         {qrPlayer.profile?.memberLevelLabel && ` · ${qrPlayer.profile.memberLevelLabel}`}
                         {(qrPlayer.profile?.account?.balance ?? 0) > 0 && ` · 余额¥${qrPlayer.profile.account.balance}`}
                       </p>
                     </div>
-                    <Check size={16} className="text-emerald-500 flex-shrink-0" />
+                    <Check size={16} className="text-success flex-shrink-0" />
                   </div>
                 )}
                 {qrInput.length >= 3 && !qrSearching && !qrPlayer && (
@@ -386,10 +386,10 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
             {consumeMode === 'physical' && (
               <div className="mt-2.5">
                 {availableCards.length === 0 ? (
-                  <p className="text-xs text-gray-400 py-2">暂无可用实体卡，请先在资源管理中录入</p>
+                  <p className="text-xs text-muted-foreground py-2">暂无可用实体卡，请先在资源管理中录入</p>
                 ) : (
                   <select value={selectedCardId} onChange={e => setSelectedCardId(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
                     <option value="">选择实体消费卡...</option>
                     {availableCards.map(c => (
                       <option key={c._id} value={c._id}>{c.cardNo}</option>
@@ -425,14 +425,14 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
           {/* 3. 住宿类型（只读回填，可展开编辑） */}
           <section>
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <DoorOpen size={14} /> 住宿
                 <span className={`text-xs font-normal px-2 py-0.5 rounded-full ${
-                  stayType === 'day' ? 'bg-gray-100 text-gray-500' : 'bg-emerald-100 text-emerald-700'
+                  stayType === 'day' ? 'bg-secondary text-muted-foreground' : 'bg-success/10 text-success'
                 }`}>{STAY_LABELS[stayType] || stayType}</span>
               </h3>
               <button type="button" onClick={() => setEditStayType(p => !p)}
-                className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1">
+                className="text-xs text-muted-foreground hover:text-muted-foreground flex items-center gap-1">
                 <Edit2 size={11} /> {editStayType ? '收起' : '修改'}
               </button>
             </div>
@@ -442,8 +442,8 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                   <button key={val} onClick={() => setStayType(val)}
                     className={`flex-1 py-2 text-xs rounded-lg border transition-all ${
                       stayType === val
-                        ? 'bg-emerald-50 border-emerald-400 text-emerald-700 font-medium'
-                        : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        ? 'bg-success/10 border-success text-success font-medium'
+                        : 'border-border text-muted-foreground hover:bg-secondary/50'
                     }`}>{label}</button>
                 ))}
               </div>
@@ -453,10 +453,10 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
           {/* 4. 更衣柜分配 */}
           <section>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Lock size={14} /> 更衣柜
                 {selectedLockerIds.length > 0 && (
-                  <span className="text-xs text-emerald-600 font-normal">已选 {selectedLockerIds.length} 个</span>
+                  <span className="text-xs text-success font-normal">已选 {selectedLockerIds.length} 个</span>
                 )}
               </h3>
               <button type="button" onClick={autoAssignLockers}
@@ -465,14 +465,14 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
               </button>
             </div>
             {resourceLoading ? (
-              <p className="text-xs text-gray-400 py-2">加载中...</p>
+              <p className="text-xs text-muted-foreground py-2">加载中...</p>
             ) : Object.keys(lockersByArea).length === 0 ? (
-              <p className="text-xs text-gray-400 py-2">暂无可用更衣柜</p>
+              <p className="text-xs text-muted-foreground py-2">暂无可用更衣柜</p>
             ) : (
               <div className="space-y-2.5 max-h-32 overflow-y-auto pr-1">
                 {Object.entries(lockersByArea).map(([area, items]) => (
                   <div key={area}>
-                    <div className="text-[10px] text-gray-400 mb-1">{area}</div>
+                    <div className="text-[10px] text-muted-foreground mb-1">{area}</div>
                     <div className="flex flex-wrap gap-1.5">
                       {items.sort((a, b) => a.lockerNo.localeCompare(b.lockerNo)).map(l => {
                         const selected = selectedLockerIds.includes(l._id)
@@ -481,7 +481,7 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                             className={`w-14 h-10 rounded-lg border-2 text-[11px] font-bold transition-all flex flex-col items-center justify-center ${
                               selected
                                 ? 'bg-blue-500 border-blue-600 text-white shadow-md scale-105'
-                                : 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:border-blue-400 hover:bg-blue-50'
+                                : 'bg-success/10 border-success/30 text-success hover:border-blue-400 hover:bg-blue-50'
                             }`}>
                             {l.lockerNo}
                             {l.dailyFee > 0 && <span className="text-[8px] opacity-70">¥{l.dailyFee}</span>}
@@ -498,15 +498,15 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
           {/* 5. 客房分配（仅住宿时显示） */}
           {stayType !== 'day' && (
             <section>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
                 <DoorOpen size={14} /> 客房分配
               </h3>
               {availableRooms.length === 0 ? (
-                <p className="text-xs text-gray-400 py-2">暂无空闲客房</p>
+                <p className="text-xs text-muted-foreground py-2">暂无空闲客房</p>
               ) : (
                 <>
                   <select value={selectedRoomId} onChange={e => setSelectedRoomId(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring">
                     <option value="">选择客房...</option>
                     {availableRooms.map(r => (
                       <option key={r._id} value={r._id}>
@@ -517,14 +517,14 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
                   {selectedRoomId && (
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       <div>
-                        <label className="block text-[10px] text-gray-500 mb-0.5">入住日期</label>
+                        <label className="block text-[10px] text-muted-foreground mb-0.5">入住日期</label>
                         <input type="date" value={roomCheckIn} onChange={e => setRoomCheckIn(e.target.value)}
-                          className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                          className="w-full px-2 py-1.5 border border-border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
                       </div>
                       <div>
-                        <label className="block text-[10px] text-gray-500 mb-0.5">退房日期</label>
+                        <label className="block text-[10px] text-muted-foreground mb-0.5">退房日期</label>
                         <input type="date" value={roomCheckOut} onChange={e => setRoomCheckOut(e.target.value)}
-                          className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                          className="w-full px-2 py-1.5 border border-border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
                       </div>
                     </div>
                   )}
@@ -536,22 +536,22 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
           {/* 6. 更多信息（可折叠：停车） */}
           <section>
             <button type="button" onClick={() => setShowMoreInfo(p => !p)}
-              className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition-colors w-full">
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-muted-foreground transition-colors w-full">
               <ChevronDown size={14} className={`transition-transform ${showMoreInfo ? 'rotate-180' : ''}`} />
               更多信息
               {plateNo && !showMoreInfo && (
-                <span className="text-xs text-gray-300 font-normal">车牌：{plateNo}</span>
+                <span className="text-xs text-muted-foreground font-normal">车牌：{plateNo}</span>
               )}
             </button>
             {showMoreInfo && (
               <div className="mt-2.5 space-y-3">
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block flex items-center gap-1.5">
+                  <label className="text-xs text-muted-foreground mb-1 block flex items-center gap-1.5">
                     <ParkingCircle size={12} /> 车牌号
                   </label>
                   <input value={plateNo} onChange={e => setPlateNo(e.target.value)}
                     placeholder="车牌号（可留空）"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
               </div>
             )}
@@ -560,9 +560,9 @@ function CheckInDialog({ booking, onClose, onSuccess }: CheckInDialogProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 flex-shrink-0">
+        <div className="flex gap-3 px-6 py-4 border-t border-border flex-shrink-0">
           <button onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors">
+            className="flex-1 px-4 py-2.5 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50 transition-colors">
             取消
           </button>
           <button onClick={handleConfirm} disabled={saving}
@@ -680,16 +680,16 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-white z-10">
           <div>
-            <h2 className="font-semibold text-gray-900">结算工作台</h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <h2 className="font-semibold text-foreground">结算工作台</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               {booking.orderNo && <span className="mr-2">{booking.orderNo}</span>}
               {booking.teeTime} · {booking.courseName}
-              {folioData?.folioNo && <span className="ml-2 text-emerald-600">Folio#{folioData.folioNo}</span>}
+              {folioData?.folioNo && <span className="ml-2 text-success">Folio#{folioData.folioNo}</span>}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -699,7 +699,7 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
           <div className="flex flex-wrap gap-1.5">
             {booking.players?.map((pl, i) => (
               <span key={i} className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                pl.type === 'guest' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'
+                pl.type === 'guest' ? 'bg-purple-100 text-purple-700' : 'bg-success/10 text-success'
               }`}>
                 {pl.name}{pl.type === 'guest' ? '（嘉宾）' : ''}
               </span>
@@ -708,26 +708,26 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
 
           {/* Folio 消费明细 */}
           {loadingFolio ? (
-            <div className="flex items-center justify-center py-8 text-gray-400 text-sm">加载账单...</div>
+            <div className="flex items-center justify-center py-8 text-muted-foreground text-sm">加载账单...</div>
           ) : (
-            <div className="bg-gray-50 rounded-xl overflow-hidden">
-              <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
-                <span className="text-xs font-medium text-gray-500">消费明细</span>
-                <span className="text-xs text-gray-400">{charges.length} 项</span>
+            <div className="bg-secondary/50 rounded-xl overflow-hidden">
+              <div className="px-4 py-2 border-b border-border flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">消费明细</span>
+                <span className="text-xs text-muted-foreground">{charges.length} 项</span>
               </div>
               {charges.length > 0 ? (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-border/50">
                   {charges.map((c: any) => (
                     <div key={c._id} className="flex items-center justify-between px-4 py-2.5 group">
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-gray-700">{c.description || CHARGE_TYPE_LABELS[c.chargeType] || c.chargeType}</div>
-                        <div className="text-[11px] text-gray-400">
+                        <div className="text-sm text-foreground">{c.description || CHARGE_TYPE_LABELS[c.chargeType] || c.chargeType}</div>
+                        <div className="text-[11px] text-muted-foreground">
                           {CHARGE_TYPE_LABELS[c.chargeType] || c.chargeType}
                           {c.chargeSource ? ` · ${c.chargeSource}` : ''}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-800">¥{c.amount}</span>
+                        <span className="text-sm font-medium text-foreground">¥{c.amount}</span>
                         <button onClick={() => handleVoid(c._id)}
                           className="opacity-0 group-hover:opacity-100 text-[11px] text-red-400 hover:text-red-600 transition-all px-1">
                           冲销
@@ -737,20 +737,20 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
                   ))}
                 </div>
               ) : (
-                <div className="px-4 py-6 text-center text-sm text-gray-400">
+                <div className="px-4 py-6 text-center text-sm text-muted-foreground">
                   {folioId ? '暂无消费记录' : '未创建 Folio，显示预订费用'}
                 </div>
               )}
 
               {/* 汇总 */}
-              <div className="flex justify-between items-center px-4 py-3 bg-gray-100">
-                <span className="text-sm font-semibold text-gray-800">消费合计</span>
-                <span className="text-lg font-bold text-gray-900">¥{totalCharges}</span>
+              <div className="flex justify-between items-center px-4 py-3 bg-secondary">
+                <span className="text-sm font-semibold text-foreground">消费合计</span>
+                <span className="text-lg font-bold text-foreground">¥{totalCharges}</span>
               </div>
               {totalPayments > 0 && (
                 <div className="flex justify-between items-center px-4 py-2.5 text-sm">
-                  <span className="text-gray-500">已付</span>
-                  <span className="text-emerald-600 font-medium">¥{totalPayments}</span>
+                  <span className="text-muted-foreground">已付</span>
+                  <span className="text-success font-medium">¥{totalPayments}</span>
                 </div>
               )}
               <div className="flex justify-between items-center px-4 py-3 bg-orange-50">
@@ -762,24 +762,24 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
 
           {/* 本次收款金额 */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">本次收款金额（元）</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">本次收款金额（元）</label>
             <input
               type="number" min="0" step="0.01"
               value={payAmount} onChange={e => setPayAmount(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-lg font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-right"
+              className="w-full px-4 py-3 border border-border rounded-xl text-lg font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-right"
             />
           </div>
 
           {/* 收款方式 */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">收款方式</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-2">收款方式</label>
             <div className="grid grid-cols-3 gap-2">
               {PAY_METHODS.map(m => (
                 <button key={m.value} onClick={() => setPayMethod(m.value)}
                   className={`flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl border text-xs font-medium transition-all ${
                     payMethod === m.value
-                      ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-success bg-success/10 text-success'
+                      : 'border-border text-muted-foreground hover:border-border hover:bg-secondary/50'
                   }`}>
                   {m.icon}
                   {m.label}
@@ -790,21 +790,21 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
 
           {/* 备注 */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">备注（可选）</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">备注（可选）</label>
             <input value={note} onChange={e => setNote(e.target.value)}
               placeholder="如：部分预付、挂账等"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
 
           {/* 历史支付记录 */}
           {payments.length > 0 && (
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">支付记录</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">支付记录</label>
               <div className="space-y-1">
                 {payments.map((pay: any, i: number) => (
-                  <div key={i} className="flex justify-between text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                  <div key={i} className="flex justify-between text-xs text-muted-foreground bg-secondary/50 rounded-lg px-3 py-2">
                     <span>{pay.payMethodName || PAY_METHODS.find(m => m.value === pay.payMethod)?.label || pay.payMethod}</span>
-                    <span className="font-medium text-gray-700">¥{pay.amount}</span>
+                    <span className="font-medium text-foreground">¥{pay.amount}</span>
                   </div>
                 ))}
               </div>
@@ -813,17 +813,17 @@ function CashierDialog({ booking, onClose, onSuccess }: CashierDialogProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 sticky bottom-0 bg-white">
+        <div className="flex gap-3 px-6 py-4 border-t border-border sticky bottom-0 bg-white">
           <button onClick={onClose}
-            className="px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors">
+            className="px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50 transition-colors">
             取消
           </button>
           <button onClick={handlePayOnly} disabled={saving}
-            className="flex-1 px-4 py-2 border border-emerald-400 text-emerald-700 text-sm rounded-lg hover:bg-emerald-50 disabled:opacity-50 transition-colors font-medium">
+            className="flex-1 px-4 py-2 border border-success text-success text-sm rounded-lg hover:bg-success/10 disabled:opacity-50 transition-colors font-medium">
             仅收款
           </button>
           <button onClick={handleConfirm} disabled={saving}
-            className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-semibold">
+            className="flex-1 px-4 py-2.5 bg-success text-white text-sm rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors font-semibold">
             {saving ? '处理中...' : `收款并完赛`}
           </button>
         </div>
@@ -864,21 +864,21 @@ function CancelDialog({ booking, onClose, onSuccess }: CancelDialogProps) {
         <div className="px-6 py-5">
           <div className="text-center mb-4">
             <div className="text-3xl mb-2">⚠️</div>
-            <h2 className="font-semibold text-gray-900 text-lg">确认取消预订？</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="font-semibold text-foreground text-lg">确认取消预订？</h2>
+            <p className="text-sm text-muted-foreground mt-1">
               {booking.teeTime} · {booking.courseName} · {booking.playerCount}人
             </p>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">取消原因（可选）</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">取消原因（可选）</label>
             <input value={cancelNote} onChange={e => setCancelNote(e.target.value)}
               placeholder="如：客户临时有事"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300" />
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300" />
           </div>
         </div>
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
+        <div className="flex gap-3 px-6 py-4 border-t border-border">
           <button onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors">
+            className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50 transition-colors">
             不取消
           </button>
           <button onClick={handleConfirm} disabled={saving}
@@ -941,19 +941,19 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         {/* 日期导航 */}
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
           <button onClick={() => setDate(formatDate(addDays(new Date(date), -1)))}
-            className="p-1.5 rounded hover:bg-white transition-colors text-gray-600"><ChevronLeft size={16} /></button>
+            className="p-1.5 rounded hover:bg-white transition-colors text-muted-foreground"><ChevronLeft size={16} /></button>
           <input type="date" value={date} onChange={e => setDate(e.target.value)}
-            className="px-2 py-1 bg-transparent text-sm font-medium text-gray-800 focus:outline-none" />
+            className="px-2 py-1 bg-transparent text-sm font-medium text-foreground focus:outline-none" />
           <button onClick={() => setDate(formatDate(addDays(new Date(date), 1)))}
-            className="p-1.5 rounded hover:bg-white transition-colors text-gray-600"><ChevronRight size={16} /></button>
+            className="p-1.5 rounded hover:bg-white transition-colors text-muted-foreground"><ChevronRight size={16} /></button>
         </div>
 
         {/* 今日快捷 */}
         {date !== today && (
           <button onClick={() => setDate(today)}
-            className="px-3 py-1.5 text-xs text-emerald-600 border border-emerald-200 rounded-lg hover:bg-emerald-50 transition-colors">
+            className="px-3 py-1.5 text-xs text-success border border-success/20 rounded-lg hover:bg-success/10 transition-colors">
             今天
           </button>
         )}
@@ -961,7 +961,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
         {/* 球场选择 */}
         {courses.length > 1 && (
           <select value={courseId} onChange={e => setCourseId(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+            className="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
             <option value="">全部球场</option>
             {courses.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
@@ -969,26 +969,26 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
 
         {/* 新增按钮 */}
         <button onClick={() => onNewBooking(date)}
-          className="ml-auto flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors">
+          className="ml-auto flex items-center gap-2 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 transition-colors">
           <Plus size={15} /> 新增预订
         </button>
       </div>
 
       {/* 日期显示 */}
       <div className="flex items-center gap-3 mb-4">
-        <h3 className="font-semibold text-gray-800">{formatDisplay(date)}</h3>
-        <span className="text-sm text-gray-400">{sorted.length} 组预订</span>
+        <h3 className="font-semibold text-foreground">{formatDisplay(date)}</h3>
+        <span className="text-sm text-muted-foreground">{sorted.length} 组预订</span>
       </div>
 
       {/* 发球表内容 */}
       {loading ? (
-        <div className="text-center py-16 text-gray-400 text-sm">加载中...</div>
+        <div className="text-center py-16 text-muted-foreground text-sm">加载中...</div>
       ) : sorted.length === 0 ? (
-        <div className="text-center py-16 text-gray-300">
+        <div className="text-center py-16 text-muted-foreground">
           <div className="text-4xl mb-3">⛳</div>
           <p className="text-sm">当天暂无预订</p>
           <button onClick={() => onNewBooking(date)}
-            className="mt-4 px-5 py-2 bg-emerald-600 text-white text-sm rounded-full hover:bg-emerald-700 transition-colors">
+            className="mt-4 px-5 py-2 bg-success text-white text-sm rounded-full hover:bg-success/90 transition-colors">
             新增预订
           </button>
         </div>
@@ -1007,10 +1007,10 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                   <div className="flex items-start gap-4 min-w-0 flex-1">
                     {/* 时间 */}
                     <div className="flex-shrink-0 text-center w-14">
-                      <div className="text-xl font-bold text-gray-800 leading-none">{b.teeTime}</div>
-                      <div className="text-xs text-gray-400 mt-1">{b.courseName}</div>
+                      <div className="text-xl font-bold text-foreground leading-none">{b.teeTime}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{b.courseName}</div>
                       {b.orderNo && (
-                        <div className="text-[10px] text-gray-300 mt-0.5 leading-tight">{b.orderNo}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{b.orderNo}</div>
                       )}
                     </div>
 
@@ -1019,15 +1019,15 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                       {/* 球员名单 */}
                       <div className="flex items-center gap-2 flex-wrap">
                         {b.players?.map((p, i) => (
-                          <span key={i} className={`text-sm font-medium ${p.type === 'guest' ? 'text-purple-700' : 'text-gray-800'}`}>
+                          <span key={i} className={`text-sm font-medium ${p.type === 'guest' ? 'text-purple-700' : 'text-foreground'}`}>
                             {p.name}{p.type === 'guest' ? '（嘉）' : ''}
                           </span>
                         ))}
-                        <span className="text-xs text-gray-400">{b.playerCount}人</span>
+                        <span className="text-xs text-muted-foreground">{b.playerCount}人</span>
                       </div>
 
                       {/* 资源信息 */}
-                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 flex-wrap">
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
                         {(res?.caddyName || b.caddyName) && (
                           <span>球童：{res?.caddyName || b.caddyName}</span>
                         )}
@@ -1050,7 +1050,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                         )}
                         {/* 费用显示 */}
                         {(pricing.totalFee || b.totalFee) > 0 && (
-                          <span className={pendingFee > 0 ? 'text-orange-600 font-medium' : 'text-emerald-600 font-medium'}>
+                          <span className={pendingFee > 0 ? 'text-orange-600 font-medium' : 'text-success font-medium'}>
                             {pendingFee > 0
                               ? `待付 ¥${Math.max(0, pendingFee)}`
                               : `已付 ¥${pricing.paidFee || b.totalFee}`
@@ -1058,7 +1058,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                           </span>
                         )}
                         {b.note && (
-                          <span className="text-gray-400 truncate max-w-[160px]">备注：{b.note}</span>
+                          <span className="text-muted-foreground truncate max-w-[160px]">备注：{b.note}</span>
                         )}
                       </div>
                     </div>
@@ -1084,7 +1084,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                               handleSuccess()
                             } catch { /* 拦截器处理 */ }
                           }}
-                          className="px-2.5 py-1 text-xs bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors">
+                          className="px-2.5 py-1 text-xs bg-success/100 text-white rounded-lg hover:bg-success transition-colors">
                           确认
                         </button>
                       )}
@@ -1100,7 +1100,7 @@ export default function TeeSheet({ onNewBooking, onStatusChange }: Props) {
                       {/* 已签到 → 完赛（打开收银台） */}
                       {b.status === 'checked_in' && (
                         <button onClick={() => setCashierTarget(b)}
-                          className="px-2.5 py-1 text-xs bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors">
+                          className="px-2.5 py-1 text-xs bg-success/100 text-white rounded-lg hover:bg-success transition-colors">
                           完赛结账
                         </button>
                       )}

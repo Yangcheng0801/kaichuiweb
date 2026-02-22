@@ -54,26 +54,26 @@ const TABS: { key: TabKey; label: string; icon: any }[] = [
 ]
 
 const LEVEL_NAMES: Record<number, string> = { 0: '非会员', 1: '普通会员', 2: '金卡会员', 3: '钻石会员', 4: '白金会员' }
-const LEVEL_COLORS: Record<number, string> = { 0: 'bg-gray-100 text-gray-600', 1: 'bg-blue-100 text-blue-700', 2: 'bg-yellow-100 text-yellow-700', 3: 'bg-purple-100 text-purple-700', 4: 'bg-emerald-100 text-emerald-700' }
+const LEVEL_COLORS: Record<number, string> = { 0: 'bg-secondary text-muted-foreground', 1: 'bg-blue-100 text-blue-700', 2: 'bg-yellow-100 text-yellow-700', 3: 'bg-purple-100 text-purple-700', 4: 'bg-success/10 text-success' }
 const INTERACTION_TYPES: Record<string, { label: string; color: string }> = {
   call: { label: '电话', color: 'bg-blue-100 text-blue-700' },
   visit: { label: '到访', color: 'bg-green-100 text-green-700' },
   complaint: { label: '投诉', color: 'bg-red-100 text-red-700' },
   feedback: { label: '反馈', color: 'bg-amber-100 text-amber-700' },
-  note: { label: '备注', color: 'bg-gray-100 text-gray-600' },
+  note: { label: '备注', color: 'bg-secondary text-muted-foreground' },
 }
 const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
-  low: { label: '低', color: 'text-gray-500' }, medium: { label: '中', color: 'text-blue-600' },
+  low: { label: '低', color: 'text-muted-foreground' }, medium: { label: '中', color: 'text-blue-600' },
   high: { label: '高', color: 'text-orange-600' }, urgent: { label: '紧急', color: 'text-red-600' },
 }
 const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
   pending: { label: '待处理', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
   in_progress: { label: '进行中', color: 'bg-blue-100 text-blue-700', icon: RefreshCw },
   completed: { label: '已完成', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
-  cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-500', icon: X },
+  cancelled: { label: '已取消', color: 'bg-secondary text-muted-foreground', icon: X },
 }
 const CAMPAIGN_STATUS: Record<string, { label: string; color: string }> = {
-  draft: { label: '草稿', color: 'bg-gray-100 text-gray-600' },
+  draft: { label: '草稿', color: 'bg-secondary text-muted-foreground' },
   running: { label: '进行中', color: 'bg-blue-100 text-blue-700' },
   completed: { label: '已完成', color: 'bg-green-100 text-green-700' },
   cancelled: { label: '已取消', color: 'bg-red-100 text-red-600' },
@@ -213,20 +213,20 @@ export default function CRM() {
   const runAutoFollowups = async () => { try { const r: any = await api.crm.generateAutoFollowups(); toast.success(r.message || '自动跟进已生成'); loadFollowups() } catch {} }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-secondary/50">
       <div className="flex items-center gap-2 px-4 py-3 bg-white border-b shrink-0">
-        <Users className="w-5 h-5 text-emerald-600" />
+        <Users className="w-5 h-5 text-success" />
         <h1 className="text-lg font-bold">CRM 客户关系管理</h1>
         <div className="flex-1" />
-        <button onClick={runAutoFollowups} className="flex items-center gap-1 px-3 py-1.5 text-xs border rounded-lg hover:bg-gray-50" title="扫描生日/到期/沉睡客户生成跟进"><Zap className="w-3.5 h-3.5 text-amber-500" />自动跟进</button>
-        <button onClick={runRFM} className="flex items-center gap-1 px-3 py-1.5 text-xs border rounded-lg hover:bg-gray-50" title="重新计算全部客户 RFM 评分"><TrendingUp className="w-3.5 h-3.5 text-blue-500" />计算RFM</button>
+        <button onClick={runAutoFollowups} className="flex items-center gap-1 px-3 py-1.5 text-xs border rounded-lg hover:bg-secondary/50" title="扫描生日/到期/沉睡客户生成跟进"><Zap className="w-3.5 h-3.5 text-amber-500" />自动跟进</button>
+        <button onClick={runRFM} className="flex items-center gap-1 px-3 py-1.5 text-xs border rounded-lg hover:bg-secondary/50" title="重新计算全部客户 RFM 评分"><TrendingUp className="w-3.5 h-3.5 text-blue-500" />计算RFM</button>
       </div>
 
       <div className="flex gap-1 px-4 pt-3 bg-white border-b shrink-0 overflow-x-auto">
         {TABS.map(t => {
           const Icon = t.icon; const active = activeTab === t.key
           return <button key={t.key} onClick={() => setActiveTab(t.key)}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg whitespace-nowrap transition-colors ${active ? 'bg-emerald-50 text-emerald-700 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}>
+            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-t-lg whitespace-nowrap transition-colors ${active ? 'bg-success/10 text-success border-b-2 border-success' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}>
             <Icon className="w-4 h-4" />{t.label}
           </button>
         })}
@@ -245,74 +245,74 @@ export default function CRM() {
 
       {tagDialogOpen && <Dialog title={editingTag ? '编辑标签' : '新增标签'} onClose={() => setTagDialogOpen(false)}>
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">名称<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={tagForm.name} onChange={e => setTagForm(p => ({ ...p, name: e.target.value }))} /></label>
-          <label className="block text-sm font-medium text-gray-700">颜色<input type="color" className="mt-1 block w-12 h-8 border rounded cursor-pointer" value={tagForm.color} onChange={e => setTagForm(p => ({ ...p, color: e.target.value }))} /></label>
-          <label className="block text-sm font-medium text-gray-700">分类<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={tagForm.category} onChange={e => setTagForm(p => ({ ...p, category: e.target.value }))}>{['通用', '身份', '行为', '消费', '风险', '偏好', '来源'].map(c => <option key={c}>{c}</option>)}</select></label>
+          <label className="block text-sm font-medium text-foreground">名称<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={tagForm.name} onChange={e => setTagForm(p => ({ ...p, name: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">颜色<input type="color" className="mt-1 block w-12 h-8 border rounded cursor-pointer" value={tagForm.color} onChange={e => setTagForm(p => ({ ...p, color: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">分类<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={tagForm.category} onChange={e => setTagForm(p => ({ ...p, category: e.target.value }))}>{['通用', '身份', '行为', '消费', '风险', '偏好', '来源'].map(c => <option key={c}>{c}</option>)}</select></label>
           <div className="flex justify-end gap-2 pt-2">
-            <button onClick={() => setTagDialogOpen(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button>
-            <button onClick={saveTag} className="px-4 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">保存</button>
+            <button onClick={() => setTagDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button>
+            <button onClick={saveTag} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button>
           </div>
-          {!editingTag && tags.length > 0 && <div className="pt-3 border-t mt-3"><p className="text-xs text-gray-500 mb-2">已有标签</p><div className="flex flex-wrap gap-2">{tags.map(t => <span key={t._id} className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{ backgroundColor: t.color + '20', color: t.color }}>{t.name}<button onClick={() => openTagDialog(t)} className="hover:opacity-70"><Edit2 className="w-3 h-3" /></button><button onClick={() => deleteTag(t._id)} className="hover:opacity-70"><Trash2 className="w-3 h-3" /></button></span>)}</div></div>}
+          {!editingTag && tags.length > 0 && <div className="pt-3 border-t mt-3"><p className="text-xs text-muted-foreground mb-2">已有标签</p><div className="flex flex-wrap gap-2">{tags.map(t => <span key={t._id} className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{ backgroundColor: t.color + '20', color: t.color }}>{t.name}<button onClick={() => openTagDialog(t)} className="hover:opacity-70"><Edit2 className="w-3 h-3" /></button><button onClick={() => deleteTag(t._id)} className="hover:opacity-70"><Trash2 className="w-3 h-3" /></button></span>)}</div></div>}
         </div>
       </Dialog>}
 
       {interactionDialogOpen && <Dialog title="新增互动记录" onClose={() => setInteractionDialogOpen(false)}>
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">客户<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.playerId} onChange={e => { const c = customers.find(c => c._id === e.target.value); setInteractionForm(p => ({ ...p, playerId: e.target.value, playerName: c?.name || '' })) }}><option value="">请选择客户</option>{customers.map(c => <option key={c._id} value={c._id}>{c.name} ({c.playerNo})</option>)}</select></label>
+          <label className="block text-sm font-medium text-foreground">客户<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.playerId} onChange={e => { const c = customers.find(c => c._id === e.target.value); setInteractionForm(p => ({ ...p, playerId: e.target.value, playerName: c?.name || '' })) }}><option value="">请选择客户</option>{customers.map(c => <option key={c._id} value={c._id}>{c.name} ({c.playerNo})</option>)}</select></label>
           <div className="grid grid-cols-2 gap-3">
-            <label className="block text-sm font-medium text-gray-700">类型<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.type} onChange={e => setInteractionForm(p => ({ ...p, type: e.target.value }))}>{Object.entries(INTERACTION_TYPES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></label>
-            <label className="block text-sm font-medium text-gray-700">方向<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.direction} onChange={e => setInteractionForm(p => ({ ...p, direction: e.target.value }))}><option value="outbound">主动联系</option><option value="inbound">客户来访</option></select></label>
+            <label className="block text-sm font-medium text-foreground">类型<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.type} onChange={e => setInteractionForm(p => ({ ...p, type: e.target.value }))}>{Object.entries(INTERACTION_TYPES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></label>
+            <label className="block text-sm font-medium text-foreground">方向<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.direction} onChange={e => setInteractionForm(p => ({ ...p, direction: e.target.value }))}><option value="outbound">主动联系</option><option value="inbound">客户来访</option></select></label>
           </div>
-          <label className="block text-sm font-medium text-gray-700">内容<textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows={3} value={interactionForm.content} onChange={e => setInteractionForm(p => ({ ...p, content: e.target.value }))} /></label>
-          <label className="block text-sm font-medium text-gray-700">摘要<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.summary} onChange={e => setInteractionForm(p => ({ ...p, summary: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">内容<textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows={3} value={interactionForm.content} onChange={e => setInteractionForm(p => ({ ...p, content: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">摘要<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={interactionForm.summary} onChange={e => setInteractionForm(p => ({ ...p, summary: e.target.value }))} /></label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={interactionForm.followUpRequired} onChange={e => setInteractionForm(p => ({ ...p, followUpRequired: e.target.checked }))} />需要跟进</label>
-          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setInteractionDialogOpen(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button><button onClick={saveInteraction} className="px-4 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">保存</button></div>
+          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setInteractionDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveInteraction} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button></div>
         </div>
       </Dialog>}
 
       {followupDialogOpen && <Dialog title="新增跟进任务" onClose={() => setFollowupDialogOpen(false)}>
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">客户<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.playerId} onChange={e => { const c = customers.find(c => c._id === e.target.value); setFollowupForm(p => ({ ...p, playerId: e.target.value, playerName: c?.name || '' })) }}><option value="">请选择客户</option>{customers.map(c => <option key={c._id} value={c._id}>{c.name} ({c.playerNo})</option>)}</select></label>
-          <label className="block text-sm font-medium text-gray-700">标题<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.title} onChange={e => setFollowupForm(p => ({ ...p, title: e.target.value }))} /></label>
-          <label className="block text-sm font-medium text-gray-700">内容<textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows={2} value={followupForm.content} onChange={e => setFollowupForm(p => ({ ...p, content: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">客户<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.playerId} onChange={e => { const c = customers.find(c => c._id === e.target.value); setFollowupForm(p => ({ ...p, playerId: e.target.value, playerName: c?.name || '' })) }}><option value="">请选择客户</option>{customers.map(c => <option key={c._id} value={c._id}>{c.name} ({c.playerNo})</option>)}</select></label>
+          <label className="block text-sm font-medium text-foreground">标题<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.title} onChange={e => setFollowupForm(p => ({ ...p, title: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">内容<textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows={2} value={followupForm.content} onChange={e => setFollowupForm(p => ({ ...p, content: e.target.value }))} /></label>
           <div className="grid grid-cols-2 gap-3">
-            <label className="block text-sm font-medium text-gray-700">优先级<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.priority} onChange={e => setFollowupForm(p => ({ ...p, priority: e.target.value }))}>{Object.entries(PRIORITY_MAP).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></label>
-            <label className="block text-sm font-medium text-gray-700">到期日<input type="date" className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.dueDate} onChange={e => setFollowupForm(p => ({ ...p, dueDate: e.target.value }))} /></label>
+            <label className="block text-sm font-medium text-foreground">优先级<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.priority} onChange={e => setFollowupForm(p => ({ ...p, priority: e.target.value }))}>{Object.entries(PRIORITY_MAP).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></label>
+            <label className="block text-sm font-medium text-foreground">到期日<input type="date" className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={followupForm.dueDate} onChange={e => setFollowupForm(p => ({ ...p, dueDate: e.target.value }))} /></label>
           </div>
-          <label className="block text-sm font-medium text-gray-700">负责人<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="员工姓名" value={followupForm.assigneeName} onChange={e => setFollowupForm(p => ({ ...p, assigneeName: e.target.value }))} /></label>
-          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setFollowupDialogOpen(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button><button onClick={saveFollowup} className="px-4 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">保存</button></div>
+          <label className="block text-sm font-medium text-foreground">负责人<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="员工姓名" value={followupForm.assigneeName} onChange={e => setFollowupForm(p => ({ ...p, assigneeName: e.target.value }))} /></label>
+          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setFollowupDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveFollowup} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button></div>
         </div>
       </Dialog>}
 
       {segmentDialogOpen && <Dialog title="新建客户分群" onClose={() => setSegmentDialogOpen(false)} wide>
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">名称<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={segmentForm.name} onChange={e => setSegmentForm(p => ({ ...p, name: e.target.value }))} /></label>
-          <label className="block text-sm font-medium text-gray-700">描述<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={segmentForm.description} onChange={e => setSegmentForm(p => ({ ...p, description: e.target.value }))} /></label>
-          <div><p className="text-sm font-medium text-gray-700 mb-2">筛选规则</p>
+          <label className="block text-sm font-medium text-foreground">名称<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={segmentForm.name} onChange={e => setSegmentForm(p => ({ ...p, name: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">描述<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={segmentForm.description} onChange={e => setSegmentForm(p => ({ ...p, description: e.target.value }))} /></label>
+          <div><p className="text-sm font-medium text-foreground mb-2">筛选规则</p>
             {segmentForm.rules.map((rule, i) => <div key={i} className="flex gap-2 mb-2 items-center">
               <select className="border rounded-lg px-2 py-1.5 text-sm flex-1" value={rule.field} onChange={e => { const rules = [...segmentForm.rules]; rules[i] = { ...rules[i], field: e.target.value }; setSegmentForm(p => ({ ...p, rules })) }}>{SEGMENT_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}</select>
               <select className="border rounded-lg px-2 py-1.5 text-sm" value={rule.operator} onChange={e => { const rules = [...segmentForm.rules]; rules[i] = { ...rules[i], operator: e.target.value }; setSegmentForm(p => ({ ...p, rules })) }}>{SEGMENT_OPERATORS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select>
               <input className="border rounded-lg px-2 py-1.5 text-sm w-24" placeholder="值" value={rule.value} onChange={e => { const rules = [...segmentForm.rules]; rules[i] = { ...rules[i], value: e.target.value }; setSegmentForm(p => ({ ...p, rules })) }} />
               {segmentForm.rules.length > 1 && <button onClick={() => setSegmentForm(p => ({ ...p, rules: p.rules.filter((_, j) => j !== i) }))} className="text-red-500"><X className="w-4 h-4" /></button>}
             </div>)}
-            <button onClick={() => setSegmentForm(p => ({ ...p, rules: [...p.rules, { field: 'account.totalRounds', operator: 'gte', value: '' }] }))} className="text-sm text-emerald-600">+ 添加条件</button>
+            <button onClick={() => setSegmentForm(p => ({ ...p, rules: [...p.rules, { field: 'account.totalRounds', operator: 'gte', value: '' }] }))} className="text-sm text-success">+ 添加条件</button>
           </div>
-          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setSegmentDialogOpen(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button><button onClick={saveSegment} className="px-4 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">保存</button></div>
+          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setSegmentDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveSegment} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button></div>
         </div>
       </Dialog>}
 
       {campaignDialogOpen && <Dialog title="新建营销活动" onClose={() => setCampaignDialogOpen(false)} wide>
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">活动名称<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.name} onChange={e => setCampaignForm(p => ({ ...p, name: e.target.value }))} /></label>
-          <label className="block text-sm font-medium text-gray-700">描述<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.description} onChange={e => setCampaignForm(p => ({ ...p, description: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">活动名称<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.name} onChange={e => setCampaignForm(p => ({ ...p, name: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">描述<input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.description} onChange={e => setCampaignForm(p => ({ ...p, description: e.target.value }))} /></label>
           <div className="grid grid-cols-2 gap-3">
-            <label className="block text-sm font-medium text-gray-700">类型<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.type} onChange={e => setCampaignForm(p => ({ ...p, type: e.target.value }))}>{Object.entries(CAMPAIGN_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
-            <label className="block text-sm font-medium text-gray-700">渠道<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.channel} onChange={e => setCampaignForm(p => ({ ...p, channel: e.target.value }))}><option value="wechat">微信推送</option><option value="sms">短信</option><option value="phone">电话</option><option value="email">邮件</option></select></label>
+            <label className="block text-sm font-medium text-foreground">类型<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.type} onChange={e => setCampaignForm(p => ({ ...p, type: e.target.value }))}>{Object.entries(CAMPAIGN_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
+            <label className="block text-sm font-medium text-foreground">渠道<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.channel} onChange={e => setCampaignForm(p => ({ ...p, channel: e.target.value }))}><option value="wechat">微信推送</option><option value="sms">短信</option><option value="phone">电话</option><option value="email">邮件</option></select></label>
           </div>
-          <label className="block text-sm font-medium text-gray-700">目标分群<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.segmentId} onChange={e => setCampaignForm(p => ({ ...p, segmentId: e.target.value }))}><option value="">全部客户</option>{segments.map(s => <option key={s._id} value={s._id}>{s.name} ({s.playerCount}人)</option>)}</select></label>
-          <label className="block text-sm font-medium text-gray-700">活动内容<textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows={3} value={campaignForm.content} onChange={e => setCampaignForm(p => ({ ...p, content: e.target.value }))} /></label>
-          <label className="block text-sm font-medium text-gray-700">预算 (元)<input type="number" className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.budget} onChange={e => setCampaignForm(p => ({ ...p, budget: Number(e.target.value) }))} /></label>
-          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setCampaignDialogOpen(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">取消</button><button onClick={saveCampaign} className="px-4 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">保存</button></div>
+          <label className="block text-sm font-medium text-foreground">目标分群<select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.segmentId} onChange={e => setCampaignForm(p => ({ ...p, segmentId: e.target.value }))}><option value="">全部客户</option>{segments.map(s => <option key={s._id} value={s._id}>{s.name} ({s.playerCount}人)</option>)}</select></label>
+          <label className="block text-sm font-medium text-foreground">活动内容<textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows={3} value={campaignForm.content} onChange={e => setCampaignForm(p => ({ ...p, content: e.target.value }))} /></label>
+          <label className="block text-sm font-medium text-foreground">预算 (元)<input type="number" className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" value={campaignForm.budget} onChange={e => setCampaignForm(p => ({ ...p, budget: Number(e.target.value) }))} /></label>
+          <div className="flex justify-end gap-2 pt-2"><button onClick={() => setCampaignDialogOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-secondary rounded-lg">取消</button><button onClick={saveCampaign} className="px-4 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg">保存</button></div>
         </div>
       </Dialog>}
     </div>
@@ -326,27 +326,27 @@ function OverviewTab({ customers, tags, loading, searchQ, setSearchQ, filterTag,
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" /><input className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm" placeholder="搜索姓名/电话/编号..." value={searchQ} onChange={e => setSearchQ(e.target.value)} /></div>
+        <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><input className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm" placeholder="搜索姓名/电话/编号..." value={searchQ} onChange={e => setSearchQ(e.target.value)} /></div>
         <select className="border rounded-lg px-3 py-2 text-sm" value={filterTag} onChange={e => setFilterTag(e.target.value)}><option value="">全部标签</option>{tags.map((t: CrmTag) => <option key={t._id} value={t.name}>{t.name}</option>)}</select>
         <select className="border rounded-lg px-3 py-2 text-sm" value={filterLevel} onChange={e => setFilterLevel(e.target.value)}><option value="">全部等级</option>{Object.entries(LEVEL_NAMES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
-        <button onClick={() => openTagDialog()} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50"><Tag className="w-4 h-4" />标签管理</button>
+        <button onClick={() => openTagDialog()} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><Tag className="w-4 h-4" />标签管理</button>
       </div>
-      {loading ? <div className="text-center py-20 text-gray-400">加载中...</div> : customers.length === 0 ? <div className="text-center py-20 text-gray-400">暂无客户数据</div> : (
+      {loading ? <div className="text-center py-20 text-muted-foreground">加载中...</div> : customers.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无客户数据</div> : (
         <div className="bg-white rounded-xl border overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600"><tr><th className="text-left px-4 py-3 font-medium">客户</th><th className="text-left px-4 py-3 font-medium">等级</th><th className="text-left px-4 py-3 font-medium">标签</th><th className="text-right px-4 py-3 font-medium">总消费</th><th className="text-right px-4 py-3 font-medium">总轮次</th><th className="text-right px-4 py-3 font-medium">余额</th><th className="text-center px-4 py-3 font-medium">操作</th></tr></thead>
+            <thead className="bg-secondary/50 text-muted-foreground"><tr><th className="text-left px-4 py-3 font-medium">客户</th><th className="text-left px-4 py-3 font-medium">等级</th><th className="text-left px-4 py-3 font-medium">标签</th><th className="text-right px-4 py-3 font-medium">总消费</th><th className="text-right px-4 py-3 font-medium">总轮次</th><th className="text-right px-4 py-3 font-medium">余额</th><th className="text-center px-4 py-3 font-medium">操作</th></tr></thead>
             <tbody className="divide-y">{customers.map((c: Customer) => (
-              <tr key={c._id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onOpen360(c._id)}>
-                <td className="px-4 py-3"><div className="font-medium text-gray-900">{c.name || '未命名'}</div><div className="text-xs text-gray-400">{c.playerNo} {c.phoneNumber && `· ${c.phoneNumber}`}</div></td>
+              <tr key={c._id} className="hover:bg-secondary/50 cursor-pointer" onClick={() => onOpen360(c._id)}>
+                <td className="px-4 py-3"><div className="font-medium text-foreground">{c.name || '未命名'}</div><div className="text-xs text-muted-foreground">{c.playerNo} {c.phoneNumber && `· ${c.phoneNumber}`}</div></td>
                 <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${LEVEL_COLORS[c.memberLevel] || LEVEL_COLORS[0]}`}>{LEVEL_NAMES[c.memberLevel] || '非会员'}</span></td>
-                <td className="px-4 py-3"><div className="flex flex-wrap gap-1">{(c.tags || []).slice(0, 3).map((t: string) => { const td = tags.find((x: CrmTag) => x.name === t); return <span key={t} className="px-1.5 py-0.5 rounded text-xs" style={{ backgroundColor: (td?.color || '#6b7280') + '20', color: td?.color || '#6b7280' }}>{t}</span> })}{(c.tags || []).length > 3 && <span className="text-xs text-gray-400">+{c.tags.length - 3}</span>}</div></td>
+                <td className="px-4 py-3"><div className="flex flex-wrap gap-1">{(c.tags || []).slice(0, 3).map((t: string) => { const td = tags.find((x: CrmTag) => x.name === t); return <span key={t} className="px-1.5 py-0.5 rounded text-xs" style={{ backgroundColor: (td?.color || '#6b7280') + '20', color: td?.color || '#6b7280' }}>{t}</span> })}{(c.tags || []).length > 3 && <span className="text-xs text-muted-foreground">+{c.tags.length - 3}</span>}</div></td>
                 <td className="px-4 py-3 text-right font-mono">{(c.totalConsumption || 0).toLocaleString()}</td>
                 <td className="px-4 py-3 text-right">{c.totalRounds || 0}</td>
                 <td className="px-4 py-3 text-right font-mono">{(c.balance || 0).toLocaleString()}</td>
                 <td className="px-4 py-3 text-center" onClick={e => e.stopPropagation()}><div className="flex justify-center gap-1">
-                  <button onClick={() => onOpen360(c._id)} className="p-1 rounded hover:bg-gray-100" title="查看详情"><Eye className="w-4 h-4 text-gray-500" /></button>
-                  <button onClick={() => onNewInteraction(c)} className="p-1 rounded hover:bg-gray-100" title="新增互动"><MessageSquare className="w-4 h-4 text-blue-500" /></button>
-                  <button onClick={() => onNewFollowup(c)} className="p-1 rounded hover:bg-gray-100" title="新增跟进"><ListTodo className="w-4 h-4 text-orange-500" /></button>
+                  <button onClick={() => onOpen360(c._id)} className="p-1 rounded hover:bg-secondary" title="查看详情"><Eye className="w-4 h-4 text-muted-foreground" /></button>
+                  <button onClick={() => onNewInteraction(c)} className="p-1 rounded hover:bg-secondary" title="新增互动"><MessageSquare className="w-4 h-4 text-blue-500" /></button>
+                  <button onClick={() => onNewFollowup(c)} className="p-1 rounded hover:bg-secondary" title="新增跟进"><ListTodo className="w-4 h-4 text-orange-500" /></button>
                 </div></td>
               </tr>
             ))}</tbody>
@@ -363,16 +363,16 @@ function OverviewTab({ customers, tags, loading, searchQ, setSearchQ, filterTag,
 function InteractionTab({ interactions, customers, onNew, onRefresh, onCreateFollowup }: any) {
   return (<div className="space-y-4">
     <div className="flex items-center justify-between">
-      <h2 className="text-base font-semibold text-gray-700">互动记录</h2>
-      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={() => onNew()} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"><Plus className="w-4 h-4" />新增互动</button></div>
+      <h2 className="text-base font-semibold text-foreground">互动记录</h2>
+      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={() => onNew()} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新增互动</button></div>
     </div>
-    {interactions.length === 0 ? <div className="text-center py-20 text-gray-400">暂无互动记录</div> : <div className="space-y-3">{interactions.map((item: Interaction) => {
+    {interactions.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无互动记录</div> : <div className="space-y-3">{interactions.map((item: Interaction) => {
       const typeInfo = INTERACTION_TYPES[item.type] || INTERACTION_TYPES.note
       return <div key={item._id} className="bg-white rounded-xl border p-4">
-        <div className="flex items-start justify-between"><div className="flex items-center gap-2"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeInfo.color}`}>{typeInfo.label}</span><span className="text-xs text-gray-400">{item.direction === 'inbound' ? '客户来访' : '主动联系'}</span><span className="font-medium text-sm text-gray-800">{item.playerName}</span></div><span className="text-xs text-gray-400">{fmtTime(item.createTime)}</span></div>
-        <p className="text-sm text-gray-700 mt-2">{item.content}</p>
-        {item.summary && <p className="text-xs text-gray-500 mt-1">摘要: {item.summary}</p>}
-        <div className="flex items-center justify-between mt-3"><span className="text-xs text-gray-400">{item.staffName && `记录人: ${item.staffName}`}</span><div className="flex gap-2">
+        <div className="flex items-start justify-between"><div className="flex items-center gap-2"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeInfo.color}`}>{typeInfo.label}</span><span className="text-xs text-muted-foreground">{item.direction === 'inbound' ? '客户来访' : '主动联系'}</span><span className="font-medium text-sm text-foreground">{item.playerName}</span></div><span className="text-xs text-muted-foreground">{fmtTime(item.createTime)}</span></div>
+        <p className="text-sm text-foreground mt-2">{item.content}</p>
+        {item.summary && <p className="text-xs text-muted-foreground mt-1">摘要: {item.summary}</p>}
+        <div className="flex items-center justify-between mt-3"><span className="text-xs text-muted-foreground">{item.staffName && `记录人: ${item.staffName}`}</span><div className="flex gap-2">
           {item.followUpRequired && !item.followUpId && <button onClick={() => onCreateFollowup(item)} className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1"><ListTodo className="w-3 h-3" />创建跟进</button>}
           {item.followUpRequired && item.followUpId && <span className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />已创建跟进</span>}
         </div></div>
@@ -387,20 +387,20 @@ function InteractionTab({ interactions, customers, onNew, onRefresh, onCreateFol
 function FollowupTab({ followups, filter, setFilter, onNew, onRefresh, onUpdateStatus }: any) {
   return (<div className="space-y-4">
     <div className="flex items-center justify-between flex-wrap gap-2">
-      <div className="flex items-center gap-2"><h2 className="text-base font-semibold text-gray-700">跟进任务</h2><div className="flex gap-1">{[{ value: '', label: '全部' }, ...Object.entries(STATUS_MAP).map(([k, v]) => ({ value: k, label: v.label }))].map(s => <button key={s.value} onClick={() => setFilter(s.value)} className={`px-2.5 py-1 text-xs rounded-full ${filter === s.value ? 'bg-emerald-100 text-emerald-700 font-medium' : 'text-gray-500 hover:bg-gray-100'}`}>{s.label}</button>)}</div></div>
-      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={() => onNew()} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"><Plus className="w-4 h-4" />新增任务</button></div>
+      <div className="flex items-center gap-2"><h2 className="text-base font-semibold text-foreground">跟进任务</h2><div className="flex gap-1">{[{ value: '', label: '全部' }, ...Object.entries(STATUS_MAP).map(([k, v]) => ({ value: k, label: v.label }))].map(s => <button key={s.value} onClick={() => setFilter(s.value)} className={`px-2.5 py-1 text-xs rounded-full ${filter === s.value ? 'bg-success/10 text-success font-medium' : 'text-muted-foreground hover:bg-secondary'}`}>{s.label}</button>)}</div></div>
+      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={() => onNew()} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新增任务</button></div>
     </div>
-    {followups.length === 0 ? <div className="text-center py-20 text-gray-400">暂无跟进任务</div> : <div className="space-y-3">{followups.map((item: Followup) => {
+    {followups.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无跟进任务</div> : <div className="space-y-3">{followups.map((item: Followup) => {
       const si = STATUS_MAP[item.status] || STATUS_MAP.pending; const pi = PRIORITY_MAP[item.priority] || PRIORITY_MAP.medium; const SI = si.icon
       const overdue = item.dueDate && item.status !== 'completed' && item.status !== 'cancelled' && new Date(item.dueDate) < new Date()
       return <div key={item._id} className={`bg-white rounded-xl border p-4 ${overdue ? 'border-red-300' : ''}`}>
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2 flex-wrap"><SI className={`w-4 h-4 ${si.color.split(' ')[1]}`} /><span className="font-medium text-sm text-gray-800">{item.title}</span><span className={`text-xs font-medium ${pi.color}`}>[{pi.label}]</span>{overdue && <span className="text-xs text-red-600 font-medium flex items-center gap-0.5"><AlertCircle className="w-3 h-3" />已逾期</span>}{item.autoType && <span className="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">自动</span>}</div>
+          <div className="flex items-center gap-2 flex-wrap"><SI className={`w-4 h-4 ${si.color.split(' ')[1]}`} /><span className="font-medium text-sm text-foreground">{item.title}</span><span className={`text-xs font-medium ${pi.color}`}>[{pi.label}]</span>{overdue && <span className="text-xs text-red-600 font-medium flex items-center gap-0.5"><AlertCircle className="w-3 h-3" />已逾期</span>}{item.autoType && <span className="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">自动</span>}</div>
           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${si.color}`}>{si.label}</span>
         </div>
-        {item.content && <p className="text-sm text-gray-600 mt-2">{item.content}</p>}
-        <div className="flex items-center justify-between mt-3 text-xs text-gray-400"><div className="flex gap-3"><span>客户: {item.playerName}</span>{item.assigneeName && <span>负责人: {item.assigneeName}</span>}{item.dueDate && <span>到期: {item.dueDate}</span>}</div>
-          <div className="flex gap-2">{item.status === 'pending' && <button onClick={() => onUpdateStatus(item._id, 'in_progress')} className="text-blue-600 hover:text-blue-700">开始处理</button>}{item.status === 'in_progress' && <button onClick={() => onUpdateStatus(item._id, 'completed')} className="text-green-600 hover:text-green-700">标记完成</button>}{(item.status === 'pending' || item.status === 'in_progress') && <button onClick={() => onUpdateStatus(item._id, 'cancelled')} className="text-gray-400 hover:text-gray-600">取消</button>}</div>
+        {item.content && <p className="text-sm text-muted-foreground mt-2">{item.content}</p>}
+        <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground"><div className="flex gap-3"><span>客户: {item.playerName}</span>{item.assigneeName && <span>负责人: {item.assigneeName}</span>}{item.dueDate && <span>到期: {item.dueDate}</span>}</div>
+          <div className="flex gap-2">{item.status === 'pending' && <button onClick={() => onUpdateStatus(item._id, 'in_progress')} className="text-blue-600 hover:text-blue-700">开始处理</button>}{item.status === 'in_progress' && <button onClick={() => onUpdateStatus(item._id, 'completed')} className="text-green-600 hover:text-green-700">标记完成</button>}{(item.status === 'pending' || item.status === 'in_progress') && <button onClick={() => onUpdateStatus(item._id, 'cancelled')} className="text-muted-foreground hover:text-muted-foreground">取消</button>}</div>
         </div>
       </div>
     })}</div>}
@@ -412,12 +412,12 @@ function FollowupTab({ followups, filter, setFilter, onNew, onRefresh, onUpdateS
  * ═══════════════════════════════════════════════════════════ */
 function SegmentTab({ segments, onNew, onRefresh, onDelete }: any) {
   return (<div className="space-y-4">
-    <div className="flex items-center justify-between"><h2 className="text-base font-semibold text-gray-700">客户分群</h2><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"><Plus className="w-4 h-4" />新建分群</button></div>
-    {segments.length === 0 ? <div className="text-center py-20 text-gray-400">暂无分群</div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{segments.map((seg: Segment) => <div key={seg._id} className="bg-white rounded-xl border p-4">
-      <div className="flex items-start justify-between"><div><h3 className="font-medium text-gray-800">{seg.name}</h3><p className="text-xs text-gray-500 mt-0.5">{seg.description || '无描述'}</p></div><span className={`px-2 py-0.5 rounded-full text-xs ${seg.type === 'auto' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{seg.type === 'auto' ? '自动' : '手动'}</span></div>
-      <div className="mt-3"><span className="text-gray-600 text-sm"><span className="font-semibold text-lg text-gray-800">{seg.playerCount || 0}</span> 位客户</span></div>
-      {seg.rules?.length > 0 && <div className="mt-2 space-y-1">{seg.rules.map((r: any, i: number) => <p key={i} className="text-xs text-gray-500">{SEGMENT_FIELDS.find(f => f.value === r.field)?.label || r.field} {SEGMENT_OPERATORS.find(o => o.value === r.operator)?.label || r.operator} {r.value}</p>)}</div>}
-      <div className="flex items-center justify-between mt-3 pt-3 border-t"><span className="text-xs text-gray-400">{seg.lastRefreshedAt ? `刷新: ${fmtTime(seg.lastRefreshedAt)}` : '未刷新'}</span><div className="flex gap-2">{seg.type === 'auto' && <button onClick={() => onRefresh(seg._id)} className="text-xs text-blue-600 flex items-center gap-1"><RefreshCw className="w-3 h-3" />刷新</button>}<button onClick={() => onDelete(seg._id)} className="text-xs text-red-500"><Trash2 className="w-3 h-3" /></button></div></div>
+    <div className="flex items-center justify-between"><h2 className="text-base font-semibold text-foreground">客户分群</h2><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新建分群</button></div>
+    {segments.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无分群</div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{segments.map((seg: Segment) => <div key={seg._id} className="bg-white rounded-xl border p-4">
+      <div className="flex items-start justify-between"><div><h3 className="font-medium text-foreground">{seg.name}</h3><p className="text-xs text-muted-foreground mt-0.5">{seg.description || '无描述'}</p></div><span className={`px-2 py-0.5 rounded-full text-xs ${seg.type === 'auto' ? 'bg-blue-100 text-blue-700' : 'bg-secondary text-muted-foreground'}`}>{seg.type === 'auto' ? '自动' : '手动'}</span></div>
+      <div className="mt-3"><span className="text-muted-foreground text-sm"><span className="font-semibold text-lg text-foreground">{seg.playerCount || 0}</span> 位客户</span></div>
+      {seg.rules?.length > 0 && <div className="mt-2 space-y-1">{seg.rules.map((r: any, i: number) => <p key={i} className="text-xs text-muted-foreground">{SEGMENT_FIELDS.find(f => f.value === r.field)?.label || r.field} {SEGMENT_OPERATORS.find(o => o.value === r.operator)?.label || r.operator} {r.value}</p>)}</div>}
+      <div className="flex items-center justify-between mt-3 pt-3 border-t"><span className="text-xs text-muted-foreground">{seg.lastRefreshedAt ? `刷新: ${fmtTime(seg.lastRefreshedAt)}` : '未刷新'}</span><div className="flex gap-2">{seg.type === 'auto' && <button onClick={() => onRefresh(seg._id)} className="text-xs text-blue-600 flex items-center gap-1"><RefreshCw className="w-3 h-3" />刷新</button>}<button onClick={() => onDelete(seg._id)} className="text-xs text-red-500"><Trash2 className="w-3 h-3" /></button></div></div>
     </div>)}</div>}
   </div>)
 }
@@ -428,14 +428,14 @@ function SegmentTab({ segments, onNew, onRefresh, onDelete }: any) {
 function CampaignTab({ campaigns, segments, onNew, onLaunch, onDelete, onRefresh }: any) {
   return (<div className="space-y-4">
     <div className="flex items-center justify-between">
-      <h2 className="text-base font-semibold text-gray-700">营销活动</h2>
-      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"><Plus className="w-4 h-4" />新建活动</button></div>
+      <h2 className="text-base font-semibold text-foreground">营销活动</h2>
+      <div className="flex gap-2"><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button><button onClick={onNew} className="flex items-center gap-1 px-3 py-2 text-sm text-white bg-success hover:bg-success/90 rounded-lg"><Plus className="w-4 h-4" />新建活动</button></div>
     </div>
-    {campaigns.length === 0 ? <div className="text-center py-20 text-gray-400">暂无营销活动</div> : <div className="space-y-4">{campaigns.map((c: Campaign) => {
+    {campaigns.length === 0 ? <div className="text-center py-20 text-muted-foreground">暂无营销活动</div> : <div className="space-y-4">{campaigns.map((c: Campaign) => {
       const si = CAMPAIGN_STATUS[c.status] || CAMPAIGN_STATUS.draft
       return <div key={c._id} className="bg-white rounded-xl border p-5">
         <div className="flex items-start justify-between">
-          <div><h3 className="font-semibold text-gray-800">{c.name}</h3><p className="text-xs text-gray-500 mt-0.5">{c.description || CAMPAIGN_TYPES[c.type] || c.type}</p></div>
+          <div><h3 className="font-semibold text-foreground">{c.name}</h3><p className="text-xs text-muted-foreground mt-0.5">{c.description || CAMPAIGN_TYPES[c.type] || c.type}</p></div>
           <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${si.color}`}>{si.label}</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
@@ -445,7 +445,7 @@ function CampaignTab({ campaigns, segments, onNew, onLaunch, onDelete, onRefresh
           <StatMini label="已转化" value={c.stats?.convertedCount || 0} icon={CheckCircle2} />
         </div>
         <div className="flex items-center justify-between mt-4 pt-3 border-t text-xs">
-          <div className="flex gap-3 text-gray-400"><span>渠道: {c.channel}</span>{c.budget > 0 && <span>预算: ¥{c.budget.toLocaleString()}</span>}<span>{fmtTime(c.createTime)}</span></div>
+          <div className="flex gap-3 text-muted-foreground"><span>渠道: {c.channel}</span>{c.budget > 0 && <span>预算: ¥{c.budget.toLocaleString()}</span>}<span>{fmtTime(c.createTime)}</span></div>
           <div className="flex gap-2">{c.status === 'draft' && <button onClick={() => onLaunch(c._id)} className="text-blue-600 hover:text-blue-700 flex items-center gap-1"><Send className="w-3 h-3" />启动</button>}<button onClick={() => onDelete(c._id)} className="text-red-500 hover:text-red-600"><Trash2 className="w-3 h-3" /></button></div>
         </div>
       </div>
@@ -457,7 +457,7 @@ function CampaignTab({ campaigns, segments, onNew, onLaunch, onDelete, onRefresh
  *  Tab 6: 数据洞察
  * ═══════════════════════════════════════════════════════════ */
 function InsightsTab({ data, onRefresh }: any) {
-  if (!data) return <div className="text-center py-20 text-gray-400">加载中...</div>
+  if (!data) return <div className="text-center py-20 text-muted-foreground">加载中...</div>
   const ov = data.overview || {}
   const rfmDist = data.rfmLevelDistribution || {}
   const memberDist = data.memberLevelDistribution || {}
@@ -474,11 +474,11 @@ function InsightsTab({ data, onRefresh }: any) {
   }
 
   return (<div className="space-y-6">
-    <div className="flex items-center justify-between"><h2 className="text-base font-semibold text-gray-700">数据洞察</h2><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50"><RefreshCw className="w-4 h-4" />刷新</button></div>
+    <div className="flex items-center justify-between"><h2 className="text-base font-semibold text-foreground">数据洞察</h2><button onClick={onRefresh} className="flex items-center gap-1 px-3 py-2 text-sm border rounded-lg hover:bg-secondary/50"><RefreshCw className="w-4 h-4" />刷新</button></div>
 
     {/* KPI */}
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <KpiCard label="总客户" value={ov.totalCustomers || 0} icon={Users} color="text-emerald-600 bg-emerald-50" />
+      <KpiCard label="总客户" value={ov.totalCustomers || 0} icon={Users} color="text-success bg-success/10" />
       <KpiCard label="活跃客户" value={ov.activeCount || 0} icon={Activity} color="text-blue-600 bg-blue-50" sub="60天内到场" />
       <KpiCard label="沉睡客户" value={ov.dormantCount || 0} icon={Clock} color="text-amber-600 bg-amber-50" sub=">60天未到场" />
       <KpiCard label="流失风险" value={ov.churnRisk || 0} icon={AlertCircle} color="text-red-600 bg-red-50" sub="R评分<=2" />
@@ -489,25 +489,25 @@ function InsightsTab({ data, onRefresh }: any) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* RFM 分布 */}
       <div className="bg-white rounded-xl border p-5">
-        <h3 className="font-semibold text-gray-700 mb-4">RFM 客户分层</h3>
-        {rfmEntries.length === 0 ? <p className="text-sm text-gray-400">请先点击顶部「计算RFM」按钮</p> :
+        <h3 className="font-semibold text-foreground mb-4">RFM 客户分层</h3>
+        {rfmEntries.length === 0 ? <p className="text-sm text-muted-foreground">请先点击顶部「计算RFM」按钮</p> :
           <div className="space-y-3">{rfmEntries.map(([level, count]: any) => (
             <div key={level}>
-              <div className="flex justify-between text-sm mb-1"><span style={{ color: RFM_COLORS[level] || '#6b7280' }} className="font-medium">{level}</span><span className="text-gray-500">{count} 人 ({((count / rfmTotal) * 100).toFixed(0)}%)</span></div>
-              <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all" style={{ width: `${(count / rfmTotal) * 100}%`, backgroundColor: RFM_COLORS[level] || '#6b7280' }} /></div>
+              <div className="flex justify-between text-sm mb-1"><span style={{ color: RFM_COLORS[level] || '#6b7280' }} className="font-medium">{level}</span><span className="text-muted-foreground">{count} 人 ({((count / rfmTotal) * 100).toFixed(0)}%)</span></div>
+              <div className="h-2.5 bg-secondary rounded-full overflow-hidden"><div className="h-full rounded-full transition-all" style={{ width: `${(count / rfmTotal) * 100}%`, backgroundColor: RFM_COLORS[level] || '#6b7280' }} /></div>
             </div>
           ))}</div>}
       </div>
 
       {/* 会员等级分布 */}
       <div className="bg-white rounded-xl border p-5">
-        <h3 className="font-semibold text-gray-700 mb-4">会员等级分布</h3>
+        <h3 className="font-semibold text-foreground mb-4">会员等级分布</h3>
         <div className="space-y-3">{memberEntries.map(([level, count]: any) => {
           const lvl = parseInt(level); const name = LEVEL_NAMES[lvl] || `等级${level}`
           const colors = ['#9ca3af', '#3b82f6', '#eab308', '#a855f7', '#10b981']
           return <div key={level}>
-            <div className="flex justify-between text-sm mb-1"><span className="font-medium">{name}</span><span className="text-gray-500">{count} 人 ({((count / memberTotal) * 100).toFixed(0)}%)</span></div>
-            <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${(count / memberTotal) * 100}%`, backgroundColor: colors[lvl] || '#6b7280' }} /></div>
+            <div className="flex justify-between text-sm mb-1"><span className="font-medium">{name}</span><span className="text-muted-foreground">{count} 人 ({((count / memberTotal) * 100).toFixed(0)}%)</span></div>
+            <div className="h-2.5 bg-secondary rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${(count / memberTotal) * 100}%`, backgroundColor: colors[lvl] || '#6b7280' }} /></div>
           </div>
         })}</div>
       </div>
@@ -515,8 +515,8 @@ function InsightsTab({ data, onRefresh }: any) {
 
     {/* 热门标签 */}
     {topTags.length > 0 && <div className="bg-white rounded-xl border p-5">
-      <h3 className="font-semibold text-gray-700 mb-4">热门标签 Top 10</h3>
-      <div className="flex flex-wrap gap-3">{topTags.map((t: any) => <span key={t.name} className="px-3 py-1.5 bg-gray-50 rounded-lg text-sm"><span className="font-medium">{t.name}</span> <span className="text-gray-400 ml-1">{t.count}人</span></span>)}</div>
+      <h3 className="font-semibold text-foreground mb-4">热门标签 Top 10</h3>
+      <div className="flex flex-wrap gap-3">{topTags.map((t: any) => <span key={t.name} className="px-3 py-1.5 bg-secondary/50 rounded-lg text-sm"><span className="font-medium">{t.name}</span> <span className="text-muted-foreground ml-1">{t.count}人</span></span>)}</div>
     </div>}
   </div>)
 }
@@ -539,16 +539,16 @@ function Customer360Drawer({ data, loading, tags, onClose, onToggleTag }: any) {
       <div className="w-[500px] bg-white shadow-2xl overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-5 py-4 flex items-center justify-between z-10">
           <h2 className="font-bold text-lg">客户 360</h2>
-          <button onClick={onClose} className="p-1 rounded hover:bg-gray-100"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="p-1 rounded hover:bg-secondary"><X className="w-5 h-5" /></button>
         </div>
-        {loading ? <div className="flex items-center justify-center h-64 text-gray-400">加载中...</div> : (
+        {loading ? <div className="flex items-center justify-center h-64 text-muted-foreground">加载中...</div> : (
           <div className="p-5 space-y-5">
             {/* 基础信息 */}
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">{(player.name || '?')[0]}</div>
+              <div className="w-14 h-14 rounded-full bg-success/10 text-success flex items-center justify-center text-xl font-bold">{(player.name || '?')[0]}</div>
               <div>
                 <h3 className="font-semibold text-lg">{player.name || '未命名'}</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-500"><span>{player.playerNo}</span>{player.phoneNumber && <><span>·</span><Phone className="w-3 h-3" /><span>{player.phoneNumber}</span></>}</div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground"><span>{player.playerNo}</span>{player.phoneNumber && <><span>·</span><Phone className="w-3 h-3" /><span>{player.phoneNumber}</span></>}</div>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium mt-1 inline-block ${LEVEL_COLORS[summary.memberLevel] || LEVEL_COLORS[0]}`}>{LEVEL_NAMES[summary.memberLevel] || '非会员'}</span>
               </div>
             </div>
@@ -557,12 +557,12 @@ function Customer360Drawer({ data, loading, tags, onClose, onToggleTag }: any) {
             {rfm && <div className="rounded-xl p-4" style={{ backgroundColor: rfm.color + '10', borderLeft: `4px solid ${rfm.color}` }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-sm" style={{ color: rfm.color }}>{rfm.level}</span>
-                <span className="text-xs text-gray-500">总分 {rfm.totalScore}/15</span>
+                <span className="text-xs text-muted-foreground">总分 {rfm.totalScore}/15</span>
               </div>
               <div className="grid grid-cols-3 gap-2 text-center">
-                <div><div className="text-xs text-gray-500">R (最近消费)</div><div className="text-lg font-bold" style={{ color: rfm.color }}>{rfm.rScore}</div><div className="text-xs text-gray-400">{rfm.rValue}天前</div></div>
-                <div><div className="text-xs text-gray-500">F (消费频次)</div><div className="text-lg font-bold" style={{ color: rfm.color }}>{rfm.fScore}</div><div className="text-xs text-gray-400">近半年{rfm.fValue}次</div></div>
-                <div><div className="text-xs text-gray-500">M (消费金额)</div><div className="text-lg font-bold" style={{ color: rfm.color }}>{rfm.mScore}</div><div className="text-xs text-gray-400">¥{(rfm.mValue || 0).toLocaleString()}</div></div>
+                <div><div className="text-xs text-muted-foreground">R (最近消费)</div><div className="text-lg font-bold" style={{ color: rfm.color }}>{rfm.rScore}</div><div className="text-xs text-muted-foreground">{rfm.rValue}天前</div></div>
+                <div><div className="text-xs text-muted-foreground">F (消费频次)</div><div className="text-lg font-bold" style={{ color: rfm.color }}>{rfm.fScore}</div><div className="text-xs text-muted-foreground">近半年{rfm.fValue}次</div></div>
+                <div><div className="text-xs text-muted-foreground">M (消费金额)</div><div className="text-lg font-bold" style={{ color: rfm.color }}>{rfm.mScore}</div><div className="text-xs text-muted-foreground">¥{(rfm.mValue || 0).toLocaleString()}</div></div>
               </div>
               <p className="text-xs mt-2" style={{ color: rfm.color }}>策略: {rfm.strategy}</p>
             </div>}
@@ -580,34 +580,34 @@ function Customer360Drawer({ data, loading, tags, onClose, onToggleTag }: any) {
                 { label: '总轮次', value: summary.totalRounds || 0 },
                 { label: '账户余额', value: `¥${(summary.balance || 0).toLocaleString()}` },
                 { label: '积分', value: (summary.points || 0).toLocaleString() },
-              ].map(s => <div key={s.label} className="bg-gray-50 rounded-lg p-3"><p className="text-xs text-gray-500">{s.label}</p><p className="text-lg font-semibold text-gray-800">{s.value}</p></div>)}
+              ].map(s => <div key={s.label} className="bg-secondary/50 rounded-lg p-3"><p className="text-xs text-muted-foreground">{s.label}</p><p className="text-lg font-semibold text-foreground">{s.value}</p></div>)}
             </div>
 
             {/* 标签管理 */}
-            <div><p className="text-sm font-medium text-gray-700 mb-2">客户标签</p>
+            <div><p className="text-sm font-medium text-foreground mb-2">客户标签</p>
               <div className="flex flex-wrap gap-2">{tags.map((t: CrmTag) => {
                 const active = currentTags.includes(t.name)
                 return <button key={t._id} onClick={() => onToggleTag(player._id, t.name, currentTags)}
                   className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${active ? 'font-medium' : 'opacity-40 hover:opacity-70'}`}
                   style={{ borderColor: t.color, backgroundColor: active ? t.color + '20' : 'transparent', color: t.color }}>{t.name}</button>
-              })}{tags.length === 0 && <span className="text-xs text-gray-400">暂无标签</span>}</div>
+              })}{tags.length === 0 && <span className="text-xs text-muted-foreground">暂无标签</span>}</div>
             </div>
 
             {/* 待办跟进 */}
-            {pendingFollowups.length > 0 && <div><p className="text-sm font-medium text-gray-700 mb-2">待办跟进</p><div className="space-y-2">{pendingFollowups.map((f: any) => {
+            {pendingFollowups.length > 0 && <div><p className="text-sm font-medium text-foreground mb-2">待办跟进</p><div className="space-y-2">{pendingFollowups.map((f: any) => {
               const si = STATUS_MAP[f.status] || STATUS_MAP.pending
-              return <div key={f._id} className="bg-orange-50 rounded-lg p-3 text-sm"><div className="flex items-center justify-between"><span className="font-medium">{f.title}</span><span className={`px-1.5 py-0.5 rounded text-xs ${si.color}`}>{si.label}</span></div>{f.dueDate && <p className="text-xs text-gray-500 mt-1">到期: {f.dueDate}</p>}</div>
+              return <div key={f._id} className="bg-orange-50 rounded-lg p-3 text-sm"><div className="flex items-center justify-between"><span className="font-medium">{f.title}</span><span className={`px-1.5 py-0.5 rounded text-xs ${si.color}`}>{si.label}</span></div>{f.dueDate && <p className="text-xs text-muted-foreground mt-1">到期: {f.dueDate}</p>}</div>
             })}</div></div>}
 
             {/* 互动时间线 */}
-            {recentInteractions.length > 0 && <div><p className="text-sm font-medium text-gray-700 mb-2">最近互动</p><div className="space-y-2">{recentInteractions.map((item: any) => {
+            {recentInteractions.length > 0 && <div><p className="text-sm font-medium text-foreground mb-2">最近互动</p><div className="space-y-2">{recentInteractions.map((item: any) => {
               const typeInfo = INTERACTION_TYPES[item.type] || INTERACTION_TYPES.note
-              return <div key={item._id} className="flex gap-3 text-sm"><div className="flex flex-col items-center"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${typeInfo.color}`}>{typeInfo.label[0]}</div><div className="flex-1 w-px bg-gray-200 mt-1" /></div>
-                <div className="pb-3 flex-1"><p className="text-gray-700">{item.content.length > 60 ? item.content.slice(0, 60) + '...' : item.content}</p><p className="text-xs text-gray-400 mt-0.5">{fmtTime(item.createTime)} {item.staffName && `· ${item.staffName}`}</p></div></div>
+              return <div key={item._id} className="flex gap-3 text-sm"><div className="flex flex-col items-center"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${typeInfo.color}`}>{typeInfo.label[0]}</div><div className="flex-1 w-px bg-secondary mt-1" /></div>
+                <div className="pb-3 flex-1"><p className="text-foreground">{item.content.length > 60 ? item.content.slice(0, 60) + '...' : item.content}</p><p className="text-xs text-muted-foreground mt-0.5">{fmtTime(item.createTime)} {item.staffName && `· ${item.staffName}`}</p></div></div>
             })}</div></div>}
 
             {/* 最近预订 */}
-            {recentBookings.length > 0 && <div><p className="text-sm font-medium text-gray-700 mb-2">最近预订</p><div className="space-y-2">{recentBookings.slice(0, 5).map((b: any) => <div key={b._id} className="bg-gray-50 rounded-lg p-3 text-sm flex justify-between items-center"><div><span className="font-medium">{b.courseName || b.orderNo || '-'}</span><span className="text-xs text-gray-400 ml-2">{b.teeTime || ''}</span></div><span className="text-xs text-gray-500">{b.status || ''}</span></div>)}</div></div>}
+            {recentBookings.length > 0 && <div><p className="text-sm font-medium text-foreground mb-2">最近预订</p><div className="space-y-2">{recentBookings.slice(0, 5).map((b: any) => <div key={b._id} className="bg-secondary/50 rounded-lg p-3 text-sm flex justify-between items-center"><div><span className="font-medium">{b.courseName || b.orderNo || '-'}</span><span className="text-xs text-muted-foreground ml-2">{b.teeTime || ''}</span></div><span className="text-xs text-muted-foreground">{b.status || ''}</span></div>)}</div></div>}
           </div>
         )}
       </div>
@@ -621,7 +621,7 @@ function Customer360Drawer({ data, loading, tags, onClose, onToggleTag }: any) {
 function Dialog({ title, onClose, children, wide }: { title: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
     <div className={`bg-white rounded-2xl shadow-2xl p-6 ${wide ? 'w-[560px]' : 'w-[420px]'} max-h-[90vh] overflow-y-auto`} onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-between mb-4"><h3 className="text-lg font-bold">{title}</h3><button onClick={onClose} className="p-1 rounded hover:bg-gray-100"><X className="w-5 h-5" /></button></div>
+      <div className="flex items-center justify-between mb-4"><h3 className="text-lg font-bold">{title}</h3><button onClick={onClose} className="p-1 rounded hover:bg-secondary"><X className="w-5 h-5" /></button></div>
       {children}
     </div>
   </div>
@@ -630,14 +630,14 @@ function Dialog({ title, onClose, children, wide }: { title: string; onClose: ()
 function KpiCard({ label, value, icon: Icon, color, sub }: { label: string; value: any; icon: any; color: string; sub?: string }) {
   return <div className="bg-white rounded-xl border p-4">
     <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${color}`}><Icon className="w-4 h-4" /></div>
-    <p className="text-xs text-gray-500">{label}</p>
-    <p className="text-xl font-bold text-gray-800">{value}</p>
-    {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    <p className="text-xs text-muted-foreground">{label}</p>
+    <p className="text-xl font-bold text-foreground">{value}</p>
+    {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
   </div>
 }
 
 function StatMini({ label, value, icon: Icon }: { label: string; value: number; icon: any }) {
-  return <div className="text-center"><Icon className="w-4 h-4 mx-auto text-gray-400 mb-1" /><p className="text-lg font-semibold text-gray-800">{value}</p><p className="text-xs text-gray-500">{label}</p></div>
+  return <div className="text-center"><Icon className="w-4 h-4 mx-auto text-muted-foreground mb-1" /><p className="text-lg font-semibold text-foreground">{value}</p><p className="text-xs text-muted-foreground">{label}</p></div>
 }
 
 function fmtTime(t: any): string {

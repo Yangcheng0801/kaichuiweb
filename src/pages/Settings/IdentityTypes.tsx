@@ -164,7 +164,7 @@ export default function IdentityTypes() {
     <div
       key={item._id}
       className={`flex items-center gap-3 p-3 rounded-xl border transition-all group ${
-        item.status === 'inactive' ? 'bg-gray-50 border-gray-200 opacity-60' : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-sm'
+        item.status === 'inactive' ? 'bg-secondary/50 border-border opacity-60' : 'bg-white border-border hover:border-border hover:shadow-sm'
       }`}
     >
       {/* 色彩标识 */}
@@ -175,12 +175,12 @@ export default function IdentityTypes() {
       {/* 信息 */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900">{item.name}</span>
-          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{item.code}</span>
+          <span className="text-sm font-medium text-foreground">{item.name}</span>
+          <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">{item.code}</span>
           {item.isDefault && <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full">系统</span>}
           {item.status === 'inactive' && <span className="text-[10px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded-full">已停用</span>}
         </div>
-        <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-2">
+        <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
           {item.memberLevel !== null && <span>会员等级 Lv.{item.memberLevel}</span>}
           {item.ageMin !== null && <span>{item.ageMin}-{item.ageMax ?? '∞'}岁</span>}
           {item.description && <span className="truncate">{item.description}</span>}
@@ -190,15 +190,15 @@ export default function IdentityTypes() {
 
       {/* 操作 */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={() => handleToggleStatus(item)} className={`p-1.5 rounded-lg text-xs ${item.status === 'active' ? 'text-amber-500 hover:bg-amber-50' : 'text-emerald-500 hover:bg-emerald-50'}`}
+        <button onClick={() => handleToggleStatus(item)} className={`p-1.5 rounded-lg text-xs ${item.status === 'active' ? 'text-amber-500 hover:bg-amber-50' : 'text-success hover:bg-success/10'}`}
           title={item.status === 'active' ? '停用' : '启用'}>
           {item.status === 'active' ? '停用' : '启用'}
         </button>
-        <button onClick={() => openEdit(item)} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+        <button onClick={() => openEdit(item)} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg">
           <Edit3 size={13} />
         </button>
         {!item.isDefault && (
-          <button onClick={() => handleDelete(item)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg">
+          <button onClick={() => handleDelete(item)} className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg">
             <Trash2 size={13} />
           </button>
         )}
@@ -212,34 +212,34 @@ export default function IdentityTypes() {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">{isNew ? '新建身份类型' : '编辑身份类型'}</h2>
-            <button onClick={closeForm} className="text-gray-400 hover:text-gray-700"><X size={20} /></button>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground">{isNew ? '新建身份类型' : '编辑身份类型'}</h2>
+            <button onClick={closeForm} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
             {/* 代码 + 名称 */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">身份代码 <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">身份代码 <span className="text-red-500">*</span></label>
                 <input value={form.code || ''} onChange={e => setForm(p => ({ ...p, code: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') }))}
                   disabled={!isNew && editItem?.isDefault}
                   placeholder="如：junior, vip_gold"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono disabled:bg-gray-100" />
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring font-mono disabled:bg-secondary" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">显示名称 <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">显示名称 <span className="text-red-500">*</span></label>
                 <input value={form.name || ''} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                   placeholder="如：青少年"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
             </div>
 
             {/* 分类 */}
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">分类</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">分类</label>
               <select value={form.category || 'special'} onChange={e => setForm(p => ({ ...p, category: e.target.value as any }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white">
                 <option value="standard">标准身份</option>
                 <option value="member">会员身份</option>
                 <option value="special">特殊身份</option>
@@ -249,33 +249,33 @@ export default function IdentityTypes() {
             {/* 会员等级（仅 member 分类） */}
             {form.category === 'member' && (
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">会员等级</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">会员等级</label>
                 <input type="number" min={1} max={10} value={form.memberLevel ?? ''} onChange={e => setForm(p => ({ ...p, memberLevel: e.target.value ? Number(e.target.value) : null }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
             )}
 
             {/* 年龄限制 */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">最小年龄</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">最小年龄</label>
                 <input type="number" min={0} value={form.ageMin ?? ''} onChange={e => setForm(p => ({ ...p, ageMin: e.target.value ? Number(e.target.value) : null }))}
-                  placeholder="不限" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  placeholder="不限" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">最大年龄</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">最大年龄</label>
                 <input type="number" min={0} value={form.ageMax ?? ''} onChange={e => setForm(p => ({ ...p, ageMax: e.target.value ? Number(e.target.value) : null }))}
-                  placeholder="不限" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  placeholder="不限" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
             </div>
 
             {/* 颜色 */}
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">标识颜色</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">标识颜色</label>
               <div className="flex flex-wrap gap-2">
                 {PRESET_COLORS.map(c => (
                   <button key={c} onClick={() => setForm(p => ({ ...p, color: c }))}
-                    className={`w-7 h-7 rounded-lg transition-all ${form.color === c ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-105'}`}
+                    className={`w-7 h-7 rounded-lg transition-all ${form.color === c ? 'ring-2 ring-offset-1 ring-ring scale-110' : 'hover:scale-105'}`}
                     style={{ backgroundColor: c }} />
                 ))}
               </div>
@@ -284,21 +284,21 @@ export default function IdentityTypes() {
             {/* 排序 + 说明 */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">排序权重</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">排序权重</label>
                 <input type="number" value={form.sortOrder ?? 200} onChange={e => setForm(p => ({ ...p, sortOrder: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">描述</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">描述</label>
                 <input value={form.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                  placeholder="选填" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  placeholder="选填" className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
             </div>
           </div>
 
-          <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
-            <button onClick={closeForm} className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50">取消</button>
-            <button onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 font-medium disabled:opacity-50">
+          <div className="flex gap-3 px-6 py-4 border-t border-border">
+            <button onClick={closeForm} className="flex-1 px-4 py-2 border border-border text-muted-foreground text-sm rounded-lg hover:bg-secondary/50">取消</button>
+            <button onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2 bg-success text-white text-sm rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
               {saving ? '保存中...' : '保存'}
             </button>
           </div>
@@ -312,11 +312,11 @@ export default function IdentityTypes() {
       {/* 标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">身份类型管理</h2>
-          <p className="text-sm text-gray-500 mt-0.5">管理球场所有球员身份，配置后可在价格矩阵中为每种身份设置独立价格</p>
+          <h2 className="text-lg font-semibold text-foreground">身份类型管理</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">管理球场所有球员身份，配置后可在价格矩阵中为每种身份设置独立价格</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={load} className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50">
+          <button onClick={load} className="flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-secondary/50">
             <RefreshCw size={14} /> 刷新
           </button>
           {identities.length === 0 && (
@@ -324,7 +324,7 @@ export default function IdentityTypes() {
               <Zap size={14} /> {seeding ? '初始化中...' : '一键初始化'}
             </button>
           )}
-          <button onClick={openNew} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium">
+          <button onClick={openNew} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-success text-white rounded-lg hover:bg-success/90 font-medium">
             <Plus size={14} /> 新增身份
           </button>
         </div>
@@ -332,10 +332,10 @@ export default function IdentityTypes() {
 
       {/* 内容 */}
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-gray-400">加载中...</div>
+        <div className="flex items-center justify-center py-20 text-muted-foreground">加载中...</div>
       ) : identities.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
-          <Users size={48} className="text-gray-200" />
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+          <Users size={48} className="text-muted-foreground" />
           <p className="text-sm">暂无身份类型，点击「一键初始化」生成行业默认身份</p>
         </div>
       ) : (
@@ -347,11 +347,11 @@ export default function IdentityTypes() {
             return (
               <div key={cat}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-gray-400">{info.icon}</span>
-                  <h3 className="text-sm font-semibold text-gray-700">{info.label}</h3>
-                  <ChevronRight size={12} className="text-gray-300" />
-                  <span className="text-xs text-gray-400">{info.description}</span>
-                  <span className="text-xs text-gray-300 ml-auto">{items.length} 项</span>
+                  <span className="text-muted-foreground">{info.icon}</span>
+                  <h3 className="text-sm font-semibold text-foreground">{info.label}</h3>
+                  <ChevronRight size={12} className="text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">{info.description}</span>
+                  <span className="text-xs text-muted-foreground ml-auto">{items.length} 项</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {items.map(renderCard)}

@@ -102,80 +102,80 @@ export default function TeamPricing() {
     })
   }
 
-  if (loading) return <div className="flex items-center justify-center py-20 text-gray-400">加载中...</div>
+  if (loading) return <div className="flex items-center justify-center py-20 text-muted-foreground">加载中...</div>
 
   return (
     <div className="space-y-6">
       {/* 标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Users size={20} className="text-emerald-600" />
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Users size={20} className="text-success" />
             团队定价规则
           </h2>
-          <p className="text-sm text-gray-500 mt-0.5">配置团队预订的人数阶梯折扣</p>
+          <p className="text-sm text-muted-foreground mt-0.5">配置团队预订的人数阶梯折扣</p>
         </div>
-        <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-5 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium disabled:opacity-50">
+        <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-5 py-2 text-sm bg-success text-white rounded-lg hover:bg-success/90 font-medium disabled:opacity-50">
           <Save size={14} />
           {saving ? '保存中...' : '保存'}
         </button>
       </div>
 
       {/* 启用开关 */}
-      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+      <div className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl">
         <label className="flex items-center gap-3 cursor-pointer">
           <div
             onClick={() => setData(p => ({ ...p, enabled: !p.enabled }))}
-            className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${data.enabled ? 'bg-emerald-500' : 'bg-gray-300'}`}
+            className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${data.enabled ? 'bg-success/100' : 'bg-secondary'}`}
           >
             <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${data.enabled ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
           </div>
-          <span className="text-sm font-medium text-gray-700">{data.enabled ? '已启用团队折扣' : '团队折扣已关闭'}</span>
+          <span className="text-sm font-medium text-foreground">{data.enabled ? '已启用团队折扣' : '团队折扣已关闭'}</span>
         </label>
       </div>
 
       {/* 阶梯表 */}
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <div className="border border-border rounded-xl overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">最少人数</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">最多人数</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">折扣率</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">折后比例</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">标签</th>
+            <tr className="bg-secondary/50">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">最少人数</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">最多人数</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">折扣率</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">折后比例</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">标签</th>
               <th className="px-4 py-3 w-10" />
             </tr>
           </thead>
           <tbody>
             {data.tiers.map((tier, idx) => (
-              <tr key={idx} className="border-t border-gray-100 hover:bg-gray-50/50">
+              <tr key={idx} className="border-t border-border hover:bg-secondary/50/50">
                 <td className="px-4 py-3">
-                  <input type="number" value={tier.minPlayers} min={2} onChange={e => updateTier(idx, 'minPlayers', Number(e.target.value))} className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  <input type="number" value={tier.minPlayers} min={2} onChange={e => updateTier(idx, 'minPlayers', Number(e.target.value))} className="w-20 px-2 py-1.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                 </td>
                 <td className="px-4 py-3">
-                  <input type="number" value={tier.maxPlayers} min={2} onChange={e => updateTier(idx, 'maxPlayers', Number(e.target.value))} className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  <input type="number" value={tier.maxPlayers} min={2} onChange={e => updateTier(idx, 'maxPlayers', Number(e.target.value))} className="w-20 px-2 py-1.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                 </td>
                 <td className="px-4 py-3">
-                  <input type="number" value={tier.discountRate} step={0.05} min={0.1} max={1} onChange={e => updateTier(idx, 'discountRate', Number(e.target.value))} className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  <input type="number" value={tier.discountRate} step={0.05} min={0.1} max={1} onChange={e => updateTier(idx, 'discountRate', Number(e.target.value))} className="w-20 px-2 py-1.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`text-sm font-semibold ${tier.discountRate < 0.85 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  <span className={`text-sm font-semibold ${tier.discountRate < 0.85 ? 'text-red-600' : 'text-success'}`}>
                     {Math.round(tier.discountRate * 100)}%
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <input value={tier.label} onChange={e => updateTier(idx, 'label', e.target.value)} placeholder="如：小型团队9折" className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  <input value={tier.label} onChange={e => updateTier(idx, 'label', e.target.value)} placeholder="如：小型团队9折" className="w-full px-2 py-1.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                 </td>
                 <td className="px-4 py-3">
-                  <button onClick={() => removeTier(idx)} className="p-1 text-gray-300 hover:text-red-500"><Trash2 size={14} /></button>
+                  <button onClick={() => removeTier(idx)} className="p-1 text-muted-foreground hover:text-red-500"><Trash2 size={14} /></button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
-          <button onClick={addTier} className="flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+        <div className="px-4 py-3 bg-secondary/50 border-t border-border">
+          <button onClick={addTier} className="flex items-center gap-1.5 text-sm text-success hover:text-success font-medium">
             <Plus size={14} /> 添加阶梯
           </button>
         </div>
@@ -191,7 +191,7 @@ export default function TeamPricing() {
           团队折扣后的价格不会低于散客价的指定比例，防止过度折扣。
         </p>
         <div className="flex items-center gap-3">
-          <label className="text-sm text-gray-700">最低价格比例：</label>
+          <label className="text-sm text-foreground">最低价格比例：</label>
           <input
             type="number"
             value={data.floorPriceRate}
